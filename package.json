@@ -1,0 +1,10 @@
+{
+  "name": "movemate",
+  "version": "1.0.0",
+  "description": "\"MoveMate is an all-in-one delivery software in Australia, specializing in food delivery, personal item transport, and house moving services.\"",
+  "main": "index.js",
+  "repository": "git@github.com:novareachsolutions/movemate.git",
+  "author": "",
+  "license": "",
+  "private": true
+}
