@@ -1,10 +1,31 @@
 {
   "name": "movemate",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "\"MoveMate is an all-in-one delivery software in Australia, specializing in food delivery, personal item transport, and house moving services.\"",
   "main": "index.js",
   "repository": "git@github.com:novareachsolutions/movemate.git",
   "author": "",
   "license": "",
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "dependencies": {
+    "eslint": "8.56.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-promise": "^7.0.0",
+    "eslint-plugin-typescript-sort-keys": "^3.2.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.5.4"
+  }
 }

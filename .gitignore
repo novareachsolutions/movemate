@@ -1,0 +1,5 @@
+// Ignore directories and files globally
+
+node_modules/
+
+*.log
