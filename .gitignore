@@ -1,0 +1,11 @@
+// Ignore directories and files globally
+
+# compiled output
+node_modules/
+build/
+dist/
+
+# Logs
+*.log
+yarn-debug.log*
+yarn-error.log*
