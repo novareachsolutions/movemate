@@ -2,8 +2,8 @@ import { RoleEnum } from "../enums";
 
 // Customer interface
 interface Customer {
-  id: string;
-  userId: string;
+  id?: string;
+  userid?: string;
   name: string;
   phoneNumber: string;
   address: string;
@@ -12,8 +12,8 @@ interface Customer {
 
 // Rider interface
 interface Rider {
-  id: string;
-  userId: string;
+  id?: string;
+  userid?: string;
   name: string;
   phoneNumber: string;
   vehicleType: string;
@@ -25,8 +25,8 @@ interface Rider {
 
 // ShopOwner interface
 interface ShopOwner {
-  id: string;
-  userId: string;
+  id?: string;
+  userid?: string;
   name: string;
   phoneNumber: string;
   shops: string[];
@@ -34,8 +34,8 @@ interface ShopOwner {
 
 // RestaurantOwner interface
 interface RestaurantOwner {
-  id: string;
-  userId: string;
+  id?: string;
+  userid?: string;
   name: string;
   phoneNumber: string;
   restaurants: string[];
@@ -43,8 +43,8 @@ interface RestaurantOwner {
 
 // Admin interface
 interface Admin {
-  id: string;
-  userId: string;
+  id?: string;
+  userid?: string;
   name: string;
   department: string;
   permissions: string[];
@@ -52,7 +52,7 @@ interface Admin {
 
 // User interface
 interface User {
-  id: string;
+  id?: string;
   email: string;
   passwordHash: string;
   role: RoleEnum;
@@ -65,11 +65,4 @@ interface User {
   admin?: Admin;
 }
 
-export {
-  Admin,
-  Customer,
-  RestaurantOwner,
-  Rider,
-  ShopOwner,
-  User,
-};
+export { Admin, Customer, RestaurantOwner, Rider, ShopOwner, User };

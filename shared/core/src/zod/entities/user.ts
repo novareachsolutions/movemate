@@ -10,8 +10,8 @@ import { ZRoleEnum } from "../enums";
 // Customer schema
 const CustomerSchema = z
   .object({
-    id: ZIdSchema,
-    userId: ZIdSchema,
+    id: ZIdSchema.optional(),
+    userid: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
     address: ZAddressSchema,
@@ -22,8 +22,8 @@ const CustomerSchema = z
 // Rider schema
 const RiderSchema = z
   .object({
-    id: ZIdSchema,
-    userId: ZIdSchema,
+    id: ZIdSchema.optional(),
+    userid: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
     vehicleType: z.string(),
@@ -37,8 +37,8 @@ const RiderSchema = z
 //Shop Owner
 const ShopOwnerSchema = z
   .object({
-    id: ZIdSchema,
-    userId: ZIdSchema,
+    id: ZIdSchema.optional(),
+    userid: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
     shops: z.array(ZIdSchema),
@@ -48,8 +48,8 @@ const ShopOwnerSchema = z
 //Restaurant Owner Schema
 const RestaurantOwnerSchema = z
   .object({
-    id: ZIdSchema,
-    userId: ZIdSchema,
+    id: ZIdSchema.optional(),
+    userid: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
     restaurants: z.array(ZIdSchema),
@@ -59,8 +59,8 @@ const RestaurantOwnerSchema = z
 //Admin Schema
 const AdminSchema = z
   .object({
-    id: ZIdSchema,
-    userId: ZIdSchema,
+    id: ZIdSchema.optional(),
+    userid: ZIdSchema.optional(),
     name: ZNameSchema,
     department: z.string(),
     permissions: z.array(ZIdSchema),
@@ -69,7 +69,7 @@ const AdminSchema = z
 
 // User schema
 const UserSchema = z.object({
-  id: ZIdSchema,
+  id: ZIdSchema.optional(),
   email: z.string().email(),
   passwordHash: z.string(),
   role: ZRoleEnum.default("CUSTOMER"),
