@@ -1,0 +1,50 @@
+name: Restrict Merge unless Approved
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  restrict-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Check if PR is approved by non-author
+        id: check-approval
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request || context.payload.review.pull_request;
+            const { owner, repo } = context.repo;
+            const prAuthor = pr.user.login;
+
+            // Get the list of reviews
+            const { data: reviews } = await github.pulls.listReviews({
+              owner,
+              repo,
+              pull_number: pr.number,
+            });
+
+            // Check if there is at least one approval from a different user than the PR author
+            const approvedByOther = reviews.some(review => review.state === 'APPROVED' && review.user.login !== prAuthor);
+
+            // Create a check run with completed status and conclusion based on approval
+            await github.checks.create({
+              owner,
+              repo,
+              name: 'Approval Check',
+              head_sha: pr.head.sha,
+              status: 'completed',
+              conclusion: approvedByOther ? 'success' : 'failure',
+              output: {
+                title: 'Approval Check',
+                summary: approvedByOther 
+                  ? 'PR is approved by a non-author.' 
+                  : 'PR is not approved by a non-author.',
+              },
+            });

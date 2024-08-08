@@ -1,0 +1,9 @@
+{
+  "editor.wordWrap": "on",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.enable": true,
+  "eslint.lintTask.enable": true,
+  "eslint.validate": ["javascript", "typescript"]
+}
