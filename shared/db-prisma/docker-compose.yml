@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  orders_db:
+    container_name: orders_db
+    image: postgres
+    restart: always
+    ports:
+      - ${ORDERS_DB_PORT}:5432
+    environment:
+      POSTGRES_USER: ${ORDERS_POSTGRES_USER}
+      POSTGRES_DB: ${ORDERS_POSTGRES_DB}
+      POSTGRES_PASSWORD: ${ORDERS_POSTGRES_PASSWORD}
+    volumes:
+      - orders_db_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${ORDERS_POSTGRES_DB}",
+          "-U",
+          "${ORDERS_POSTGRES_USER}",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  users_db:
+    container_name: users_db
+    image: postgres
+    restart: always
+    ports:
+      - ${USERS_DB_PORT}:5432
+    environment:
+      POSTGRES_USER: ${USERS_POSTGRES_USER}
+      POSTGRES_DB: ${USERS_POSTGRES_DB}
+      POSTGRES_PASSWORD: ${USERS_POSTGRES_PASSWORD}
+    volumes:
+      - users_db_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${USERS_POSTGRES_DB}",
+          "-U",
+          "${USERS_POSTGRES_USER}",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - ${PGADMIN_PORT}:80
+    depends_on:
+      - orders_db
+      - users_db
+
+volumes:
+  orders_db_data:
+  users_db_data:

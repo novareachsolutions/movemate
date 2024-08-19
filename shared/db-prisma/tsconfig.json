@@ -1,0 +1,34 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "baseUrl": "./",
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "Node16",
+    "noEmit": false,
+    "incremental": true,
+    "declaration": true,
+    "declarationDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "outDir": "./dist",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "@prisma/sql/*": ["./prisma/sql/*"],
+      "@prisma/nosql/*": ["./prisma/nosql/*"]
+    }
+  },
+  "include": ["./src"],
+  "exclude": [
+    "**/node_modules",
+    "**/.*/",
+    "**/prisma/nosql/**/**/client/",
+    "**/prisma/sql/**/client/",
+    "./dist",
+    "./build",
+    "**/prisma/sql/**/schema/seed.ts",
+    "**/prisma/nosql/**/**/seed.js"
+  ]
+}
