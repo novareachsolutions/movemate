@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
 
 @Injectable()
@@ -6,13 +7,13 @@ export class CryptoService {
   private readonly encryptionKey: Buffer;
   private readonly algorithm: string = 'aes-192-cbc';
 
-  constructor() {
-    // Ensure to replace 'salt' with a secure salt
-    this.encryptionKey = scryptSync(process.env.ENCRYPTION_SECRET, 'salt', 24);
+  constructor(private readonly configService: ConfigService) {
+    const secret = this.configService.get<string>('ENCRYPTION_SECRET');
+    this.encryptionKey = scryptSync(secret, 'salt', 24);
   }
 
   private generateIv(): Buffer {
-    return randomBytes(16); // Initialization vector
+    return randomBytes(16); 
   }
 
   encrypt(text: string): string {

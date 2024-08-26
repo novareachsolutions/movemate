@@ -1,24 +1,27 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from '@/redis/redis.service'; // Adjust the path as needed
 import { generate as randToken } from 'rand-token';
 import { CryptoService } from './crypto';
-
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TokenService {
   private readonly jwtService: JwtService;
   private readonly redisService: RedisService;
   private readonly cryptoService: CryptoService;
+  private readonly configService: ConfigService;
 
   constructor(
     jwtService: JwtService,
     redisService: RedisService,
     cryptoService: CryptoService,
+    configService: ConfigService,
   ) {
     this.jwtService = jwtService;
     this.redisService = redisService;
     this.cryptoService = cryptoService;
+    this.configService = configService;
   }
 
   generateAccessToken(user: { id: string; phoneNumber: string; role: string }, xsrfToken: string): string {
@@ -29,8 +32,8 @@ export class TokenService {
     };
 
     return this.jwtService.sign(payload, {
-      secret: `${process.env.JWT_ACCESS_SECRET}${xsrfToken}`,
-      expiresIn: process.env.JWT_ACCESS_EXPIRY,
+      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
+      expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRY'),
     });
   }
 
@@ -38,8 +41,8 @@ export class TokenService {
     const payload = { userId: user.id };
 
     return this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: process.env.JWT_REFRESH_EXPIRY,
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRY'),
     });
   }
 
@@ -49,13 +52,13 @@ export class TokenService {
 
   async verifyAccessToken(accessToken: string, xsrfToken: string): Promise<any> {
     return this.jwtService.verify(accessToken, {
-      secret: `${process.env.JWT_ACCESS_SECRET}${xsrfToken}`,
+      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
     });
   }
 
   async verifyRefreshToken(refreshToken: string): Promise<any> {
     return this.jwtService.verify(refreshToken, {
-      secret: process.env.JWT_REFRESH_SECRET,
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
   }
 
@@ -66,7 +69,7 @@ export class TokenService {
     return this.jwtService.sign(
       { phone: encryptedPhone, tokenId: tokenId },
       {
-        secret: process.env.ONBOARDING_JWT_SECRET,
+        secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
         expiresIn: '60m',
       },
     );
@@ -75,7 +78,7 @@ export class TokenService {
   async verifyOnboardingToken(token: string): Promise<boolean> {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: process.env.ONBOARDING_JWT_SECRET,
+        secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
       });
 
       if (!payload.phone || !payload.tokenId) return false;

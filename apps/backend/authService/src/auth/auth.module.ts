@@ -8,7 +8,7 @@ import { RedisService } from '@/redis/redis.service';
 
 @Module({
   imports: [
-    RedisModule, // Ensure RedisService is available
+    RedisModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
