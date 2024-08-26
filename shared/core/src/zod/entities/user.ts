@@ -5,13 +5,13 @@ import {
   ZNameSchema,
   ZPhoneNumberSchema,
 } from "../common";
-import { ZRoleEnum } from "../enums";
+import { ZRoleEnum, ZVehicleTypes } from "../enums";
 
 // Customer schema
-const CustomerSchema = z
+export const CustomerSchema = z
   .object({
     id: ZIdSchema.optional(),
-    userid: ZIdSchema.optional(),
+    userId: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
     address: ZAddressSchema,
@@ -20,13 +20,13 @@ const CustomerSchema = z
   .nullable();
 
 // Rider schema
-const RiderSchema = z
+export const RiderSchema = z
   .object({
     id: ZIdSchema.optional(),
-    userid: ZIdSchema.optional(),
+    userId: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
-    vehicleType: z.string(),
+    vehicleType: ZVehicleTypes,
     licenseNumber: z.string(),
     currentLocation: ZIdSchema.nullable(),
     activeOrders: z.array(ZIdSchema),
@@ -35,10 +35,10 @@ const RiderSchema = z
   .nullable();
 
 //Shop Owner
-const ShopOwnerSchema = z
+export const ShopOwnerSchema = z
   .object({
     id: ZIdSchema.optional(),
-    userid: ZIdSchema.optional(),
+    userId: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
     shops: z.array(ZIdSchema),
@@ -46,10 +46,10 @@ const ShopOwnerSchema = z
   .nullable();
 
 //Restaurant Owner Schema
-const RestaurantOwnerSchema = z
+export const RestaurantOwnerSchema = z
   .object({
     id: ZIdSchema.optional(),
-    userid: ZIdSchema.optional(),
+    userId: ZIdSchema.optional(),
     name: ZNameSchema,
     phoneNumber: ZPhoneNumberSchema,
     restaurants: z.array(ZIdSchema),
@@ -57,10 +57,10 @@ const RestaurantOwnerSchema = z
   .nullable();
 
 //Admin Schema
-const AdminSchema = z
+export const AdminSchema = z
   .object({
     id: ZIdSchema.optional(),
-    userid: ZIdSchema.optional(),
+    userId: ZIdSchema.optional(),
     name: ZNameSchema,
     department: z.string(),
     permissions: z.array(ZIdSchema),
@@ -68,7 +68,7 @@ const AdminSchema = z
   .nullable();
 
 // User schema
-const UserSchema = z.object({
+export const UserSchema = z.object({
   id: ZIdSchema.optional(),
   email: z.string().email(),
   passwordHash: z.string(),
@@ -82,11 +82,4 @@ const UserSchema = z.object({
   admin: AdminSchema,
 });
 
-export {
-  AdminSchema,
-  CustomerSchema,
-  RestaurantOwnerSchema,
-  RiderSchema,
-  ShopOwnerSchema,
-  UserSchema,
-};
+

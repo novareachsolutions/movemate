@@ -1,18 +1,16 @@
 import { ZodError, ZodSchema } from "zod";
 
 
-const validateWithSafeParse = <T>(schema: ZodSchema<T>, data: any): { isValid: boolean; errors?: ZodError<T> } => {
+export const validateWithSafeParse = <T>(schema: ZodSchema<T>, data: any): { isValid: boolean; error?: ZodError<T> } => {
   const result = schema.safeParse(data);
   if (result.success) {
     return { isValid: true };
   } else {
-    return { isValid: false, errors: result.error };
+    return { isValid: false, error: result.error };
   }
 };
 
-
-const validateWithParse = <T>(schema: ZodSchema<T>, data: any): T => {
+export const validateWithParse = <T>(schema: ZodSchema<T>, data: any): T => {
   return schema.parse(data);
 };
 
-export { validateWithParse, validateWithSafeParse };

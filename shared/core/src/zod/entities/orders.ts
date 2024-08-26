@@ -3,7 +3,7 @@ import { ZIdSchema } from "../common";
 import { ZOrderStatusEnum } from "../enums";
 
 // Order schema
-const OrderSchema = z.object({
+export const OrderSchema = z.object({
   id: ZIdSchema,
   serviceId: ZIdSchema,
   customerId: ZIdSchema,
@@ -18,4 +18,3 @@ const OrderSchema = z.object({
   tracking: ZIdSchema.nullable(),
 });
 
-export {OrderSchema}
