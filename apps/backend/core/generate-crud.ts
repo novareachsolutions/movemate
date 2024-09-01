@@ -9,15 +9,13 @@ const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + strin
 
 const generateService = (model) => `
 import { Injectable } from '@nestjs/common';
-import { Create${model}Dto } from './dto/create-${model.toLowerCase()}.dto';
-import { Update${model}Dto } from './dto/update-${model.toLowerCase()}.dto';
 import { validateSchema } from '@/utils/validateSchema';
 
 @Injectable()
 export class ${model}Service {
-  async create(${model.toLowerCase()}: Create${model}Dto, user_id: string) {
+  async create(${model.toLowerCase()}: any, user_id: string) {
     try {
-      validateSchema(Create${model}Dto, user);
+    //  validateSchema(Create${model}Dto,${model.toLowerCase()} );
       // Add your create logic here
       return \`This action adds a new ${model.toLowerCase()}\`;
     } catch (error) {
@@ -25,9 +23,8 @@ export class ${model}Service {
     }
   }
 
-  async update(id: string, ${model.toLowerCase()}: Update${model}Dto, user_id: string) {
+  async update(id: string, ${model.toLowerCase()}: any, user_id: string) {
     try {
-      validateSchema(Update${model}Dto, user);
       // Add your update logic here
       return \`This action updates a #\${id} ${model.toLowerCase()}\`;
     } catch (error) {
