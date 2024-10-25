@@ -29,7 +29,11 @@
 ## Project setup
 
 ```bash
-$ yarn install
+# If running for the first time, when no yarn.lock file exists
+$ yarn install  
+
+#  If a yarn.lock file exists then
+$ yarn install --frozen-lockfile 
 ```
 
 ## Compile and run the project
