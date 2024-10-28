@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RedisService } from '@/redis/redis.service'; // Adjust the path as needed
 import { generate as randToken } from 'rand-token';
 import { CryptoService } from './crypto';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from 'src/modules/redis/redis.service';
 
 @Injectable()
 export class TokenService {

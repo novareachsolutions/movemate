@@ -3,12 +3,12 @@ import { AuthService } from './auth.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './utils/jwt.strategy';
-import { RedisModule } from '@/redis/redis.module';
-import { RedisService } from '@/redis/redis.service';
+import { OtpService } from './utils/otp';
+import { RedisModule } from '../redis/redis.module';
+import { RedisService } from '../redis/redis.service';
 
 @Module({
   imports: [
-    RedisModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
@@ -17,12 +17,14 @@ import { RedisService } from '@/redis/redis.service';
       }),
       inject: [ConfigService],
     }),
+    RedisModule,
   ],
   controllers: [],
   providers: [
     AuthService,
     JwtStrategy,
     RedisService,
+    OtpService
   ],
   exports: [AuthService, JwtStrategy],
 })
