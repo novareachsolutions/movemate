@@ -11,13 +11,17 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node out/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migration-generate": "rm -rf out && yarn run build && ./node_modules/.bin/typeorm migration:generate --dataSource './out/ormconfig.js' --pretty true",
+    "migration-create": "yarn run build && ./node_modules/.bin/typeorm migration:create",
+    "migration:run": "rm -rf out && yarn run build && ./node_modules/.bin/typeorm migration:run --dataSource './out/ormconfig.js' -t each",
+    "migration:revert": "yarn run build && ./node_modules/.bin/typeorm migration:revert --dataSource './out/ormconfig.js'"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -26,6 +30,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/typeorm": "^10.0.2",
     "dotenv": "^16.4.5",
     "ioredis": "^5.4.1",
     "passport": "^0.7.0",
