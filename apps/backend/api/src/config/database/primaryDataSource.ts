@@ -28,6 +28,9 @@ const createDataSource = async (): Promise<DataSource> => {
     extra: {
       max: DB_CONNECTION_POOL_MAX,
     },
+    cli: {
+      migrationsDir: process.env.TYPEORM_MIGRATIONS_DIR,
+    },
   } as PostgresConnectionOptions;
 
   return new DataSource(connectionOptions);
