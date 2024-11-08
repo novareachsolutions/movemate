@@ -54,7 +54,8 @@ export class AuthService {
     onboardingToken: string;
   }> {
     // const existingUser = await this.userService.getUserByPhoneNumber(phoneNumber);
-    const existingUser = false; // Temporarily set to true for testing
+    const existingUser =
+      this.configService.get<string>('ENVIRONMENT') === 'local' && false; // Temporarily set to false for testing as user.service is not defined
 
     if (existingUser) {
       throw new HttpException(
