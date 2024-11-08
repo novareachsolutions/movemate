@@ -1,0 +1,18 @@
+export enum AgentType {
+  CAR_TOWING = 'CAR_TOWING',
+  DELIVERY = 'DELIVERY',
+}
+
+export enum AgentStatus {
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
+}
+
+export enum DocType {
+  DRIVER_LICENSE = 'DRIVER_LICENSE',
+  VEHICLE_REGISTRATION = 'VEHICLE_REGISTRATION',
+  INSURANCE = 'INSURANCE',
+  PROFILE_PHOTO = 'PROFILE_PHOTO',
+  ABN = 'ABN',
+  OTHER = 'OTHER',
+}
