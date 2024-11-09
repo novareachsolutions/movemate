@@ -32,8 +32,6 @@ export class AgentService {
 
     @InjectRepository(RequiredDoc)
     private readonly requiredDocRepository: Repository<RequiredDoc>,
-
-    private readonly configService: ConfigService,
   ) {}
 
   async createAgent(createAgentDto, userId: number) {
@@ -215,40 +213,5 @@ export class AgentService {
     return agent;
   }
 
-  async updateOrderStatus(
-    status: string,
-    orderId: number,
-    userId: number,
-  ): Promise<Order> {
-    const agent = await this.agentRepository.findOne({
-      where: { user: { id: userId } },
-    });
 
-    if (!agent) {
-      throw new NotFoundException(
-        `Agent profile not found for user ID ${userId}.`,
-      );
-    }
-
-    const order = await this.orderRepository.findOne({
-      where: { id: orderId, agent: { id: agent.id } },
-    });
-
-    if (!order) {
-      throw new NotFoundException(
-        `Order with ID ${orderId} not found for this agent.`,
-      );
-    }
-
-    const validStatuses = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
-    if (!validStatuses.includes(status)) {
-      throw new BadRequestException(
-        `Invalid status. Valid statuses are: ${validStatuses.join(', ')}`,
-      );
-    }
-
-    order.status = status as any;
-
-    return this.orderRepository.save(order);
-  }
 }
