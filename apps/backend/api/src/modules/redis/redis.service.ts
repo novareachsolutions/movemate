@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis, { RedisOptions } from 'ioredis';
+import { logger } from 'src/logger';
 
 @Injectable()
 export class RedisService implements OnModuleInit {
@@ -8,10 +9,10 @@ export class RedisService implements OnModuleInit {
 
   private setupEventListeners(client: Redis) {
     client.on('connect', () => {
-      console.info('Connected to Redis server');
+      logger.info('Connected to Redis server');
     });
     client.on('error', (error: unknown) => {
-      console.error('Error connecting to Redis:', error);
+      logger.error('Error connecting to Redis:', error);
     });
   }
 
@@ -25,11 +26,11 @@ export class RedisService implements OnModuleInit {
 
     this.setupEventListeners(this.redisClient);
     this.redisClient.on('connect', () => {
-      console.info('Connected to Redis server');
+      logger.info('Connected to Redis server'); 
     });
 
     this.redisClient.on('error', (error: unknown) => {
-      console.error('Error connecting to Redis:', error);
+      logger.error('Error connecting to Redis:', error); 
     });
   }
 

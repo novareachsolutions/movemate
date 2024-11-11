@@ -6,6 +6,7 @@ import { generate as randToken } from 'rand-token';
 import { RedisService } from '../redis/redis.service';
 import { CryptoService } from './utils/crypto';
 import { OtpService } from './utils/otp';
+import { logger } from 'src/logger';
 
 @Injectable()
 export class AuthService {
@@ -53,7 +54,6 @@ export class AuthService {
     message: string;
     onboardingToken: string;
   }> {
-    // const existingUser = await this.userService.getUserByPhoneNumber(phoneNumber);
     const existingUser =
       this.configService.get<string>('ENVIRONMENT') === 'local' && false; // Temporarily set to false for testing as user.service is not defined
 
@@ -61,7 +61,7 @@ export class AuthService {
       throw new HttpException(
         {
           success: false,
-          message: 'The user with this phone number already exists',
+          message: 'The phone number is already registered.',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -134,11 +134,7 @@ export class AuthService {
   }
 
   private async sendOtp(phoneNumber: string, otp: string): Promise<void> {
-    if (
-      !phoneNumber ||
-      typeof phoneNumber !== 'string' ||
-      phoneNumber.trim() === ''
-    ) {
+    if (!phoneNumber) {
       throw new HttpException(
         {
           success: false,
@@ -151,12 +147,11 @@ export class AuthService {
     try {
       await this.twilioClient.messages.create({
         body: `Your OTP for NOVATECH SOL is ${otp}`,
-        from:
-          this.configService.get<string>('TW_PHONE_NUMBER') || '+12513090278',
+        from: this.configService.get<string>('TW_PHONE_NUMBER'),
         to: phoneNumber,
       });
     } catch (error: any) {
-      console.log(error);
+      logger.error(`AuthService.sendOtp: failed to send otp. error: ${error}`);
       throw new HttpException(
         {
           success: false,
