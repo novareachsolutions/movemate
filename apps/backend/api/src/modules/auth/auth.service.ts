@@ -18,7 +18,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
     private readonly cryptoService: CryptoService,
-    // private readonly userService: UserService,
   ) {
     const accountSid = this.configService.get<string>('TW_ACC_SID');
     const authToken = this.configService.get<string>('TW_AUTH_TOKEN');
