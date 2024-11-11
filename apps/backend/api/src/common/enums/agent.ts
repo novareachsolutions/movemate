@@ -1,14 +1,14 @@
-export enum AgentType {
+export enum AgentTypeEnum {
   CAR_TOWING = 'CAR_TOWING',
   DELIVERY = 'DELIVERY',
 }
 
-export enum AgentStatus {
+export enum AgentStatusEnum {
   ONLINE = 'ONLINE',
   OFFLINE = 'OFFLINE',
 }
 
-export enum DocType {
+export enum AgentRegistrationDocumentEnum {
   DRIVER_LICENSE = 'DRIVER_LICENSE',
   VEHICLE_REGISTRATION = 'VEHICLE_REGISTRATION',
   INSURANCE = 'INSURANCE',

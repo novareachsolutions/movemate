@@ -1,4 +1,3 @@
-import { UserRole } from 'src/common/enums';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,42 +8,43 @@ import {
 import { Order } from './Order';
 import { Agent } from './Agent';
 import { Review } from './Review';
-import { SavedAddress } from './SavedAddress'; 
+import { Location } from './Location';
+import { UserRoleEnum } from 'src/common/enums/userRole';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   phoneNumber: string;
 
   @Column({
     type: 'enum',
-    enum: UserRole,
+    enum: UserRoleEnum,
   })
-  role: UserRole;
+  role: UserRoleEnum;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar' })
   firstName: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar' })
   lastName: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar' })
   street: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar' })
   suburb: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar' })
   state: string;
 
-  @Column({ nullable: true })
-  postalCode: string;
+  @Column({ type: 'int' })
+  postalCode: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
@@ -59,8 +59,8 @@ export class User {
   @OneToMany(() => Order, (order) => order.customer)
   customerOrders: Order[];
 
-  @OneToMany(() => SavedAddress, (address) => address.user)
-  savedAddresses: SavedAddress[];
+  @OneToMany(() => Location, (address) => address.user)
+  locations: Location[];
 
   @OneToOne(() => Agent, (agent) => agent.user)
   agent: Agent;

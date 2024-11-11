@@ -11,8 +11,8 @@ import {
 import { User } from './User';
 import { Order } from './Order';
 import { Review } from './Review';
-import { AgentType, AgentStatus } from 'src/common/enums';
-import { AgentDocument } from './AgentDocument'; 
+import { AgentDocument } from './AgentDocument';
+import { AgentStatusEnum, AgentTypeEnum } from 'src/common/enums/agent';
 
 @Entity()
 export class Agent {
@@ -25,33 +25,33 @@ export class Agent {
 
   @Column({
     type: 'enum',
-    enum: AgentType,
+    enum: AgentTypeEnum,
     nullable: true,
   })
-  agentType: AgentType;
+  agentType: AgentTypeEnum;
+
+  @Column()
+  abnNumber: string;
+
+  @Column()
+  vehicleMake: string;
+
+  @Column()
+  vehicleModel: string;
+
+  @Column()
+  vehicleYear: number;
 
   @Column({ nullable: true })
   profilePhoto: string;
 
-  @Column({ nullable: true })
-  abnNumber: string;
-
-  @Column({ nullable: true })
-  vehicleMake: string;
-
-  @Column({ nullable: true })
-  vehicleModel: string;
-
-  @Column({ nullable: true })
-  vehicleYear: number;
-
   @Column({
     type: 'enum',
-    enum: AgentStatus,
-    default: AgentStatus.OFFLINE,
+    enum: AgentStatusEnum,
+    default: AgentStatusEnum.OFFLINE,
     nullable: true,
   })
-  status: AgentStatus;
+  status: AgentStatusEnum;
 
   @CreateDateColumn()
   createdAt: Date;

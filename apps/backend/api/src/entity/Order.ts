@@ -1,4 +1,3 @@
-import { OrderStatus, OrderType } from 'src/common/enums';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -12,32 +11,40 @@ import {
 import { User } from './User';
 import { Review } from './Review';
 import { Agent } from './Agent';
+import { OrderStatusEnum, OrderTypeEnum } from 'src/common/enums/orderStatus';
+import { Location } from './Location';
 
 @Entity()
-@Index(['agent', 'status'])
+@Index(['status'])
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
     type: 'enum',
-    enum: OrderStatus,
-    default: OrderStatus.PENDING,
+    enum: OrderStatusEnum,
+    default: OrderStatusEnum.PENDING,
   })
-  status: OrderStatus;
+  status: OrderStatusEnum;
 
   @Column({
     type: 'enum',
-    enum: OrderType,
-    default: OrderType.DELIVERY,
+    enum: OrderTypeEnum,
+    default: OrderTypeEnum.DELIVERY,
   })
-  type: OrderType;
+  type: OrderTypeEnum;
 
-  @Column({ nullable: true })
-  pickupLocation: string;
+  @ManyToOne(() => Location, {
+    eager: true,
+    onDelete: 'SET NULL',
+  })
+  pickupLocation: Location;
 
-  @Column({ nullable: true })
-  dropLocation: string;
+  @ManyToOne(() => Location, {
+    eager: true,
+    onDelete: 'SET NULL',
+  })
+  dropLocation: Location;
 
   @Column({ nullable: true })
   distance: number;

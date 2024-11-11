@@ -14,7 +14,6 @@ import { Order } from './Order';
 
 @Entity()
 @Unique(['order'])
-@Index(['agent'])
 export class Review {
   @PrimaryGeneratedColumn()
   id: number;
@@ -22,7 +21,7 @@ export class Review {
   @Column({ type: 'int' })
   rating: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   comment: string;
 
   @CreateDateColumn()
@@ -49,4 +48,3 @@ export class Review {
   })
   order: Order;
 }
-

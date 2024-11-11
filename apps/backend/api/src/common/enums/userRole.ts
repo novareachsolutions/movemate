@@ -1,5 +1,6 @@
-export enum UserRole {
-    AGENT = 'AGENT',
-    ADMIN = 'ADMIN',
-    CUSTOMER = 'CUSTOMER',
-  }
+export enum UserRoleEnum {
+  AGENT = 'AGENT',
+  ADMIN = 'ADMIN',
+  CUSTOMER = 'CUSTOMER',
+  SUPPORT = 'SUPPORT ',
+}

@@ -1,3 +1,3 @@
-export interface CustomRequest extends Request {
+export interface ICustomRequest extends Request {
   userId?: number;
 }
