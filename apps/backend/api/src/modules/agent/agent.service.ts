@@ -10,6 +10,7 @@ import { Order } from '../../entity/Order';
 import { Review } from '../../entity/Review';
 import { RequiredDoc } from '../../entity/RequiredDoc';
 import { DatabaseService } from 'src/config/database/database.service';
+import { StandardResponse } from 'src/shared/interfaces/standardResponse';
 
 @Injectable()
 export class AgentService {
@@ -29,7 +30,10 @@ export class AgentService {
       DatabaseService.getRepository<RequiredDoc>('RequiredDoc');
   }
 
-  async createAgent(createAgentDto, userId: number) {
+  async createAgent(
+    createAgentDto: Agent,
+    userId: number,
+  ): Promise<StandardResponse<Agent>> {
     const existingAgent = await this.agentRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -44,10 +48,15 @@ export class AgentService {
       ...createAgentDto,
     });
 
-    return this.agentRepository.save(agent);
+    const data = await this.agentRepository.save(agent);
+    return {
+      success: true,
+      message: 'Agent created successfully.',
+      data,
+    };
   }
 
-  async getAgentProfile(userId: number): Promise<Agent> {
+  async getAgentProfile(userId: number): Promise<StandardResponse<Agent>> {
     const agent = await this.agentRepository.findOne({
       where: { user: { id: userId } },
       relations: ['agentDocuments', 'agentOrders', 'reviews'],
@@ -59,13 +68,17 @@ export class AgentService {
       );
     }
 
-    return agent;
+    return {
+      success: true,
+      message: 'Agent profile retrieved successfully.',
+      data: agent,
+    };
   }
 
   async updateAgentProfile(
     updateAgentDto: any,
     userId: number,
-  ): Promise<Agent> {
+  ): Promise<StandardResponse<Agent>> {
     const agent = await this.agentRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -78,10 +91,15 @@ export class AgentService {
 
     Object.assign(agent, updateAgentDto);
 
-    return this.agentRepository.save(agent);
+    const updatedAgent = await this.agentRepository.save(agent);
+    return {
+      success: true,
+      message: 'Agent profile updated successfully.',
+      data: updatedAgent,
+    };
   }
 
-  async deleteAgent(agentId: number): Promise<void> {
+  async deleteAgent(agentId: number): Promise<StandardResponse<null>> {
     const agent = await this.agentRepository.findOne({
       where: { id: agentId },
     });
@@ -91,9 +109,17 @@ export class AgentService {
     }
 
     await this.agentRepository.remove(agent);
+    return {
+      success: true,
+      message: 'Agent deleted successfully.',
+      data: null,
+    };
   }
 
-  async uploadDocument(uploadDto: any, userId: number): Promise<AgentDocument> {
+  async uploadDocument(
+    uploadDto: any,
+    userId: number,
+  ): Promise<StandardResponse<AgentDocument>> {
     const agent = await this.agentRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -128,10 +154,17 @@ export class AgentService {
       url: uploadDto.url,
     });
 
-    return this.agentDocumentRepository.save(agentDocument);
+    const data = await this.agentDocumentRepository.save(agentDocument);
+    return {
+      success: true,
+      message: 'Document uploaded successfully.',
+      data,
+    };
   }
 
-  async getAgentDocuments(userId: number): Promise<AgentDocument[]> {
+  async getAgentDocuments(
+    userId: number,
+  ): Promise<StandardResponse<AgentDocument[]>> {
     const agent = await this.agentRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -142,13 +175,22 @@ export class AgentService {
       );
     }
 
-    return this.agentDocumentRepository.find({
+    const documents = await this.agentDocumentRepository.find({
       where: { agent: { id: agent.id } },
       relations: ['requiredDoc'],
     });
+
+    return {
+      success: true,
+      message: 'Agent documents retrieved successfully.',
+      data: documents,
+    };
   }
 
-  async deleteAgentDocument(documentId: number, userId: number): Promise<void> {
+  async deleteAgentDocument(
+    documentId: number,
+    userId: number,
+  ): Promise<StandardResponse<null>> {
     const agent = await this.agentRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -170,9 +212,14 @@ export class AgentService {
     }
 
     await this.agentDocumentRepository.remove(document);
+    return {
+      success: true,
+      message: 'Document deleted successfully.',
+      data: null,
+    };
   }
 
-  async getAgentReviews(userId: number): Promise<Review[]> {
+  async getAgentReviews(userId: number): Promise<StandardResponse<Review[]>> {
     const agent = await this.agentRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -183,19 +230,33 @@ export class AgentService {
       );
     }
 
-    return this.reviewRepository.find({
+    const reviews = await this.reviewRepository.find({
       where: { agent: { id: agent.id } },
       relations: ['customer', 'order'],
     });
+
+    return {
+      success: true,
+      message: 'Agent reviews retrieved successfully.',
+      data: reviews,
+    };
   }
 
-  async getAllAgents(): Promise<Agent[]> {
-    return this.agentRepository.find({
+
+  // Admin fns
+  async getAllAgents(): Promise<StandardResponse<Agent[]>> {
+    const agents = await this.agentRepository.find({
       relations: ['user', 'agentDocuments', 'agentOrders', 'reviews'],
     });
+
+    return {
+      success: true,
+      message: 'All agents retrieved successfully.',
+      data: agents,
+    };
   }
 
-  async getAgentById(agentId: number): Promise<Agent> {
+  async getAgentById(agentId: number): Promise<StandardResponse<Agent>> {
     const agent = await this.agentRepository.findOne({
       where: { id: agentId },
       relations: ['user', 'agentDocuments', 'agentOrders', 'reviews'],
@@ -205,6 +266,10 @@ export class AgentService {
       throw new NotFoundException(`Agent with ID ${agentId} not found.`);
     }
 
-    return agent;
+    return {
+      success: true,
+      message: 'Agent retrieved successfully.',
+      data: agent,
+    };
   }
 }
