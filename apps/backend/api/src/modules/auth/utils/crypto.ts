@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  scryptSync,
+} from 'crypto';
 
 @Injectable()
 export class CryptoService {
@@ -9,11 +14,16 @@ export class CryptoService {
 
   constructor(private readonly configService: ConfigService) {
     const secret = this.configService.get<string>('ENCRYPTION_SECRET');
+    if (!secret) {
+      throw new Error(
+        'ENCRYPTION_SECRET is not defined in environment variables',
+      );
+    }
     this.encryptionKey = scryptSync(secret, 'salt', 24);
   }
 
   private generateIv(): Buffer {
-    return randomBytes(16); 
+    return randomBytes(16);
   }
 
   encrypt(text: string): string {
@@ -31,5 +41,9 @@ export class CryptoService {
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
+  }
+
+  encryptPhone(phoneNumber: string): string {
+    return this.encrypt(phoneNumber);
   }
 }

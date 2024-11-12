@@ -50,18 +50,6 @@ export class TokenService {
     return randToken(length);
   }
 
-  async verifyAccessToken(accessToken: string, xsrfToken: string): Promise<any> {
-    return this.jwtService.verify(accessToken, {
-      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
-    });
-  }
-
-  async verifyRefreshToken(refreshToken: string): Promise<any> {
-    return this.jwtService.verify(refreshToken, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-    });
-  }
-
   generateOnboardingToken(phoneNumber: string): string {
     const encryptedPhone = this.cryptoService.encrypt(phoneNumber);
     const tokenId = randToken(24);
@@ -73,6 +61,18 @@ export class TokenService {
         expiresIn: '60m',
       },
     );
+  }
+
+  async verifyAccessToken(accessToken: string, xsrfToken: string): Promise<any> {
+    return this.jwtService.verify(accessToken, {
+      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
+    });
+  }
+
+  async verifyRefreshToken(refreshToken: string): Promise<any> {
+    return this.jwtService.verify(refreshToken, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+    });
   }
 
   async verifyOnboardingToken(token: string): Promise<boolean> {
