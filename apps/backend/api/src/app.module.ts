@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from './modules/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DatabaseModule } from './config/database/database.module';
-import { AgentModule } from './modules/agent/agent.module';
 
 @Module({
   imports: [
@@ -14,8 +13,7 @@ import { AgentModule } from './modules/agent/agent.module';
     }),
     DatabaseModule,
     RedisModule,
-    AuthModule,
-    AgentModule
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
