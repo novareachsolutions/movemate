@@ -43,7 +43,6 @@ export class Review {
   agent: Agent;
 
   @ManyToOne(() => Order, (order) => order.review, {
-    eager: true,
     onDelete: 'CASCADE',
   })
   order: Order;

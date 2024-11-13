@@ -18,8 +18,8 @@ export class AuthService {
     private readonly otpService: OtpService,
   ) {
     // Initialize Twilio client with credentials
-    const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
-    const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
+    const accountSid = this.configService.get<string>('TW_ACC_SID');
+    const authToken = this.configService.get<string>('TW_AUTH_TOKEN');
 
     if (!accountSid || !authToken) {
       throw new HttpException(
