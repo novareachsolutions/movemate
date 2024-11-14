@@ -75,11 +75,27 @@ export class AuthService {
     };
   }
 
-  decryptOnboardingToken(token: string): string {
-    const payload = this.jwtService.verify(token, {
-      secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
-    });
-    return this.cryptoService.decrypt(payload.phone);
+  async verifyOnboardingToken(token: string): Promise<boolean> {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
+      })
+
+      if (!payload.phone || !payload.tokenId) return false
+
+      const verifyPhone = await this.redisService.get(
+        `onboardingToken:${payload.tokenId}`,
+      )
+      if (!verifyPhone) return false
+
+      if (verifyPhone === payload.phone) {
+        await this.redisService.del(`onboardingToken:${payload.tokenId}`) 
+        return true
+      }
+      return false
+    } catch (error) {
+      throw new Error('Invalid or expired token')
+    }
   }
 
   private async manageOtpRequests(phoneNumber: string): Promise<void> {
