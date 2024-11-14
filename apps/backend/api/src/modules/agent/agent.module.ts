@@ -1,5 +1,3 @@
-// src/modules/agent/agent.module.ts
-
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Agent } from '../../entity/Agent';
