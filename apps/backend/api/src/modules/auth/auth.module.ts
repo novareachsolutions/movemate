@@ -7,6 +7,8 @@ import { RedisModule } from '../redis/redis.module';
 import { RedisService } from '../redis/redis.service';
 import { CryptoService } from './utils/crypto';
 import { AuthController } from './auth.controller';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @Module({
   imports: [
@@ -26,7 +28,9 @@ import { AuthController } from './auth.controller';
     RedisService,
     OtpService,
     CryptoService,
+    AuthGuard,
+    RolesGuard
   ],
-  exports: [AuthService],
-})  
-export class AuthModule {}
+  exports: [AuthService, AuthGuard, RolesGuard],
+})
+export class AuthModule { }
