@@ -13,7 +13,7 @@ import { DatabaseModule } from './config/database/database.module';
     }),
     DatabaseModule,
     RedisModule,
-    AuthModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
