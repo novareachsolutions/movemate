@@ -18,7 +18,7 @@ import { ICustomRequest } from 'src/shared/interfaces/customRequest';
 export class AgentController {
   constructor(private readonly agentService: AgentService) { }
 
-  @Post('/signup')
+  @Post('signup')
   async create(@Body() createAgentDto, @Req() req: ICustomRequest) {
     const data = await this.agentService.createAgent(createAgentDto, req.userId);
     return {
@@ -38,7 +38,7 @@ export class AgentController {
     };
   }
 
-  @Patch('/update')
+  @Patch('update')
   async updateProfile(@Body() updateAgentDto, @Req() req: ICustomRequest) {
     const data = await this.agentService.updateAgentProfile(
       updateAgentDto,
@@ -112,7 +112,7 @@ export class AgentController {
     };
   }
 
-  @Get('/list')
+  @Get('list')
   async getAll() {
     const data = await this.agentService.getAllAgents();
     return {
