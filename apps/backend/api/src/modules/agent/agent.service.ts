@@ -3,10 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { Agent } from '../../entity/Agent';
 import { AgentDocument } from '../../entity/AgentDocument';
-import { Order } from '../../entity/Order';
 import { Review } from '../../entity/Review';
 import { RequiredDoc } from '../../entity/RequiredDoc';
 import { DatabaseService } from 'src/config/database/database.service';
@@ -14,27 +12,12 @@ import { StandardResponse } from 'src/shared/interfaces/standardResponse';
 
 @Injectable()
 export class AgentService {
-  private agentRepository: Repository<Agent>;
-  private agentDocumentRepository: Repository<AgentDocument>;
-  private orderRepository: Repository<Order>;
-  private reviewRepository: Repository<Review>;
-  private requiredDocRepository: Repository<RequiredDoc>;
-
-  constructor() {
-    this.agentRepository = DatabaseService.getRepository<Agent>('Agent');
-    this.agentDocumentRepository =
-      DatabaseService.getRepository<AgentDocument>('AgentDocument');
-    this.orderRepository = DatabaseService.getRepository<Order>('Order');
-    this.reviewRepository = DatabaseService.getRepository<Review>('Review');
-    this.requiredDocRepository =
-      DatabaseService.getRepository<RequiredDoc>('RequiredDoc');
-  }
 
   async createAgent(
     createAgentDto: Agent,
     userId: number,
   ): Promise<StandardResponse<Agent>> {
-    const existingAgent = await this.agentRepository.findOne({
+    const existingAgent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { user: { id: userId } },
     });
     if (existingAgent) {
@@ -43,12 +26,12 @@ export class AgentService {
       );
     }
 
-    const agent = this.agentRepository.create({
+    const agent = DatabaseService.getRepository<Agent>('Agent').create({
       user: { id: userId },
       ...createAgentDto,
     });
 
-    const data = await this.agentRepository.save(agent);
+    const data = await DatabaseService.getRepository<Agent>('Agent').save(agent);
     return {
       success: true,
       message: 'Agent created successfully.',
@@ -57,7 +40,7 @@ export class AgentService {
   }
 
   async getAgentProfile(userId: number): Promise<StandardResponse<Agent>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { user: { id: userId } },
       relations: ['agentDocuments', 'agentOrders', 'reviews'],
     });
@@ -79,7 +62,7 @@ export class AgentService {
     updateAgentDto: any,
     userId: number,
   ): Promise<StandardResponse<Agent>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { user: { id: userId } },
     });
 
@@ -91,7 +74,7 @@ export class AgentService {
 
     Object.assign(agent, updateAgentDto);
 
-    const updatedAgent = await this.agentRepository.save(agent);
+    const updatedAgent = await DatabaseService.getRepository<Agent>('Agent').save(agent);
     return {
       success: true,
       message: 'Agent profile updated successfully.',
@@ -100,7 +83,7 @@ export class AgentService {
   }
 
   async deleteAgent(agentId: number): Promise<StandardResponse<null>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { id: agentId },
     });
 
@@ -108,7 +91,7 @@ export class AgentService {
       throw new NotFoundException(`Agent with ID ${agentId} not found.`);
     }
 
-    await this.agentRepository.remove(agent);
+    await DatabaseService.getRepository<Agent>('Agent').remove(agent);
     return {
       success: true,
       message: 'Agent deleted successfully.',
@@ -120,7 +103,7 @@ export class AgentService {
     uploadDto: any,
     userId: number,
   ): Promise<StandardResponse<AgentDocument>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { user: { id: userId } },
     });
 
@@ -130,7 +113,7 @@ export class AgentService {
       );
     }
 
-    const requiredDoc = await this.requiredDocRepository.findOne({
+    const requiredDoc = await DatabaseService.getRepository<RequiredDoc>('RequiredDoc').findOne({
       where: { name: uploadDto.requiredDocType },
     });
 
@@ -140,7 +123,7 @@ export class AgentService {
       );
     }
 
-    const existingDocument = await this.agentDocumentRepository.findOne({
+    const existingDocument = await DatabaseService.getRepository<AgentDocument>('AgentDocument').findOne({
       where: { agent: { id: agent.id }, requiredDoc: { id: requiredDoc.id } },
     });
 
@@ -148,13 +131,13 @@ export class AgentService {
       throw new BadRequestException('Document of this type already uploaded.');
     }
 
-    const agentDocument = this.agentDocumentRepository.create({
+    const agentDocument = DatabaseService.getRepository<AgentDocument>('AgentDocument').create({
       agent,
       requiredDoc,
       url: uploadDto.url,
     });
 
-    const data = await this.agentDocumentRepository.save(agentDocument);
+    const data = await DatabaseService.getRepository<AgentDocument>('AgentDocument').save(agentDocument);
     return {
       success: true,
       message: 'Document uploaded successfully.',
@@ -165,7 +148,7 @@ export class AgentService {
   async getAgentDocuments(
     userId: number,
   ): Promise<StandardResponse<AgentDocument[]>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { user: { id: userId } },
     });
 
@@ -175,7 +158,7 @@ export class AgentService {
       );
     }
 
-    const documents = await this.agentDocumentRepository.find({
+    const documents = await DatabaseService.getRepository<AgentDocument>('AgentDocument').find({
       where: { agent: { id: agent.id } },
       relations: ['requiredDoc'],
     });
@@ -191,7 +174,7 @@ export class AgentService {
     documentId: number,
     userId: number,
   ): Promise<StandardResponse<null>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { user: { id: userId } },
     });
 
@@ -201,7 +184,7 @@ export class AgentService {
       );
     }
 
-    const document = await this.agentDocumentRepository.findOne({
+    const document = await DatabaseService.getRepository<AgentDocument>('AgentDocument').findOne({
       where: { id: documentId, agent: { id: agent.id } },
     });
 
@@ -211,7 +194,7 @@ export class AgentService {
       );
     }
 
-    await this.agentDocumentRepository.remove(document);
+    await DatabaseService.getRepository<AgentDocument>('AgentDocument').remove(document);
     return {
       success: true,
       message: 'Document deleted successfully.',
@@ -220,7 +203,7 @@ export class AgentService {
   }
 
   async getAgentReviews(userId: number): Promise<StandardResponse<Review[]>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { user: { id: userId } },
     });
 
@@ -230,7 +213,7 @@ export class AgentService {
       );
     }
 
-    const reviews = await this.reviewRepository.find({
+    const reviews = await DatabaseService.getRepository<Review>('Review').find({
       where: { agent: { id: agent.id } },
       relations: ['customer', 'order'],
     });
@@ -242,10 +225,8 @@ export class AgentService {
     };
   }
 
-
-  // Admin fns
   async getAllAgents(): Promise<StandardResponse<Agent[]>> {
-    const agents = await this.agentRepository.find({
+    const agents = await DatabaseService.getRepository<Agent>('Agent').find({
       relations: ['user', 'agentDocuments', 'agentOrders', 'reviews'],
     });
 
@@ -257,7 +238,7 @@ export class AgentService {
   }
 
   async getAgentById(agentId: number): Promise<StandardResponse<Agent>> {
-    const agent = await this.agentRepository.findOne({
+    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
       where: { id: agentId },
       relations: ['user', 'agentDocuments', 'agentOrders', 'reviews'],
     });
@@ -273,3 +254,4 @@ export class AgentService {
     };
   }
 }
+

@@ -13,101 +13,112 @@ import {
 import { AgentService } from './agent.service';
 import { UserRoleEnum } from 'src/common/enums/userRole';
 import { ICustomRequest } from 'src/shared/interfaces/customRequest';
-import { StandardResponse } from 'src/shared/interfaces/standardResponse';
-import { createResponse } from 'src/common/helpers/response.helpers';
 
 @Controller('agents')
 export class AgentController {
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: AgentService) { }
 
   @Post('/signup')
-  async create(
-    @Body() createAgentDto,
-    @Req() req: ICustomRequest,
-  ): Promise<StandardResponse<any>> {
-    const userId = req.userId;
-    const data = await this.agentService.createAgent(createAgentDto, userId);
-    return createResponse(true, 'Agent created successfully.', data);
+  async create(@Body() createAgentDto, @Req() req: ICustomRequest) {
+    const data = await this.agentService.createAgent(createAgentDto, req.userId);
+    return {
+      success: true,
+      message: 'Agent created successfully.',
+      data,
+    };
   }
 
   @Get('profile')
-  async getProfile(@Req() req: ICustomRequest): Promise<StandardResponse<any>> {
-    const userId = req.userId;
-    const data = await this.agentService.getAgentProfile(userId);
-    return createResponse(true, 'Agent profile retrieved successfully.', data);
+  async getProfile(@Req() req: ICustomRequest) {
+    const data = await this.agentService.getAgentProfile(req.userId);
+    return {
+      success: true,
+      message: 'Agent profile retrieved successfully.',
+      data,
+    };
   }
 
   @Patch('/update')
-  async updateProfile(
-    @Body() updateAgentDto,
-    @Req() req: ICustomRequest,
-  ): Promise<StandardResponse<any>> {
-    const userId = req.userId;
+  async updateProfile(@Body() updateAgentDto, @Req() req: ICustomRequest) {
     const data = await this.agentService.updateAgentProfile(
       updateAgentDto,
-      userId,
+      req.userId,
     );
-    return createResponse(true, 'Agent profile updated successfully.', data);
+    return {
+      success: true,
+      message: 'Agent profile updated successfully.',
+      data,
+    };
   }
 
   @Delete(':agentId')
-  async deleteAgent(
+  async delete(
     @Param('agentId', ParseIntPipe) agentId: number,
     @Body() body: { userRole: UserRoleEnum },
-  ): Promise<StandardResponse<null>> {
+  ) {
     const { userRole } = body;
     if (userRole !== UserRoleEnum.ADMIN) {
       throw new BadRequestException('Only admins can perform this action.');
     }
     await this.agentService.deleteAgent(agentId);
-    return createResponse(true, 'Agent deleted successfully.', null);
+    return {
+      success: true,
+      message: 'Agent deleted successfully.',
+      data: null,
+    };
   }
 
   @Post('documents')
-  async uploadDocument(
-    @Body() uploadDto,
-    @Req() req: ICustomRequest,
-  ): Promise<StandardResponse<any>> {
+  async uploadDocument(@Body() uploadDto, @Req() req: ICustomRequest) {
     const userId = req.userId;
     const data = await this.agentService.uploadDocument(uploadDto, userId);
-    return createResponse(true, 'Document uploaded successfully.', data);
+    return {
+      success: true,
+      message: 'Document uploaded successfully.',
+      data,
+    };
   }
 
   @Get('documents')
-  async getAgentDocuments(
-    @Req() req: ICustomRequest,
-  ): Promise<StandardResponse<any>> {
-    const userId = req.userId;
-    const data = await this.agentService.getAgentDocuments(userId);
-    return createResponse(
-      true,
-      'Agent documents retrieved successfully.',
+  async getDocuments(@Req() req: ICustomRequest) {
+    const data = await this.agentService.getAgentDocuments(req.userId);
+    return {
+      success: true,
+      message: 'Agent documents retrieved successfully.',
       data,
-    );
+    };
   }
 
   @Delete('documents/:documentId')
-  async deleteAgentDocument(
+  async deleteDocument(
     @Param('documentId', ParseIntPipe) documentId: number,
     @Req() req: ICustomRequest,
-  ): Promise<StandardResponse<null>> {
-    const userId = req.userId;
-    await this.agentService.deleteAgentDocument(documentId, userId);
-    return createResponse(true, 'Document deleted successfully.', null);
+  ) {
+    await this.agentService.deleteAgentDocument(documentId, req.userId);
+    return {
+      success: true,
+      message: 'Document deleted successfully.',
+      data: null,
+    };
   }
 
   @Get('reviews')
-  async getAgentReviews(
-    @Req() req: ICustomRequest,
-  ): Promise<StandardResponse<any>> {
-    const userId = req.userId;
-    const data = await this.agentService.getAgentReviews(userId);
-    return createResponse(true, 'Agent reviews retrieved successfully.', data);
+  async getReviews(@Req() req: ICustomRequest) {
+    const data = await this.agentService.getAgentReviews(req.userId);
+    return {
+      success: true,
+      message: 'Agent reviews retrieved successfully.',
+      data,
+    };
   }
 
   @Get('/list')
-  async getAllAgents(): Promise<StandardResponse<any>> {
+  async getAll() {
     const data = await this.agentService.getAllAgents();
-    return createResponse(true, 'All agents retrieved successfully.', data);
+    return {
+      success: true,
+      message: 'All agents retrieved successfully.',
+      data,
+    };
   }
 }
