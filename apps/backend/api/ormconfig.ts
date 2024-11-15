@@ -9,6 +9,10 @@ const dataSource = async (): Promise<DataSource> => {
 
   return new DataSource({
     ...primaryDataSourceInstance.options,
+    entities: [
+      'src/modules/user/entities/*.ts',
+      'src/entity/*.ts',
+    ],
     logging: false,
   });
 };

@@ -1,0 +1,7 @@
+export enum PackageType {
+    DOCUMENTS = 'DOCUMENTS',
+    ELECTRONICS = 'ELECTRONICS',
+    CLOTHING = 'CLOTHING',
+    PERISHABLES = 'PERISHABLES',
+    OTHER = 'OTHER',
+  }
