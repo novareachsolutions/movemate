@@ -1,22 +1,13 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  OneToMany,
-} from 'typeorm';
-import { Order } from './Order';
-import { Agent } from './Agent';
-import { Review } from './Review';
-import { Location } from './Location';
+import { Entity, Column, Index, Unique } from 'typeorm';
 import { UserRoleEnum } from 'src/common/enums/userRole';
+import { BaseEntity } from './BaseEntity';
 
+@Index('IDX_user_role', ['role'], { where: '"deletedAt" IS NULL' })
+@Unique('UQ_user_email', ['email'])
+@Unique('UQ_user_phoneNumber', ['phoneNumber'])
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: 'varchar', unique: true })
+export class User extends BaseEntity {
+  @Column({ type: 'varchar', nullable: false })
   phoneNumber: string;
 
   @Column({
@@ -25,46 +16,24 @@ export class User {
   })
   role: UserRoleEnum;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: false })
   firstName: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   lastName: string;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'varchar', nullable: false })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   street: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   suburb: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   state: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'integer', nullable: true })
   postalCode: number;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
-  updatedAt: Date;
-
-  @OneToMany(() => Order, (order) => order.customer)
-  customerOrders: Order[];
-
-  @OneToMany(() => Location, (address) => address.user)
-  locations: Location[];
-
-  @OneToOne(() => Agent, (agent) => agent.user)
-  agent: Agent;
-
-  @OneToMany(() => Review, (review) => review.customer)
-  reviews: Review[];
 }

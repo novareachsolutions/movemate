@@ -1,37 +1,30 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  Unique,
-  RelationId,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, Unique, RelationId, Index } from 'typeorm';
 import { Agent } from './Agent';
-import { RequiredDoc } from './RequiredDoc';
+import { BaseEntity } from './BaseEntity';
 
+@Index('IDX_agent_document_agentId', ['agentId'], {
+  where: '"deletedAt" IS NULL',
+})
+@Unique('UQ_agent_document_agentId', ['agentId'])
 @Entity()
-@Unique(['agent', 'requiredDoc'])
-export class AgentDocument {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class AgentDocument extends BaseEntity {
+  @Column({ type: 'varchar', nullable: false })
+  name: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: true })
+  description: string;
+
+  @Column({ type: 'varchar', nullable: false })
   url: string;
 
-  @ManyToOne(() => Agent, (agent) => agent.agentDocuments, {
+  @ManyToOne(() => Agent, {
+    cascade: true,
+    deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
   })
   agent: Agent;
 
   @RelationId((doc: AgentDocument) => doc.agent)
+  @Column({ type: 'integer' })
   agentId: number;
-
-  @ManyToOne(() => RequiredDoc, (requiredDoc) => requiredDoc.agentDocuments, {
-    eager: true,
-    onDelete: 'CASCADE',
-  })
-  requiredDoc: RequiredDoc;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  uploadedAt: Date;
 }
