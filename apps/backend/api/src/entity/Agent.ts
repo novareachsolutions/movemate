@@ -1,12 +1,14 @@
-import { Entity, Column, OneToOne, RelationId, Index } from 'typeorm';
+import { Entity, Column, OneToOne, RelationId, Index, Unique } from 'typeorm';
 import { User } from './User';
-import { AgentStatusEnum, AgentTypeEnum } from 'src/common/enums/agent';
 import { BaseEntity } from './BaseEntity';
+import { TAgent } from 'src/modules/agent/agent.types';
+import { AgentStatusEnum, AgentTypeEnum } from 'src/shared/enums';
 
 @Index('IDX_agent_userId', ['userId'], { where: '"deletedAt" IS NULL' })
 @Index('IDX_agent_status', ['status'], { where: '"deletedAt" IS NULL' })
+@Unique('UQ_agent_abnNumber', ['abnNumber'])
 @Entity()
-export class Agent extends BaseEntity {
+export class Agent extends BaseEntity implements TAgent {
   @OneToOne(() => User, {
     cascade: true,
     deferrable: 'INITIALLY IMMEDIATE',
@@ -20,7 +22,7 @@ export class Agent extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    nullable: true,
+    nullable: false,
   })
   agentType: AgentTypeEnum;
 
@@ -42,7 +44,7 @@ export class Agent extends BaseEntity {
   @Column({
     type: 'varchar',
     default: AgentStatusEnum.OFFLINE,
-    nullable: true,
+    nullable: false,
   })
   status: AgentStatusEnum;
 }

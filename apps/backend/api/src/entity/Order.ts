@@ -8,10 +8,10 @@ import {
 } from 'typeorm';
 import { User } from './User';
 import { Agent } from './Agent';
-import { OrderStatusEnum, OrderTypeEnum } from 'src/common/enums/orderStatus';
 import { BaseEntity } from './BaseEntity';
 import { PickupLocation } from './PickupLocation';
 import { DropLocation } from './DropLocation';
+import { OrderStatusEnum, OrderTypeEnum } from 'src/shared/enums';
 
 @Index('IDX_order_customerId', ['customerId'], { where: '"deletedAt" IS NULL' })
 @Index('IDX_order_agentId', ['agentId'], { where: '"deletedAt" IS NULL' })
