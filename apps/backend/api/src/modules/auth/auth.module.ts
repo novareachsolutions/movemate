@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './utils/jwt.strategy';
 import { OtpService } from './utils/otp';
 import { RedisModule } from '../redis/redis.module';
 import { RedisService } from '../redis/redis.service';
+import { CryptoService } from './utils/crypto';
+import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
@@ -19,13 +20,13 @@ import { RedisService } from '../redis/redis.service';
     }),
     RedisModule,
   ],
-  controllers: [],
+  controllers: [AuthController],
   providers: [
     AuthService,
-    JwtStrategy,
     RedisService,
-    OtpService
+    OtpService,
+    CryptoService,
   ],
-  exports: [AuthService, JwtStrategy],
-})
+  exports: [AuthService],
+})  
 export class AuthModule {}
