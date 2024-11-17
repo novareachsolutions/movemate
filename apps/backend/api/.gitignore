@@ -1,7 +1,7 @@
 # compiled output
-/out
 /node_modules
 /build
+/out
 
 # Logs
 yarn-debug.log*
