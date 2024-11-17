@@ -1,5 +1,11 @@
 import { logger } from 'src/logger';
-import { BaseEntity, DataSource, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  BaseEntity,
+  DataSource,
+  EntityTarget,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { primaryDataSource } from './primaryDataSource';
 import { readReplicaDataSource } from './readReplicaDataSource';
 
@@ -53,13 +59,15 @@ export class DatabaseService {
     }
   }
 
-  public static getRepository<T>(entity: string): Repository<T> {
+  public static getRepository<T>(entity: EntityTarget<T>): Repository<T> {
     const baseRepository =
       DatabaseService.instance.primaryDataSource.getRepository<T>(entity);
     return new Proxy(baseRepository, DatabaseService.methodInterceptor());
   }
 
-  public static getReadReplicaRepository<T>(entity: string): Repository<T> {
+  public static getReadReplicaRepository<T>(
+    entity: EntityTarget<T>,
+  ): Repository<T> {
     const readReplicaRepository =
       DatabaseService.instance.secondaryDataSource.getRepository<T>(entity);
     return new Proxy(
@@ -146,4 +154,20 @@ export class DatabaseService {
       }
     }
   }
+}
+
+export function dbRepo<T>(entity: EntityTarget<T>): Repository<T> {
+  return DatabaseService.getRepository<T>(entity);
+}
+
+export function dbReadRepo<T>(entity: EntityTarget<T>): Repository<T> {
+  return DatabaseService.getReadReplicaRepository<T>(entity);
+}
+
+export function dbQuery<T>(query: string, parameters?: any[]): Promise<T> {
+  return DatabaseService.executeQuery<T>(query, parameters);
+}
+
+export function dbReadQuery<T>(query: string, parameters?: any[]): Promise<T> {
+  return DatabaseService.executeReadReplicaQuery<T>(query, parameters);
 }

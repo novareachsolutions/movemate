@@ -33,7 +33,7 @@ export class AgentReview extends BaseEntity {
     cascade: true,
     deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
-    nullable: true,
+    nullable: false,
   })
   agent: Agent;
 

@@ -5,253 +5,154 @@ import {
 } from '@nestjs/common';
 import { Agent } from '../../entity/Agent';
 import { AgentDocument } from '../../entity/AgentDocument';
-import { Review } from '../../entity/Review';
-import { RequiredDoc } from '../../entity/RequiredDoc';
-import { DatabaseService } from 'src/config/database/database.service';
-import { StandardResponse } from 'src/shared/interfaces/standardResponse';
+import {
+  DatabaseService,
+  dbReadRepo,
+  dbRepo,
+} from 'src/config/database/database.service';
+import {
+  TAgent,
+  TAgentDocument,
+  TAgentPartial,
+  TGetAgentProfile,
+} from './agent.types';
+import { logger } from 'src/logger';
+import { filterEmptyValues } from 'src/utils/filter';
+import { DeleteResult, UpdateResult } from 'typeorm';
+import { RequiredDocument } from 'src/entity/RequiredDocument';
+import { UserRoleEnum } from 'src/shared/enums';
+import { AgentReview } from 'src/entity/AgentReview';
 
 @Injectable()
 export class AgentService {
-
-  async createAgent(
-    createAgentDto: Agent,
-    userId: number,
-  ): Promise<StandardResponse<any>> {
-    const existingAgent = await DatabaseService.getRepository('Agent').findOne({
-      where: { user: { id: userId } },
+  async createAgent(agent: TAgent): Promise<Agent> {
+    const existingAgent = await dbReadRepo(Agent).findOne({
+      where: {
+        abnNumber: agent.abnNumber,
+      },
     });
     if (existingAgent) {
+      logger.error(
+        `AgentService.createAgent: Agent with ABN number ${agent.abnNumber} already exists.`,
+      );
       throw new BadRequestException(
-        'Agent profile already exists for this user.',
+        `Agent with this ABN number already exists. Provided ABN number: ${agent.abnNumber}`,
       );
     }
 
-    const agent = DatabaseService.getRepository('Agent').create({
-      user: { id: userId },
-      ...createAgentDto,
+    const response = await dbRepo(Agent).save({
+      ...agent,
+      user: { id: agent.userId },
     });
 
-    const data = await DatabaseService.getRepository('Agent').save(agent);
-    return {
-      success: true,
-      message: 'Agent created successfully.',
-      data,
-    };
+    return response;
   }
 
-  async getAgentProfile(userId: number): Promise<StandardResponse<any>> {
-    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
-      where: { user: { id: userId } },
-      relations: ['agentDocuments', 'agentOrders', 'reviews'],
+  async getAgentById(agentId: number): Promise<Agent> {
+    const agent = await dbReadRepo(Agent).findOne({
+      where: { id: agentId },
+      relations: ['user'],
+    });
+    if (!agent) {
+      throw new NotFoundException(`Agent with ID ${agentId} not found.`);
+    }
+
+    return agent;
+  }
+
+  async getAgentProfile(input: TGetAgentProfile): Promise<Agent> {
+    const filteredInput = filterEmptyValues(input);
+    const agent = await dbReadRepo(Agent).findOne({
+      where: filteredInput,
+      relations: ['user'],
     });
 
     if (!agent) {
       throw new NotFoundException(
-        `Agent profile not found for user ID ${userId}.`,
+        `No agent found with the provided details. Details: ${JSON.stringify(
+          input,
+        )}`,
       );
     }
 
-    return {
-      success: true,
-      message: 'Agent profile retrieved successfully.',
-      data: agent,
-    };
+    return agent;
+  }
+
+  async getAllAgents(): Promise<Agent[]> {
+    return await dbReadRepo(Agent).find();
   }
 
   async updateAgentProfile(
-    updateAgentDto: any,
-    userId: number,
-  ): Promise<StandardResponse<any>> {
-    const agent = await DatabaseService.getRepository('Agent').findOne({
-      where: { user: { id: userId } },
+    id: number,
+    updateAgent: TAgentPartial,
+  ): Promise<UpdateResult> {
+    const agent = await dbReadRepo(Agent).findOne({
+      where: { id },
     });
-
     if (!agent) {
-      throw new NotFoundException(
-        `Agent profile not found for user ID ${userId}.`,
-      );
+      throw new NotFoundException(`Agent profile not found for ID ${id}.`);
     }
 
-    Object.assign(agent, updateAgentDto);
-
-    const updatedAgent = await DatabaseService.getRepository('Agent').save(agent);
-    return {
-      success: true,
-      message: 'Agent profile updated successfully.',
-      data: updatedAgent,
-    };
+    const filteredUpdateAgent = filterEmptyValues(updateAgent);
+    logger.debug(
+      `Updating agent with ID ${id} with data: ${JSON.stringify(filteredUpdateAgent)}`,
+    );
+    return await dbRepo(Agent).update(id, filteredUpdateAgent);
   }
 
-  async deleteAgent(agentId: number): Promise<StandardResponse<any>> {
-    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
-      where: { id: agentId },
-    });
-
-    if (!agent) {
-      throw new NotFoundException(`Agent with ID ${agentId} not found.`);
-    }
-
-    await DatabaseService.getRepository('Agent').remove(agent);
-    return {
-      success: true,
-      message: 'Agent deleted successfully.',
-      data: null,
-    };
+  async deleteAgent(agentId: number): Promise<UpdateResult> {
+    logger.debug(`Deleting agent with ID ${agentId}`);
+    return await dbRepo(Agent).softDelete(agentId);
   }
 
   async uploadDocument(
-    uploadDto: any,
-    userId: number,
-  ): Promise<StandardResponse<any>> {
-    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
-      where: { user: { id: userId } },
+    agentId: number,
+    uploadDocumnent: TAgentDocument,
+  ): Promise<AgentDocument> {
+    const requiredDocument = await dbReadRepo(RequiredDocument).findOne({
+      where: { role: UserRoleEnum.AGENT },
     });
 
-    if (!agent) {
-      throw new NotFoundException(
-        `Agent profile not found for user ID ${userId}.`,
+    if (!requiredDocument.documents.includes(uploadDocumnent.name)) {
+      throw new BadRequestException(
+        `Document ${uploadDocumnent.name} is not required for agents.`,
       );
     }
 
-    const requiredDoc = await DatabaseService.getRepository<RequiredDoc>('RequiredDoc').findOne({
-      where: { name: uploadDto.requiredDocType },
-    });
-
-    if (!requiredDoc) {
-      throw new NotFoundException(
-        `Required document type ${uploadDto.requiredDocType} not found.`,
-      );
-    }
-
-    const existingDocument = await DatabaseService.getRepository<AgentDocument>('AgentDocument').findOne({
-      where: { agent: { id: agent.id }, requiredDoc: { id: requiredDoc.id } },
+    const existingDocument = await dbReadRepo(AgentDocument).findOne({
+      where: { agent: { id: agentId }, name: uploadDocumnent.name },
     });
 
     if (existingDocument) {
-      throw new BadRequestException('Document of this type already uploaded.');
-    }
-
-    const agentDocument = DatabaseService.getRepository('AgentDocument').create({
-      agent,
-      requiredDoc,
-      url: uploadDto.url,
-    });
-
-    const data = await DatabaseService.getRepository('AgentDocument').save(agentDocument);
-    return {
-      success: true,
-      message: 'Document uploaded successfully.',
-      data,
-    };
-  }
-
-  async getAgentDocuments(
-    userId: number,
-  ): Promise<StandardResponse<AgentDocument[]>> {
-    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
-      where: { user: { id: userId } },
-    });
-
-    if (!agent) {
-      throw new NotFoundException(
-        `Agent profile not found for user ID ${userId}.`,
+      throw new BadRequestException(
+        `Document ${uploadDocumnent.name} already exists for this agent.`,
       );
     }
 
-    const documents = await DatabaseService.getRepository<AgentDocument>('AgentDocument').find({
-      where: { agent: { id: agent.id } },
-      relations: ['requiredDoc'],
+    const response = await dbRepo(AgentDocument).save({
+      ...uploadDocumnent,
+      agent: { id: agentId },
     });
 
-    return {
-      success: true,
-      message: 'Agent documents retrieved successfully.',
-      data: documents,
-    };
+    return response;
   }
 
-  async deleteAgentDocument(
-    documentId: number,
-    userId: number,
-  ): Promise<StandardResponse<null>> {
-    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
-      where: { user: { id: userId } },
+  async getAgentDocuments(id: number): Promise<AgentDocument[]> {
+    logger.debug(`Getting documents for agent with ID ${id}`);
+    return await dbReadRepo(AgentDocument).find({
+      where: { id },
     });
-
-    if (!agent) {
-      throw new NotFoundException(
-        `Agent profile not found for user ID ${userId}.`,
-      );
-    }
-
-    const document = await DatabaseService.getRepository<AgentDocument>('AgentDocument').findOne({
-      where: { id: documentId, agent: { id: agent.id } },
-    });
-
-    if (!document) {
-      throw new NotFoundException(
-        `Document with ID ${documentId} not found for this agent.`,
-      );
-    }
-
-    await DatabaseService.getRepository('AgentDocument').remove(document);
-    return {
-      success: true,
-      message: 'Document deleted successfully.',
-      data: null,
-    };
   }
 
-  async getAgentReviews(userId: number): Promise<StandardResponse<any>> {
-    const agent = await DatabaseService.getRepository<Agent>('Agent').findOne({
-      where: { user: { id: userId } },
-    });
-
-    if (!agent) {
-      throw new NotFoundException(
-        `Agent profile not found for user ID ${userId}.`,
-      );
-    }
-
-    const reviews = await DatabaseService.getRepository('Review').find({
-      where: { agent: { id: agent.id } },
-      relations: ['customer', 'order'],
-    });
-
-    return {
-      success: true,
-      message: 'Agent reviews retrieved successfully.',
-      data: reviews,
-    };
+  async deleteAgentDocument(documentId: number): Promise<UpdateResult> {
+    logger.debug(`Deleting document with ID ${documentId}`);
+    return await dbRepo(AgentDocument).softDelete(documentId);
   }
 
-  async getAllAgents(): Promise<StandardResponse<any>> {
-    const agents = await DatabaseService.getRepository('Agent').find({
-      relations: ['user', 'agentDocuments', 'agentOrders', 'reviews'],
+  async getAgentReviews(agentId: number): Promise<AgentReview[]> {
+    return await dbReadRepo(AgentReview).find({
+      where: { agentId },
+      relations: ['agent'],
     });
-
-    return {
-      success: true,
-      message: 'All agents retrieved successfully.',
-      data: agents,
-    };
-  }
-
-  async getAgentById(agentId: number): Promise<StandardResponse<any>> {
-    const agent = await DatabaseService.getRepository('Agent').findOne({
-      where: { id: agentId },
-      relations: ['user', 'agentDocuments', 'agentOrders', 'reviews'],
-    });
-
-    if (!agent) {
-      throw new NotFoundException(`Agent with ID ${agentId} not found.`);
-    }
-
-    return {
-      success: true,
-      message: 'Agent retrieved successfully.',
-      data: agent,
-    };
   }
 }
-

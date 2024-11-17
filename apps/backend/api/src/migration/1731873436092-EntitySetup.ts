@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class EntitesSetup1731749797859 implements MigrationInterface {
-  name = 'EntitesSetup1731749797859';
+export class EntitySetup1731873436092 implements MigrationInterface {
+  name = 'EntitySetup1731873436092';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
@@ -32,19 +32,34 @@ export class EntitesSetup1731749797859 implements MigrationInterface {
             WHERE "deletedAt" IS NULL
         `);
     await queryRunner.query(`
+            CREATE TYPE "public"."required_document_role_enum" AS ENUM('AGENT', 'ADMIN', 'CUSTOMER', 'SUPPORT')
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "required_document" (
+                "id" SERIAL NOT NULL,
+                "role" "public"."required_document_role_enum" NOT NULL,
+                "documents" text array NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                CONSTRAINT "PK_300ed345f09c863bbb1b3de7f2a" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
             CREATE TABLE "agent" (
                 "id" SERIAL NOT NULL,
                 "userId" integer NOT NULL,
-                "agentType" character varying,
+                "agentType" character varying NOT NULL,
                 "abnNumber" character varying NOT NULL,
                 "vehicleMake" character varying NOT NULL,
                 "vehicleModel" character varying NOT NULL,
                 "vehicleYear" character varying NOT NULL,
                 "profilePhoto" character varying,
-                "status" character varying DEFAULT 'OFFLINE',
+                "status" character varying NOT NULL DEFAULT 'OFFLINE',
                 "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
                 "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
                 "deletedAt" TIMESTAMP,
+                CONSTRAINT "UQ_agent_abnNumber" UNIQUE ("abnNumber"),
                 CONSTRAINT "PK_1000e989398c5d4ed585cf9a46f" PRIMARY KEY ("id")
             )
         `);
@@ -277,6 +292,12 @@ export class EntitesSetup1731749797859 implements MigrationInterface {
         `);
     await queryRunner.query(`
             DROP TABLE "agent"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "required_document"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "public"."required_document_role_enum"
         `);
     await queryRunner.query(`
             DROP INDEX "public"."IDX_user_role"
