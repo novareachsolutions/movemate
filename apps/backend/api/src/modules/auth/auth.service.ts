@@ -79,22 +79,33 @@ export class AuthService {
     try {
       const payload = this.jwtService.verify(token, {
         secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
-      })
+      });
 
-      if (!payload.phone || !payload.tokenId) return false
+      if (!payload.phone || !payload.tokenId) {
+        logger.error('Token payload missing required fields',)
+        return false;
+      }
 
       const verifyPhone = await this.redisService.get(
         `onboardingToken:${payload.tokenId}`,
-      )
-      if (!verifyPhone) return false
+      );
+
+      if (!verifyPhone) {
+        logger.error('Token ID not found in Redis')
+        return false;
+      }
 
       if (verifyPhone === payload.phone) {
-        await this.redisService.del(`onboardingToken:${payload.tokenId}`) 
-        return true
+        await this.redisService.del(`onboardingToken:${payload.tokenId}`);
+        logger.info('Onboarding token verified and deleted from Redis')
+        return true;
       }
-      return false
+
+      logger.error('Phone number in token does not match Redis value')
+      return false;
     } catch (error) {
-      throw new Error('Invalid or expired token')
+      logger.error('Error verifying onboarding token')
+      throw new Error('Invalid or expired token');
     }
   }
 

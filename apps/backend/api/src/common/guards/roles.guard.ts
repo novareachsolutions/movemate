@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/entity/User';
 import { ROLES_KEY } from '../decorators/roles.decorators';
+import { logger } from 'src/logger'; 
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -30,9 +31,10 @@ export class RolesGuard implements CanActivate {
         }
 
         const request = context.switchToHttp().getRequest();
-        const userId = request.userId;
+        const userId = request.user.id;
 
         if (!userId) {
+            logger.error('userId not found in request')
             throw new ForbiddenException('userId not found in request');
         }
 
@@ -41,13 +43,14 @@ export class RolesGuard implements CanActivate {
         });
 
         if (!userEntity) {
-            throw new ForbiddenException('User not found');
-        }
+            logger.error('User not found in database')
 
-        if (!requiredRoles.includes(userEntity.role)) {
-            throw new ForbiddenException('Insufficient role');
-        }
+            if (!requiredRoles.includes(userEntity.role)) {
+                logger.error('Insufficient role for user')
+                throw new ForbiddenException('Insufficient role');
+            }
 
-        return true;
+            return true;
+        }
     }
 }
