@@ -1,70 +1,50 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  OneToMany,
-  JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, Column, OneToOne, RelationId, Index, Unique } from 'typeorm';
 import { User } from './User';
-import { Order } from './Order';
-import { Review } from './Review';
-import { AgentDocument } from './AgentDocument';
-import { AgentStatusEnum, AgentTypeEnum } from 'src/common/enums/agent';
+import { BaseEntity } from './BaseEntity';
+import { TAgent } from 'src/modules/agent/agent.types';
+import { AgentStatusEnum, AgentTypeEnum } from 'src/shared/enums';
 
+@Index('IDX_agent_userId', ['userId'], { where: '"deletedAt" IS NULL' })
+@Index('IDX_agent_status', ['status'], { where: '"deletedAt" IS NULL' })
+@Unique('UQ_agent_abnNumber', ['abnNumber'])
 @Entity()
-export class Agent {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @OneToOne(() => User, (user) => user.agent, { eager: true })
-  @JoinColumn({ name: 'userId' })
+export class Agent extends BaseEntity implements TAgent {
+  @OneToOne(() => User, {
+    cascade: true,
+    deferrable: 'INITIALLY IMMEDIATE',
+    onDelete: 'CASCADE',
+  })
   user: User;
 
+  @RelationId((agent: Agent) => agent.user)
+  @Column({ type: 'integer', nullable: false })
+  userId: number;
+
   @Column({
-    type: 'enum',
-    enum: AgentTypeEnum,
-    nullable: true,
+    type: 'varchar',
+    nullable: false,
   })
   agentType: AgentTypeEnum;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false })
   abnNumber: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false })
   vehicleMake: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false })
   vehicleModel: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false })
   vehicleYear: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   profilePhoto: string;
 
   @Column({
-    type: 'enum',
-    enum: AgentStatusEnum,
+    type: 'varchar',
     default: AgentStatusEnum.OFFLINE,
-    nullable: true,
+    nullable: false,
   })
   status: AgentStatusEnum;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @OneToMany(() => Order, (order) => order.agent)
-  agentOrders: Order[];
-
-  @OneToMany(() => Review, (review) => review.agent)
-  reviews: Review[];
-
-  @OneToMany(() => AgentDocument, (agentDocument) => agentDocument.agent)
-  agentDocuments: AgentDocument[];
 }

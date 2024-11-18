@@ -1,50 +1,58 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
   Index,
+  RelationId,
+  OneToOne,
 } from 'typeorm';
 import { User } from './User';
-import { Review } from './Review';
 import { Agent } from './Agent';
-import { OrderStatusEnum, OrderTypeEnum } from 'src/common/enums/orderStatus';
-import { Location } from './Location';
+import { BaseEntity } from './BaseEntity';
+import { PickupLocation } from './PickupLocation';
+import { DropLocation } from './DropLocation';
+import { OrderStatusEnum, OrderTypeEnum } from 'src/shared/enums';
 
+@Index('IDX_order_customerId', ['customerId'], { where: '"deletedAt" IS NULL' })
+@Index('IDX_order_agentId', ['agentId'], { where: '"deletedAt" IS NULL' })
+@Index('IDX_order_status', ['status'], { where: '"deletedAt" IS NULL' })
 @Entity()
-@Index(['status'])
-export class Order {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Order extends BaseEntity {
   @Column({
-    type: 'enum',
-    enum: OrderStatusEnum,
+    type: 'varchar',
     default: OrderStatusEnum.PENDING,
+    nullable: false,
   })
   status: OrderStatusEnum;
 
   @Column({
-    type: 'enum',
-    enum: OrderTypeEnum,
+    type: 'varchar',
     default: OrderTypeEnum.DELIVERY,
+    nullable: false,
   })
   type: OrderTypeEnum;
 
-  @ManyToOne(() => Location, {
-    eager: true,
-    onDelete: 'SET NULL',
+  @OneToOne(() => PickupLocation, {
+    cascade: true,
+    deferrable: 'INITIALLY IMMEDIATE',
+    onDelete: 'CASCADE',
   })
-  pickupLocation: Location;
+  pickupLocation: PickupLocation;
 
-  @ManyToOne(() => Location, {
-    eager: true,
-    onDelete: 'SET NULL',
+  @RelationId((order: Order) => order.pickupLocation)
+  @Column({ type: 'integer' })
+  pickupLocationId: number;
+
+  @OneToOne(() => DropLocation, {
+    cascade: true,
+    deferrable: 'INITIALLY IMMEDIATE',
+    onDelete: 'CASCADE',
   })
-  dropLocation: Location;
+  dropLocation: DropLocation;
+
+  @RelationId((order: Order) => order.dropLocation)
+  @Column({ type: 'integer' })
+  dropLocationId: number;
 
   @Column({ nullable: true })
   distance: number;
@@ -52,27 +60,25 @@ export class Order {
   @Column({ nullable: true })
   estimatedTime: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @ManyToOne(() => User, (user) => user.customerOrders, {
-    eager: true,
-    onDelete: 'SET NULL',
+  @ManyToOne(() => User, {
+    cascade: true,
+    deferrable: 'INITIALLY IMMEDIATE',
+    onDelete: 'CASCADE',
   })
   customer: User;
 
-  @ManyToOne(() => Agent, (agent) => agent.agentOrders, {
-    eager: true,
-    onDelete: 'SET NULL',
+  @RelationId((order: Order) => order.customer)
+  @Column({ type: 'integer' })
+  customerId: number;
+
+  @ManyToOne(() => Agent, {
+    cascade: true,
+    deferrable: 'INITIALLY IMMEDIATE',
+    onDelete: 'CASCADE',
   })
   agent: Agent;
 
-  @OneToOne(() => Review, (review) => review.order, {
-    cascade: true,
-    eager: true,
-  })
-  review: Review;
+  @RelationId((order: Order) => order.agent)
+  @Column({ type: 'integer' })
+  agentId: number;
 }
