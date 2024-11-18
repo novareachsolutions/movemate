@@ -5,52 +5,68 @@ import {
     ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRoleEnum } from 'src/common/enums/userRole';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { User } from 'src/entity/User';
 import { ROLES_KEY } from '../decorators/roles.decorators';
-import { logger } from 'src/logger'; 
+import { logger } from 'src/logger';
+import { dbRepo } from 'src/config/database/database.service';
+import { UserRoleEnum } from 'src/shared/enums';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-    constructor(
-        private reflector: Reflector,
-        @InjectRepository(User)
-        private userRepository: Repository<User>,
-    ) { }
+    constructor(private reflector: Reflector) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        logger.debug('RolesGuard: Starting canActivate method');
+
         const requiredRoles = this.reflector.getAllAndOverride<UserRoleEnum[]>(
             ROLES_KEY,
             [context.getHandler(), context.getClass()],
         );
+        logger.debug(
+            `RolesGuard: Retrieved required roles`,
+        );
 
         if (!requiredRoles || requiredRoles.length === 0) {
+            logger.debug('RolesGuard: No roles specified, access granted');
             return true;
         }
 
         const request = context.switchToHttp().getRequest();
-        const userId = request.user.id;
+        const userId = request.user?.id;
+
 
         if (!userId) {
-            logger.error('userId not found in request')
+            logger.error('RolesGuard: userId not found in request');
             throw new ForbiddenException('userId not found in request');
         }
 
-        const userEntity = await this.userRepository.findOne({
-            where: { id: userId },
-        });
+        logger.debug(`RolesGuard: Retrieved userId from request: ${userId}`);
 
-        if (!userEntity) {
-            logger.error('User not found in database')
+        try {
+            logger.debug(`RolesGuard: Fetching user with id: ${userId}`);
+            const userEntity = await dbRepo(User).findOne({
+                where: { id: userId },
+            });
+
+            if (!userEntity) {
+                logger.error('RolesGuard: User not found in database');
+                throw new ForbiddenException('User not found in database');
+            }
+
+            logger.debug(`RolesGuard: User found: ${JSON.stringify(userEntity)}`);
 
             if (!requiredRoles.includes(userEntity.role)) {
-                logger.error('Insufficient role for user')
+                logger.error(
+                    `RolesGuard: User role (${userEntity.role}) does not match required roles`,
+                );
                 throw new ForbiddenException('Insufficient role');
             }
 
+            logger.debug(`RolesGuard: User role (${userEntity.role}) matches required roles`);
             return true;
+        } catch (error) {
+            logger.error('RolesGuard: Error occurred during role verification');
+            throw new ForbiddenException('Error validating user role');
         }
     }
 }

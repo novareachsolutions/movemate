@@ -17,11 +17,15 @@ export class AuthGuard implements CanActivate {
     ) { }
 
     canActivate(context: ExecutionContext): boolean {
+        logger.debug('AuthGuard: Checking authorization for the incoming request');
+
         const request: Request = context.switchToHttp().getRequest();
+
         const accessToken = request.cookies['accessToken'];
+        logger.debug(`AuthGuard: Retrieved access token from cookies`)
 
         if (!accessToken) {
-            logger.error('Access token not found');
+            logger.error('AuthGuard: Access token not found');
             throw new UnauthorizedException('Access token not found');
         }
 
@@ -29,18 +33,18 @@ export class AuthGuard implements CanActivate {
             const payload = this.jwtService.verify(accessToken, {
                 secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
             });
+            logger.debug('AuthGuard: JWT verification successful');
 
             request['user'] = {
                 id: payload.id,
                 role: payload.role,
                 phoneNumber: payload.phoneNumber,
             };
-
-            logger.info(`User with phoneNumber ${payload.phoneNumber} authenticated`)
+            logger.debug(`AuthGuard: User payload attached to request: ${ JSON.stringify(request['user']) }`);
 
             return true;
         } catch (error) {
-            logger.error('Invalid access token')
+            logger.error('AuthGuard: Invalid access token');
             throw new UnauthorizedException('Invalid access token');
         }
     }
