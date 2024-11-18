@@ -24,75 +24,37 @@ export class TokenService {
     this.configService = configService;
   }
 
-  generateAccessToken(user: { id: string; phoneNumber: string; role: string }, xsrfToken: string): string {
+  generateAccessToken(userId: number, phoneNumber: string, role: string): string {
     const payload = {
-      sub: user.id,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
+      id: userId,
+      phoneNumber: phoneNumber,
+      role: role,
     };
 
     return this.jwtService.sign(payload, {
-      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
+      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}`,
       expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRY'),
     });
   }
 
-  generateRefreshToken(user: { id: string }): string {
-    const payload = { userId: user.id };
+  generateRefreshToken(userId: number): string {
 
-    return this.jwtService.sign(payload, {
+    return this.jwtService.sign({ userId }, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRY'),
     });
   }
 
-  generateXsrfToken(length: number = 32): string {
-    return randToken(length);
-  }
-
   generateOnboardingToken(phoneNumber: string): string {
-    const encryptedPhone = this.cryptoService.encrypt(phoneNumber);
     const tokenId = randToken(24);
 
     return this.jwtService.sign(
-      { phone: encryptedPhone, tokenId: tokenId },
+      { phone: phoneNumber, tokenId: tokenId },
       {
         secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
-        expiresIn: '60m',
+        expiresIn: this.configService.get<string>('ONBOARDING_JWT_EXPIRY'),
       },
     );
   }
 
-  async verifyAccessToken(accessToken: string, xsrfToken: string): Promise<any> {
-    return this.jwtService.verify(accessToken, {
-      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
-    });
-  }
-
-  async verifyRefreshToken(refreshToken: string): Promise<any> {
-    return this.jwtService.verify(refreshToken, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-    });
-  }
-
-  async verifyOnboardingToken(token: string): Promise<boolean> {
-    try {
-      const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
-      });
-
-      if (!payload.phone || !payload.tokenId) return false;
-
-      const verifyPhone = await this.redisService.get(
-        `onboardingToken:${payload.tokenId}`,
-      );
-      if (!verifyPhone) return false;
-
-      // Decrypt the phone number to compare
-      const decryptedPhone = this.cryptoService.decrypt(payload.phone);
-      return verifyPhone === decryptedPhone;
-    } catch (error) {
-      throw new Error('Invalid or expired token');
-    }
-  }
 }
