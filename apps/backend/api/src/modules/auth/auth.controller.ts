@@ -23,13 +23,14 @@ export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('otp/request')
-  async requestOtp(@Body() requestOtpDto: { phoneNumber: string }): Promise<any> {
+  async requestOtp(@Body() requestOtpDto: { phoneNumber: string }): Promise<ApiResponse<null>> {
     const { phoneNumber } = requestOtpDto;
     logger.debug(`Received OTP request for phoneNumber: ${phoneNumber}`);
     try {
       await this.authService.requestOtp(phoneNumber);
       logger.debug('OTP sent successfully');
-      return { success: true, message: 'OTP sent successfully.', data: null };
+
+      return { success: true, message: 'OTP sent successfully.' };
     } catch (error) {
       logger.error(`Error sending OTP: ${error.message}`);
       throw new InternalServerErrorException(
@@ -42,7 +43,7 @@ export class AuthController {
   async verifyOtp(
     @Body() verifyOtpDto: { phoneNumber: string; otp: string },
     @Res() res: Response,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<null>> {
     const { phoneNumber, otp } = verifyOtpDto;
     logger.debug(`Verifying OTP for phoneNumber: ${phoneNumber}`);
     try {
@@ -65,7 +66,7 @@ export class AuthController {
     @Body() body: { phoneNumber: string; otp: string },
     @Headers('role') role: UserRoleEnum,
     @Res() res: Response,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<null>> {
     const { phoneNumber, otp } = body;
     logger.debug(`Login request for phoneNumber: ${phoneNumber}, role: ${role}`);
     try {
@@ -83,7 +84,7 @@ export class AuthController {
           maxAge: 60 * 60 * 24 * 7 * 1000,
         });
       }
-      return { success: response.success, message: response.message, data: null };
+      return { success: response.success, message: response.message };
     } catch (error) {
       logger.error(`Error during login: ${error.message}`);
       throw new UnauthorizedException(
@@ -93,7 +94,7 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  async refreshToken(@Res() res: Response, @Req() req: Request): Promise<ApiResponse<any>> {
+  async refreshToken(@Res() res: Response, @Req() req: Request): Promise<ApiResponse<null>> {
     const refreshToken = req.cookies['refresh_token'];
     logger.debug('Refresh token request received');
     if (!refreshToken) {
