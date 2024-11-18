@@ -17,7 +17,7 @@ export class OnboardingGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
 
         const token = request.headers['x-onboarding-token'];
-        logger.debug(`OnboardingGuard: Extracted onboarding token from headers`);
+        logger.debug('OnboardingGuard: Extracted onboarding token from headers');
 
         if (!token) {
             logger.error('OnboardingGuard: Onboarding token is missing');
@@ -26,17 +26,20 @@ export class OnboardingGuard implements CanActivate {
 
         try {
             logger.debug('OnboardingGuard: Verifying onboarding token with AuthService');
-            const isValid = await this.authService.verifyOnboardingToken(token);
 
-            if (!isValid) {
+            const phoneNumber = await this.authService.verifyOnboardingToken(token);
+
+            if (!phoneNumber) {
                 logger.error('OnboardingGuard: Invalid onboarding token');
                 throw new UnauthorizedException('Invalid onboarding token');
             }
 
-            logger.debug('OnboardingGuard: Onboarding token verified successfully');
+            request.phoneNumber = phoneNumber;
+            logger.debug('OnboardingGuard: Onboarding token verified successfully and phoneNumber attached to request');
+
             return true;
         } catch (error) {
-            logger.error('OnboardingGuard: Error occurred during onboarding token validation');
+            logger.error('OnboardingGuard: Error occurred during onboarding token');
             throw new UnauthorizedException('Invalid onboarding token');
         }
     }
