@@ -2,8 +2,6 @@ import {
   Controller,
   Post,
   Body,
-  HttpCode,
-  HttpStatus,
   Res,
   Headers,
   Req,
@@ -23,16 +21,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('otp/request')
-  async requestOtp(@Body() requestOtpDto: { phoneNumber: string }): Promise<ApiResponse<null>> {
-    const { phoneNumber } = requestOtpDto;
-    logger.debug(`Received OTP request for phoneNumber: ${phoneNumber}`);
+  async requestOtp(@Body() phoneNumber: string): Promise<ApiResponse<null>> {
+    logger.debug(`AuthController. requestOtp: Received OTP request for phoneNumber: ${phoneNumber}`);
     try {
       await this.authService.requestOtp(phoneNumber);
-      logger.debug('OTP sent successfully');
+      logger.debug('AuthController. requestOtp: OTP sent successfully');
 
-      return { success: true, message: 'OTP sent successfully.' };
+      return { success: true, message: 'OTP sent successfully.', data: null };
     } catch (error) {
-      logger.error(`Error sending OTP: ${error.message}`);
+      logger.error(`AuthController. requestOtp: Error sending OTP: ${error.message}`);
       throw new InternalServerErrorException(
         'Failed to send OTP. Please try again later.'
       );
@@ -41,20 +38,20 @@ export class AuthController {
 
   @Post('otp/verify')
   async verifyOtp(
-    @Body() verifyOtpDto: { phoneNumber: string; otp: string },
+    @Body() body: { phoneNumber: string; otp: string },
     @Res() res: Response,
   ): Promise<ApiResponse<null>> {
-    const { phoneNumber, otp } = verifyOtpDto;
-    logger.debug(`Verifying OTP for phoneNumber: ${phoneNumber}`);
+    const { phoneNumber, otp } = body;
+    logger.debug(`AuthController. verifyOtp: Verifying OTP for phoneNumber: ${phoneNumber}`);
     try {
       const response = await this.authService.signupInitiate(phoneNumber, otp);
       if (response.success) {
-        logger.debug('OTP verification successful, setting onboarding token cookie');
+        logger.debug('AuthController. verifyOtp: OTP verification successful, setting onboarding token cookie');
         res.setHeader('x-onboarding-token', response.data.onboardingToken);
       }
-      return { success: response.success, message: response.message };
+      return { success: response.success, message: response.message, data: null };
     } catch (error) {
-      logger.error(`Error verifying OTP: ${error.message}`);
+      logger.error(`AuthController. verifyOtp: Error verifying OTP: ${error.message}`);
       throw new BadRequestException(
         'Invalid OTP or phone number. Please try again.'
       );
@@ -68,11 +65,11 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<ApiResponse<null>> {
     const { phoneNumber, otp } = body;
-    logger.debug(`Login request for phoneNumber: ${phoneNumber}, role: ${role}`);
+    logger.debug(`AuthController. login: Login request for phoneNumber: ${phoneNumber}, role: ${role}`);
     try {
       const response = await this.authService.login(phoneNumber, otp, role);
       if (response.success) {
-        logger.debug('Login successful, setting access and refresh token cookies');
+        logger.debug('AuthController. login: Login successful, setting access and refresh token cookies');
         res.cookie('access_token', response.data.accessToken, {
           httpOnly: true,
           secure: process.env.ENVIRONMEMNT === 'production',
@@ -84,9 +81,9 @@ export class AuthController {
           maxAge: 60 * 60 * 24 * 7 * 1000,
         });
       }
-      return { success: response.success, message: response.message };
+      return { success: response.success, message: response.message, data: null };
     } catch (error) {
-      logger.error(`Error during login: ${error.message}`);
+      logger.error(`AuthController. login: Error during login: ${error.message}`);
       throw new UnauthorizedException(
         'Invalid credentials or role. Please try again.'
       );
@@ -96,15 +93,15 @@ export class AuthController {
   @Post('refresh-token')
   async refreshToken(@Res() res: Response, @Req() req: Request): Promise<ApiResponse<null>> {
     const refreshToken = req.cookies['refresh_token'];
-    logger.debug('Refresh token request received');
+    logger.debug('AuthController. refreshToken: Refresh token request received');
     if (!refreshToken) {
-      logger.error('Refresh token not found in cookies');
+      logger.error('AuthController. refreshToken: Refresh token not found in cookies');
       throw new ForbiddenException('Refresh token not found.');
     }
     try {
       const response = await this.authService.refreshToken(refreshToken);
       if (response.success) {
-        logger.debug('Refresh token validated, setting new tokens in cookies');
+        logger.debug('AuthController. refreshToken: Refresh token validated, setting new tokens in cookies');
         res.cookie('access_token', response.data.accessToken, {
           httpOnly: true,
           secure: process.env.ENVIRONMEMNT === 'production',
@@ -115,11 +112,10 @@ export class AuthController {
           secure: process.env.ENVIRONMEMNT === 'production',
           maxAge: 60 * 60 * 24 * 7 * 1000,
         });
-
       }
-      return { success: response.success, message: response.message };
+      return { success: response.success, message: response.message, data: null };
     } catch (error) {
-      logger.error(`Error during token refresh: ${error.message}`);
+      logger.error(`AuthController. refreshToken: Error during token refresh: ${error.message}`);
       throw new UnauthorizedException(
         'Failed to refresh token. Please log in again.'
       );
