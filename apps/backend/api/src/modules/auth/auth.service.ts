@@ -16,7 +16,6 @@ import { dbRepo } from 'src/config/database/database.service';
 import { User } from 'src/entity/User';
 import { UserRoleEnum } from 'src/shared/enums';
 import { TokenService } from './utils/generateTokens';
-import { ApiResponse } from 'src/shared/interface';
 
 @Injectable()
 export class AuthService {
@@ -33,88 +32,75 @@ export class AuthService {
     const authToken = this.configService.get<string>('TW_AUTH_TOKEN');
 
     if (!accountSid || !authToken) {
-      logger.error('Twilio credentials are not set');
+      logger.error('AuthService: Twilio credentials are not set');
       throw new InternalServerErrorException('Twilio credentials are not set');
     }
     this.twilioClient = new Twilio(accountSid, authToken);
   }
 
-  async requestOtp(phoneNumber: string): Promise<ApiResponse<null>> {
-    logger.debug(`AuthService. requestOtp: Requesting OTP for ${phoneNumber}`);
+  async requestOtp(phoneNumber: string): Promise<void> {
+    logger.debug(`AuthService.requestOtp: Requesting OTP for ${phoneNumber}`);
     await this.manageOtpRequests(phoneNumber);
     const otp = this.otpService.generateOTP();
     await this.storeOtp(phoneNumber, otp);
     await this.sendOtp(phoneNumber, otp);
-    return { success: true, message: 'OTP sent successfully', data: null };
   }
 
-  async signupInitiate(phoneNumber: string, otp: string): Promise<ApiResponse<{ onboardingToken: string }>> {
-    logger.debug(`AuthService. signupInitiate: Initiating signup for ${phoneNumber}`);
+  async signupInitiate(phoneNumber: string, otp: string): Promise<string> {
+    logger.debug(`AuthService.signupInitiate: Initiating signup for ${phoneNumber}`);
     const existingUser = await dbRepo(User).findOne({ where: { phoneNumber } });
 
     if (existingUser) {
-      logger.error(`AuthService. signupInitiate: Phone number ${phoneNumber} already registered`);
+      logger.error(`AuthService.signupInitiate: Phone number ${phoneNumber} already registered`);
       throw new BadRequestException('The phone number is already registered.');
     }
 
     await this.validateOtp(phoneNumber, otp);
     const onboardingToken = await this.tokenService.generateOnboardingToken(phoneNumber);
 
-    return { success: true, message: 'Signup initiated successfully', data: { onboardingToken } };
+    return onboardingToken;
   }
 
-  async login(phoneNumber: string, otp: string, role: UserRoleEnum): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
-    logger.debug(`AuthService. login: Logging in user with phone number ${phoneNumber}`);
+  async login(phoneNumber: string, otp: string, role: UserRoleEnum): Promise<{ accessToken: string; refreshToken: string }> {
+    logger.debug(`AuthService.login: Logging in user with phone number ${phoneNumber}`);
     await this.validateOtp(phoneNumber, otp);
     const user = await dbRepo(User).findOne({ where: { phoneNumber } });
 
     if (!user) {
-      logger.error(`AuthService. login: User with phone number ${phoneNumber} not found`);
+      logger.error(`AuthService.login: User with phone number ${phoneNumber} not found`);
       throw new NotFoundException('User not found.');
     }
 
     if (user.role !== role) {
-      logger.error(`AuthService. login: Role mismatch. Expected ${role}, got ${user.role}`);
-      throw new ForbiddenException(`AuthService. login: User role mismatch. Expected ${role} but got ${user.role}`);
+      logger.error(`AuthService.login: Role mismatch. Expected ${role}, got ${user.role}`);
+      throw new ForbiddenException(`User role mismatch. Expected ${role} but got ${user.role}`);
     }
 
-    const accessToken = await this.tokenService.generateAccessToken(user.id, user.phoneNumber, user.role);
-    const refreshToken = await this.tokenService.generateRefreshToken(user.id);
+    const accessToken = this.tokenService.generateAccessToken(user.id, user.phoneNumber, user.role);
+    const refreshToken = this.tokenService.generateRefreshToken(user.id);
 
-    await this.redisService.set(
-      `refreshToken:${user.id}`,
-      refreshToken,
-      'EX',
-      60 * 60 * 24 * 7,
-    );
-
-    return { success: true, message: 'Login successful', data: { accessToken, refreshToken } };
+    return { accessToken, refreshToken };
   }
 
-  async refreshToken(refreshToken: string): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
-    logger.debug('AuthService. refreshToken: Refreshing token');
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    logger.debug('AuthService.refreshToken: Refreshing token');
     try {
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
 
       const user = await dbRepo(User).findOne({ where: { id: payload.userId } });
-
       if (!user) {
-        logger.error(`AuthService. refreshToken: User with ID ${payload.userId} not found`);
+        logger.error(`AuthService.refreshToken: User with ID ${payload.userId} not found`);
         throw new NotFoundException('User not found.');
       }
 
-      const newAccessToken = await this.tokenService.generateAccessToken(user.id, user.phoneNumber, user.role);
-      const newRefreshToken = await this.tokenService.generateRefreshToken(user.id);
+      const newAccessToken = this.tokenService.generateAccessToken(user.id, user.phoneNumber, user.role);
+      const newRefreshToken = this.tokenService.generateRefreshToken(user.id);
 
-      return {
-        success: true,
-        message: 'Tokens refreshed successfully.',
-        data: { accessToken: newAccessToken, refreshToken: newRefreshToken },
-      };
-    } catch (error) {
-      logger.error(`AuthService. refreshToken: Failed to refresh token. Error: ${error.message}`);
+      return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+    } catch (error: any) {
+      logger.error(`AuthService.refreshToken: Failed to refresh token. Error: ${error}`);
       throw new UnauthorizedException('Failed to refresh token.');
     }
   }
@@ -133,7 +119,7 @@ export class AuthService {
 
     if (now < currentTtw) {
       const waitTime = Math.ceil((currentTtw - now) / 1000);
-      logger.error(`AuthService. manageOtpRequests: Rate limit reached. Wait ${waitTime} seconds`);
+      logger.error(`AuthService.manageOtpRequests: Rate limit reached. Wait ${waitTime} seconds`);
       throw new BadRequestException(`Please wait ${waitTime} seconds before requesting a new OTP.`);
     }
 
@@ -142,7 +128,7 @@ export class AuthService {
       await this.redisService.set(ttwKey, newTtw.toString(), 'EX', 86400);
     } else {
       await this.redisService.set(`ban:${phoneNumber}`, 'banned', 'EX', 86400);
-      logger.error('AuthService. manageOtpRequests: Too many OTP requests. User banned for 24 hours');
+      logger.error('AuthService.manageOtpRequests: Too many OTP requests. User banned for 24 hours');
       throw new BadRequestException('Too many OTP requests. You are banned for 24 hours.');
     }
   }
@@ -157,9 +143,9 @@ export class AuthService {
   }
 
   private async sendOtp(phoneNumber: string, otp: string): Promise<void> {
-    logger.debug(`AuthService. sendOtp: Sending OTP to ${phoneNumber}`);
+    logger.debug(`AuthService.sendOtp: Sending OTP to ${phoneNumber}`);
     if (!phoneNumber) {
-      logger.error('AuthService. sendOtp: Phone number is required to send OTP');
+      logger.error('AuthService.sendOtp: Phone number is required to send OTP');
       throw new BadRequestException('Phone number is required to send OTP.');
     }
 
@@ -169,38 +155,38 @@ export class AuthService {
         from: this.configService.get<string>('TW_PHONE_NUMBER'),
         to: phoneNumber,
       });
-      logger.debug(`AuthService. sendOtp: OTP sent successfully to ${phoneNumber}`);
+      logger.debug(`AuthService.sendOtp: OTP sent successfully to ${phoneNumber}`);
     } catch (error: any) {
-      logger.error(`Failed to send OTP. Error: ${error.message}`);
+      logger.error(`Failed to send OTP. Error: ${error}`);
       throw new InternalServerErrorException('Failed to send OTP.');
     }
   }
 
   private async validateOtp(phoneNumber: string, inputOtp: string): Promise<void> {
-    logger.debug(`AuthService. validateOtp: Validating OTP for ${phoneNumber}`);
+    logger.debug(`AuthService.validateOtp: Validating OTP for ${phoneNumber}`);
     const otpKey = `otp:${phoneNumber}`;
     const otpRequestKey = `otp_request:${phoneNumber}`;
 
     const otpExists = await this.redisService.get(otpRequestKey);
     if (!otpExists) {
-      logger.error('AuthService. validateOtp: No OTP request found for this number');
+      logger.error('AuthService.validateOtp: No OTP request found for this number');
       throw new BadRequestException('No OTP request was found associated with this number.');
     }
 
     const storedSecret = await this.redisService.get(otpKey);
     if (!storedSecret) {
-      logger.error('OTP expired');
-      throw new BadRequestException("AuthService. validateOtp: The OTP you're trying to verify has expired, please retry!");
+      logger.error('AuthService.validateOtp: OTP expired');
+      throw new BadRequestException("The OTP you're trying to verify has expired, please retry!");
     }
 
     const isValid = this.otpService.verifyOTP(inputOtp, storedSecret);
     if (!isValid) {
-      logger.error('Invalid OTP');
-      throw new BadRequestException("AuthService. validateOtp: The OTP you're trying to verify is incorrect, please retry!");
+      logger.error('AuthService.validateOtp: Invalid OTP');
+      throw new BadRequestException("The OTP you're trying to verify is incorrect, please retry!");
     }
 
     await this.redisService.del(otpKey);
     await this.redisService.del(otpRequestKey);
-    logger.debug('OTP validated successfully');
+    logger.debug('AuthService.validateOtp: OTP validated successfully');
   }
 }
