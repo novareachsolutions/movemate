@@ -14,8 +14,7 @@
   },
   "scripts": {
     "prepare": "husky",
-    "commit": "git-cz",
-    "tsc": "tsc --noEmit"
+    "commit": "git-cz"
   },
   "config": {
     "commitizen": {
