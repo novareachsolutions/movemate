@@ -1,13 +1,19 @@
 import {
-  Controller,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
   Get,
+  Param,
   ParseIntPipe,
+  Post,
   Put,
 } from '@nestjs/common';
+import { UpdateResult } from 'typeorm';
+
+import { Agent } from '../../entity/Agent';
+import { AgentDocument } from '../../entity/AgentDocument';
+import { AgentReview } from '../../entity/AgentReview';
+import { ApiResponse } from '../../shared/interface';
 import { AgentService } from './agent.service';
 import {
   TAgent,
@@ -15,11 +21,6 @@ import {
   TAgentPartial,
   TGetAgentProfile,
 } from './agent.types';
-import { ApiResponse } from '../../shared/interface';
-import { Agent } from '../../entity/Agent';
-import { UpdateResult } from 'typeorm';
-import { AgentDocument } from '../../entity/AgentDocument';
-import { AgentReview } from '../../entity/AgentReview';
 
 @Controller('agent')
 export class AgentController {

@@ -1,3 +1,6 @@
+import { DataSource } from 'typeorm';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+
 import {
   CONNECTION_TIMEOUT_MS,
   DB_CONNECTION_POOL_MAX,
@@ -5,8 +8,6 @@ import {
   DB_READ_PORT,
   MAX_QUERY_EXECUTION_TIME,
 } from '../../constants';
-import { DataSource } from 'typeorm';
-import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 const createDataSource = async (): Promise<DataSource> => {
   const connectionOptions = {

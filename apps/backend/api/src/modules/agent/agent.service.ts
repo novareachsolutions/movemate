@@ -1,23 +1,24 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
+import { UpdateResult } from 'typeorm';
+
+import { dbReadRepo, dbRepo } from '../../config/database/database.service';
 import { Agent } from '../../entity/Agent';
 import { AgentDocument } from '../../entity/AgentDocument';
-import { dbReadRepo, dbRepo } from '../../config/database/database.service';
+import { AgentReview } from '../../entity/AgentReview';
+import { RequiredDocument } from '../../entity/RequiredDocument';
+import { logger } from '../../logger';
+import { UserRoleEnum } from '../../shared/enums';
+import { filterEmptyValues } from '../../utils/filter';
 import {
   TAgent,
   TAgentDocument,
   TAgentPartial,
   TGetAgentProfile,
 } from './agent.types';
-import { logger } from '../../logger';
-import { filterEmptyValues } from '../../utils/filter';
-import { UpdateResult } from 'typeorm';
-import { RequiredDocument } from '../../entity/RequiredDocument';
-import { UserRoleEnum } from '../../shared/enums';
-import { AgentReview } from '../../entity/AgentReview';
 
 @Injectable()
 export class AgentService {

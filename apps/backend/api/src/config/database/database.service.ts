@@ -1,4 +1,3 @@
-import { logger } from '../../logger';
 import {
   BaseEntity,
   DataSource,
@@ -6,6 +5,8 @@ import {
   FindOptionsWhere,
   Repository,
 } from 'typeorm';
+
+import { logger } from '../../logger';
 import { primaryDataSource } from './primaryDataSource';
 import { readReplicaDataSource } from './readReplicaDataSource';
 

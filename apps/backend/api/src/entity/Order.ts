@@ -1,17 +1,18 @@
+import { OrderStatusEnum, OrderTypeEnum } from 'src/shared/enums';
 import {
-  Entity,
   Column,
-  ManyToOne,
+  Entity,
   Index,
-  RelationId,
+  ManyToOne,
   OneToOne,
+  RelationId,
 } from 'typeorm';
-import { User } from './User';
+
 import { Agent } from './Agent';
 import { BaseEntity } from './BaseEntity';
-import { PickupLocation } from './PickupLocation';
 import { DropLocation } from './DropLocation';
-import { OrderStatusEnum, OrderTypeEnum } from 'src/shared/enums';
+import { PickupLocation } from './PickupLocation';
+import { User } from './User';
 
 @Index('IDX_order_customerId', ['customerId'], { where: '"deletedAt" IS NULL' })
 @Index('IDX_order_agentId', ['agentId'], { where: '"deletedAt" IS NULL' })

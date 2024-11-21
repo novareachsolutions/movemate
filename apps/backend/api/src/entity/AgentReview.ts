@@ -1,7 +1,8 @@
-import { Entity, Column, ManyToOne, Index, RelationId } from 'typeorm';
-import { User } from './User';
-import { BaseEntity } from './BaseEntity';
+import { Column, Entity, Index, ManyToOne, RelationId } from 'typeorm';
+
 import { Agent } from './Agent';
+import { BaseEntity } from './BaseEntity';
+import { User } from './User';
 
 @Index('IDX_agent_review_customerId', ['customerId'], {
   where: '"deletedAt" IS NULL',
