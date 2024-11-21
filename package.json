@@ -1,0 +1,24 @@
+{
+  "name": "movemate",
+  "version": "1.0.0",
+  "repository": "https://github.com/novareach-solutions/movemate.git",
+  "author": "novareach-solutions",
+  "license": "MIT",
+  "devDependencies": {
+    "@commitlint/cli": "^19.4.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.3.3"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "commit": "git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  }
+}
