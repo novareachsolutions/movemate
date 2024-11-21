@@ -1,4 +1,4 @@
-import { logger } from 'src/logger';
+import { logger } from '../../logger';
 import {
   BaseEntity,
   DataSource,
@@ -143,12 +143,13 @@ export class DatabaseService {
 
     for (const findOptionsWhere of where) {
       for (const key in findOptionsWhere) {
+        const typedKey = key as keyof FindOptionsWhere<BaseEntity>;
         if (
-          findOptionsWhere[key] === undefined ||
-          findOptionsWhere[key] === null
+          findOptionsWhere[typedKey] === undefined ||
+          findOptionsWhere[typedKey] === null
         ) {
           throw new Error(
-            `Invalid where clause: ${key} cannot be undefined or null`,
+            `Invalid where clause: ${typedKey} cannot be undefined or null`,
           );
         }
       }

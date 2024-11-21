@@ -6,7 +6,6 @@
     "lib": ["ES2023"],
     "module": "Node16",
     "moduleResolution": "Node16",
-    "outDir": "./out",
     "target": "ES2022",
     "skipLibCheck": true,
     "emitDecoratorMetadata": true,
@@ -14,6 +13,7 @@
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noEmit": true
   }
 }

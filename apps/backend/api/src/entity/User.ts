@@ -1,6 +1,6 @@
 import { Entity, Column, Index, Unique } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
-import { UserRoleEnum } from 'src/shared/enums';
+import { UserRoleEnum } from '../shared/enums';
 
 @Index('IDX_user_role', ['role'], { where: '"deletedAt" IS NULL' })
 @Unique('UQ_user_email', ['email'])

@@ -1,0 +1,10 @@
+# Allow merge commits
+if grep -qE '^Merge ' "$1"; then
+  exit 0
+fi
+
+# Enforce conventional commits for regular commits
+if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|release)\(.+\)!?: .{1,50}' "$1"; then
+  echo "Please use 'yarn commit' to commit changes."
+  exit 1
+fi

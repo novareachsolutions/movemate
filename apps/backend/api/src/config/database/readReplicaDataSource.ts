@@ -4,7 +4,7 @@ import {
   DB_READ_NAME,
   DB_READ_PORT,
   MAX_QUERY_EXECUTION_TIME,
-} from 'src/constants';
+} from '../../constants';
 import { DataSource } from 'typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 

@@ -6,7 +6,7 @@ import { generate as randToken } from 'rand-token';
 import { RedisService } from '../redis/redis.service';
 import { CryptoService } from './utils/crypto';
 import { OtpService } from './utils/otp';
-import { logger } from 'src/logger';
+import { logger } from '../../logger';
 
 @Injectable()
 export class AuthService {
