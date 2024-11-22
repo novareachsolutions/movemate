@@ -10,14 +10,6 @@ const off = 0,
   error = 2;
 
 const rootConfig = [
-  {
-    ignores: [
-      "apps/backend/api/src/migrations/**",
-      "apps/frontend/**",
-      "apps/backend/api/out",
-      "apps/backend/api/node_modules",
-    ],
-  },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   pluginPromise.configs["flat/recommended"],
