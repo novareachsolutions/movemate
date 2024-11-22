@@ -1,0 +1,45 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/backend/**'
+      - 'shared/core/**'
+      - 'package.json'
+      - 'yarn.lock'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'apps/backend/**'
+      - 'shared/core/**'
+      - 'package.json'
+      - 'yarn.lock'
+
+jobs:
+  build:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+        
+      - name: TypeScript Check
+        run: yarn tsc --build apps/backend/api/tsconfig.json
+        
+      - name: Build Backend
+        working-directory: apps/backend/api
+        run: yarn build
+        
+      - name: Run Tests
+        working-directory: apps/backend/api
+        run: yarn test
