@@ -1,5 +1,5 @@
 {
-  "name": "@pnats/core",
+  "name": "@movemate/core",
   "version": "1.0.0",
   "description": "This package contains all the types, Zod schemas, and related utlity functions",
   "main": "src/index.js",
