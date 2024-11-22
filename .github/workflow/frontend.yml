@@ -5,14 +5,12 @@ on:
     branches: [main]
     paths:
       - "apps/frontend/web/admin/**"
-      - "shared/core/**"
       - "package.json"
       - "yarn.lock"
   pull_request:
     branches: [main]
     paths:
       - "apps/frontend/web/admin/**"
-      - "shared/core/**"
       - "package.json"
       - "yarn.lock"
 
