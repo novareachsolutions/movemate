@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { generate as randToken } from 'rand-token';
+
+import { RedisService } from '../../../modules/redis/redis.service';
 import { CryptoService } from './crypto';
-import { ConfigService } from '@nestjs/config';
-import { RedisService } from 'src/modules/redis/redis.service';
 
 @Injectable()
 export class TokenService {
@@ -24,7 +25,11 @@ export class TokenService {
     this.configService = configService;
   }
 
-  generateAccessToken(userId: number, phoneNumber: string, role: string): string {
+  generateAccessToken(
+    userId: number,
+    phoneNumber: string,
+    role: string,
+  ): string {
     const payload = {
       id: userId,
       phoneNumber: phoneNumber,
@@ -38,11 +43,13 @@ export class TokenService {
   }
 
   generateRefreshToken(userId: number): string {
-
-    return this.jwtService.sign({ userId }, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRY'),
-    });
+    return this.jwtService.sign(
+      { userId },
+      {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRY'),
+      },
+    );
   }
 
   generateOnboardingToken(phoneNumber: string): string {
@@ -56,5 +63,4 @@ export class TokenService {
       },
     );
   }
-
 }

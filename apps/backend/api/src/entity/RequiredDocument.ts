@@ -1,6 +1,7 @@
-import { Entity, Column, OneToOne, RelationId } from 'typeorm';
-import { BaseEntity } from './BaseEntity';
 import { UserRoleEnum } from 'src/shared/enums';
+import { Column, Entity, OneToOne, RelationId } from 'typeorm';
+
+import { BaseEntity } from './BaseEntity';
 
 @Entity()
 export class RequiredDocument extends BaseEntity {

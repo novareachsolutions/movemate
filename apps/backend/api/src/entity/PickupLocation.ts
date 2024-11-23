@@ -1,4 +1,5 @@
-import { Entity, Column, OneToOne, RelationId } from 'typeorm';
+import { Column, Entity, OneToOne, RelationId } from 'typeorm';
+
 import { BaseEntity } from './BaseEntity';
 import { Order } from './Order';
 

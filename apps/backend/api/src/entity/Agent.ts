@@ -1,8 +1,9 @@
-import { Entity, Column, OneToOne, RelationId, Index, Unique } from 'typeorm';
-import { User } from './User';
+import { Column, Entity, Index, OneToOne, RelationId, Unique } from 'typeorm';
+
+import { TAgent } from '../modules/agent/agent.types';
+import { AgentStatusEnum, AgentTypeEnum } from '../shared/enums';
 import { BaseEntity } from './BaseEntity';
-import { TAgent } from 'src/modules/agent/agent.types';
-import { AgentStatusEnum, AgentTypeEnum } from 'src/shared/enums';
+import { User } from './User';
 
 @Index('IDX_agent_userId', ['userId'], { where: '"deletedAt" IS NULL' })
 @Index('IDX_agent_status', ['status'], { where: '"deletedAt" IS NULL' })
