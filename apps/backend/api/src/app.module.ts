@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { RedisModule } from './modules/redis/redis.module';
-import { AuthModule } from './modules/auth/auth.module';
 import { DatabaseModule } from './config/database/database.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { DatabaseModule } from './config/database/database.module';
     }),
     DatabaseModule,
     RedisModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

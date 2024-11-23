@@ -1,4 +1,4 @@
-import { AgentStatusEnum, AgentTypeEnum } from 'src/shared/enums';
+import { AgentStatusEnum, AgentTypeEnum } from '../../shared/enums';
 
 export type TAgent = {
   userId: number;

@@ -1,15 +1,19 @@
 import {
-  Controller,
-  Post,
   Body,
-  Param,
-  Patch,
+  Controller,
   Delete,
   Get,
-  Req,
+  Param,
   ParseIntPipe,
+  Post,
   Put,
 } from '@nestjs/common';
+import { UpdateResult } from 'typeorm';
+
+import { Agent } from '../../entity/Agent';
+import { AgentDocument } from '../../entity/AgentDocument';
+import { AgentReview } from '../../entity/AgentReview';
+import { ApiResponse } from '../../shared/interface';
 import { AgentService } from './agent.service';
 import {
   TAgent,
@@ -17,10 +21,6 @@ import {
   TAgentPartial,
   TGetAgentProfile,
 } from './agent.types';
-import { ApiResponse, ICustomRequest } from 'src/shared/interface';
-import { Agent } from 'src/entity/Agent';
-import { UpdateResult } from 'typeorm';
-import { AgentDocument } from 'src/entity/AgentDocument';
 
 @Controller('agent')
 export class AgentController {
@@ -240,7 +240,9 @@ export class AgentController {
   }
 
   @Get('/:id/reviews')
-  async getReviews(@Param('id', ParseIntPipe) agentId: number) {
+  async getReviews(
+    @Param('id', ParseIntPipe) agentId: number,
+  ): Promise<ApiResponse<AgentReview[]>> {
     try {
       const data = await this.agentService.getAgentReviews(agentId);
       return {

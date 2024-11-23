@@ -1,12 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Twilio } from 'twilio';
 import { JwtService } from '@nestjs/jwt';
 import { generate as randToken } from 'rand-token';
+import { Twilio } from 'twilio';
+
+import { logger } from '../../logger';
 import { RedisService } from '../redis/redis.service';
 import { CryptoService } from './utils/crypto';
 import { OtpService } from './utils/otp';
-import { logger } from 'src/logger';
 
 @Injectable()
 export class AuthService {

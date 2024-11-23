@@ -1,4 +1,5 @@
 import { Module, OnModuleInit } from '@nestjs/common';
+
 import { DatabaseService } from './database.service';
 
 @Module({

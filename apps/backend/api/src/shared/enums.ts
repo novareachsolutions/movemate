@@ -5,25 +5,25 @@ export enum AgentTypeEnum {
 }
 
 export enum AgentStatusEnum {
-  ONLINE = 'ONLINE',
   OFFLINE = 'OFFLINE',
+  ONLINE = 'ONLINE',
 }
 
 export enum AgentRegistrationDocumentEnum {
-  DRIVER_LICENSE = 'DRIVER_LICENSE',
-  VEHICLE_REGISTRATION = 'VEHICLE_REGISTRATION',
-  INSURANCE = 'INSURANCE',
-  PROFILE_PHOTO = 'PROFILE_PHOTO',
   ABN = 'ABN',
+  DRIVER_LICENSE = 'DRIVER_LICENSE',
+  INSURANCE = 'INSURANCE',
   OTHER = 'OTHER',
+  PROFILE_PHOTO = 'PROFILE_PHOTO',
+  VEHICLE_REGISTRATION = 'VEHICLE_REGISTRATION',
 }
 
 // Order
 export enum OrderStatusEnum {
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
   CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  PENDING = 'PENDING',
 }
 
 export enum OrderTypeEnum {
@@ -33,8 +33,8 @@ export enum OrderTypeEnum {
 
 // User
 export enum UserRoleEnum {
-  AGENT = 'AGENT',
   ADMIN = 'ADMIN',
+  AGENT = 'AGENT',
   CUSTOMER = 'CUSTOMER',
   SUPPORT = 'SUPPORT',
 }

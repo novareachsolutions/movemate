@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { generate as randToken } from 'rand-token';
+
+import { RedisService } from '../../../modules/redis/redis.service';
 import { CryptoService } from './crypto';
-import { ConfigService } from '@nestjs/config';
-import { RedisService } from 'src/modules/redis/redis.service';
 
 @Injectable()
 export class TokenService {
@@ -24,7 +25,10 @@ export class TokenService {
     this.configService = configService;
   }
 
-  generateAccessToken(user: { id: string; phoneNumber: string; role: string }, xsrfToken: string): string {
+  generateAccessToken(
+    user: { id: string; phoneNumber: string; role: string },
+    xsrfToken: string,
+  ): string {
     const payload = {
       sub: user.id,
       phoneNumber: user.phoneNumber,
@@ -63,7 +67,10 @@ export class TokenService {
     );
   }
 
-  async verifyAccessToken(accessToken: string, xsrfToken: string): Promise<any> {
+  async verifyAccessToken(
+    accessToken: string,
+    xsrfToken: string,
+  ): Promise<any> {
     return this.jwtService.verify(accessToken, {
       secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
     });
