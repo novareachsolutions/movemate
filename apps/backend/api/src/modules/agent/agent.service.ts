@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 
-import { dbReadRepo, dbRepo } from '../../config/database/database.service';
 import { Agent } from '../../entity/Agent';
 import { AgentDocument } from '../../entity/AgentDocument';
 import { AgentReview } from '../../entity/AgentReview';
@@ -13,6 +12,7 @@ import { RequiredDocument } from '../../entity/RequiredDocument';
 import { logger } from '../../logger';
 import { UserRoleEnum } from '../../shared/enums';
 import { filterEmptyValues } from '../../utils/filter';
+import { dbReadRepo, dbRepo } from '../database/database.service';
 import {
   TAgent,
   TAgentDocument,

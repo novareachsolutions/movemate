@@ -1,6 +1,6 @@
-import { UserRoleEnum } from 'src/shared/enums';
-import { Column, Entity, OneToOne, RelationId } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
+import { UserRoleEnum } from '../shared/enums';
 import { BaseEntity } from './BaseEntity';
 
 @Entity()

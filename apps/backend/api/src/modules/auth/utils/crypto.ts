@@ -22,10 +22,6 @@ export class CryptoService {
     this.encryptionKey = scryptSync(secret, 'salt', 24);
   }
 
-  private generateIv(): Buffer {
-    return randomBytes(16);
-  }
-
   encrypt(text: string): string {
     const iv = this.generateIv();
     const cipher = createCipheriv(this.algorithm, this.encryptionKey, iv);
@@ -45,5 +41,9 @@ export class CryptoService {
 
   encryptPhone(phoneNumber: string): string {
     return this.encrypt(phoneNumber);
+  }
+
+  private generateIv(): Buffer {
+    return randomBytes(16);
   }
 }

@@ -8,12 +8,12 @@ import { DatabaseService } from './database.service';
 })
 export class DatabaseModule implements OnModuleInit {
   // Initialize DatabaseService when the module is initialized
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     await DatabaseService.initialize();
   }
 
   // Ensure that DatabaseService is cleaned up when the module is destroyed
-  async onModuleDestroy() {
+  async onModuleDestroy(): Promise<void> {
     await DatabaseService.stop();
   }
 }

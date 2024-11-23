@@ -152,7 +152,7 @@ export class AgentController {
       return {
         success: true,
         message: 'Agent deleted successfully.',
-        data: null,
+        data,
       };
     } catch (error) {
       return {
@@ -211,6 +211,10 @@ export class AgentController {
         success: false,
         message: 'Agent documents retrieval failed.',
         data: null,
+        error: {
+          message: error.message,
+          code: error.status || 500,
+        },
       };
     }
   }

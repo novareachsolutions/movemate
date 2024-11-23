@@ -1,16 +1,17 @@
 import {
   Body,
   Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Res,
-  Headers,
-  Req,
   ForbiddenException,
+  Headers,
+  Post,
+  Req,
+  Res,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
+import { logger } from '../../logger';
+import { UserRoleEnum } from '../../shared/enums';
+import { ApiResponse } from '../../shared/interface';
 import { AuthService } from './auth.service';
 
 @Controller('auth')

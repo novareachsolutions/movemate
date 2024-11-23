@@ -10,10 +10,10 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Twilio } from 'twilio';
 
-import { dbRepo } from '../../config/database/database.service';
 import { User } from '../../entity/User';
 import { logger } from '../../logger';
 import { UserRoleEnum } from '../../shared/enums';
+import { dbRepo } from '../database/database.service';
 import { RedisService } from '../redis/redis.service';
 import { TokenService } from './utils/generateTokens';
 import { OtpService } from './utils/otp';
