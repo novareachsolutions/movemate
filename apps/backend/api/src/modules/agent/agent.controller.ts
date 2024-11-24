@@ -52,24 +52,12 @@ export class AgentController {
   async getProfileById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<IApiResponse<Agent>> {
-    try {
-      const data = await this.agentService.getAgentById(id);
-      return {
-        success: true,
-        message: 'Agent profile retrieved successfully.',
-        data,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Agent profile retrieval failed.',
-        data: null,
-        error: {
-          message: error.message,
-          code: error.status || 500,
-        },
-      };
-    }
+    const data = await this.agentService.getAgentById(id);
+    return {
+      success: true,
+      message: 'Agent profile retrieved successfully.',
+      data,
+    };
   }
 
   @Get('profile')

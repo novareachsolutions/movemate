@@ -3,25 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { generate as randToken } from 'rand-token';
 
-import { RedisService } from '../../../modules/redis/redis.service';
-import { CryptoService } from './crypto';
-
 @Injectable()
 export class TokenService {
   private readonly jwtService: JwtService;
-  private readonly redisService: RedisService;
-  private readonly cryptoService: CryptoService;
   private readonly configService: ConfigService;
 
-  constructor(
-    jwtService: JwtService,
-    redisService: RedisService,
-    cryptoService: CryptoService,
-    configService: ConfigService,
-  ) {
+  constructor(jwtService: JwtService, configService: ConfigService) {
     this.jwtService = jwtService;
-    this.redisService = redisService;
-    this.cryptoService = cryptoService;
     this.configService = configService;
   }
 

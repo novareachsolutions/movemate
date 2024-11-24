@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { Response } from 'express';
 
+import { logger } from './logger';
 import { UserFacingError } from './shared/errors/userFacing';
 
 @Catch()
@@ -26,6 +27,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
     }
 
     // For other errors, send a generic internal server error response
+    logger.error('CustomExceptionFilter: Internal Server Error', exception);
     return response.status(500).json({
       success: false,
       message: 'Internal Server Error',

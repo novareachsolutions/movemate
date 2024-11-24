@@ -32,8 +32,8 @@ export class AuthService {
     private readonly otpService: OtpService,
     private readonly tokenService: TokenService,
   ) {
-    const accountSid = this.configService.get<string>('TW_ACC_SID');
-    const authToken = this.configService.get<string>('TW_AUTH_TOKEN');
+    const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
+    const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
 
     if (!accountSid || !authToken) {
       logger.error('AuthService: Twilio credentials are not set');
