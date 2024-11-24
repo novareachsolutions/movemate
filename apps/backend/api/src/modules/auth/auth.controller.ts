@@ -11,7 +11,7 @@ import { Request, Response } from 'express';
 
 import { logger } from '../../logger';
 import { UserRoleEnum } from '../../shared/enums';
-import { ApiResponse } from '../../shared/interface';
+import { IApiResponse } from '../../shared/interface';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -21,12 +21,8 @@ export class AuthController {
   @Post('otp/request')
   async requestOtp(
     @Body('phoneNumber') phoneNumber: string,
-  ): Promise<ApiResponse<null>> {
-    logger.debug(
-      `AuthController.requestOtp: Received OTP request for phoneNumber: ${phoneNumber}`,
-    );
+  ): Promise<IApiResponse<null>> {
     await this.authService.requestOtp(phoneNumber);
-    logger.debug('AuthController.requestOtp: OTP sent successfully');
 
     return { success: true, message: 'OTP sent successfully.', data: null };
   }
@@ -35,7 +31,7 @@ export class AuthController {
   async verifyOtp(
     @Body() body: { phoneNumber: string; otp: string },
     @Res({ passthrough: true }) res: Response,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
     logger.debug(
       `AuthController.verifyOtp: Verifying OTP for phoneNumber: ${phoneNumber}`,
@@ -44,9 +40,7 @@ export class AuthController {
       phoneNumber,
       otp,
     );
-    logger.debug(
-      'AuthController.verifyOtp: OTP verification successful, setting onboarding token header',
-    );
+
     res.setHeader('x-onboarding-token', onboardingToken);
 
     return { success: true, message: 'OTP verified successfully.', data: null };
@@ -57,7 +51,7 @@ export class AuthController {
     @Body() body: { phoneNumber: string; otp: string },
     @Headers('role') role: UserRoleEnum,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
     logger.debug(
       `AuthController.login: Login request for phoneNumber: ${phoneNumber}, role: ${role}`,
@@ -66,9 +60,6 @@ export class AuthController {
       phoneNumber,
       otp,
       role,
-    );
-    logger.debug(
-      'AuthController.login: Login successful, setting access and refresh token cookies',
     );
 
     res.cookie('access_token', accessToken, {
@@ -89,7 +80,7 @@ export class AuthController {
   async refreshToken(
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<IApiResponse<null>> {
     const refreshToken = req.cookies['refresh_token'];
 
     if (!refreshToken) {

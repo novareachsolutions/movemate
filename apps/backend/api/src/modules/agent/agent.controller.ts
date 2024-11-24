@@ -13,7 +13,7 @@ import { UpdateResult } from 'typeorm';
 import { Agent } from '../../entity/Agent';
 import { AgentDocument } from '../../entity/AgentDocument';
 import { AgentReview } from '../../entity/AgentReview';
-import { ApiResponse } from '../../shared/interface';
+import { IApiResponse } from '../../shared/interface';
 import { AgentService } from './agent.service';
 import {
   TAgent,
@@ -27,7 +27,7 @@ export class AgentController {
   constructor(private readonly agentService: AgentService) {}
 
   @Post('signup')
-  async create(@Body() agent: TAgent): Promise<ApiResponse<Agent>> {
+  async create(@Body() agent: TAgent): Promise<IApiResponse<Agent>> {
     try {
       const data = await this.agentService.createAgent(agent);
       return {
@@ -51,7 +51,7 @@ export class AgentController {
   @Get('profile/:id')
   async getProfileById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ApiResponse<Agent>> {
+  ): Promise<IApiResponse<Agent>> {
     try {
       const data = await this.agentService.getAgentById(id);
       return {
@@ -75,7 +75,7 @@ export class AgentController {
   @Get('profile')
   async getProfileByValue(
     @Body() agent: TGetAgentProfile,
-  ): Promise<ApiResponse<Agent>> {
+  ): Promise<IApiResponse<Agent>> {
     try {
       const data = await this.agentService.getAgentProfile(agent);
       return {
@@ -97,7 +97,7 @@ export class AgentController {
   }
 
   @Get('list')
-  async getAll(): Promise<ApiResponse<Agent[]>> {
+  async getAll(): Promise<IApiResponse<Agent[]>> {
     try {
       const data = await this.agentService.getAllAgents();
       return {
@@ -122,7 +122,7 @@ export class AgentController {
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAgent: TAgentPartial,
-  ): Promise<ApiResponse<UpdateResult>> {
+  ): Promise<IApiResponse<UpdateResult>> {
     try {
       const data = await this.agentService.updateAgentProfile(id, updateAgent);
       return {
@@ -146,7 +146,7 @@ export class AgentController {
   @Delete('profile/:id')
   async delete(
     @Param('id', ParseIntPipe) agentId: number,
-  ): Promise<ApiResponse<UpdateResult>> {
+  ): Promise<IApiResponse<UpdateResult>> {
     try {
       const data = await this.agentService.deleteAgent(agentId);
       return {
@@ -171,7 +171,7 @@ export class AgentController {
   async uploadDocument(
     @Param('id', ParseIntPipe) agentId: number,
     @Body() uploadDocument: TAgentDocument,
-  ): Promise<ApiResponse<AgentDocument>> {
+  ): Promise<IApiResponse<AgentDocument>> {
     try {
       const data = await this.agentService.uploadDocument(
         agentId,
@@ -198,7 +198,7 @@ export class AgentController {
   @Get('/:id/documents')
   async getDocuments(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ApiResponse<AgentDocument[]>> {
+  ): Promise<IApiResponse<AgentDocument[]>> {
     try {
       const data = await this.agentService.getAgentDocuments(id);
       return {
@@ -222,7 +222,7 @@ export class AgentController {
   @Delete('/:id/documents/:documentId')
   async deleteDocument(
     @Param('documentId', ParseIntPipe) documentId: number,
-  ): Promise<ApiResponse<UpdateResult>> {
+  ): Promise<IApiResponse<UpdateResult>> {
     try {
       await this.agentService.deleteAgentDocument(documentId);
       return {
@@ -246,7 +246,7 @@ export class AgentController {
   @Get('/:id/reviews')
   async getReviews(
     @Param('id', ParseIntPipe) agentId: number,
-  ): Promise<ApiResponse<AgentReview[]>> {
+  ): Promise<IApiResponse<AgentReview[]>> {
     try {
       const data = await this.agentService.getAgentReviews(agentId);
       return {

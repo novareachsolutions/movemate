@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Twilio } from 'twilio';
@@ -13,6 +6,16 @@ import { Twilio } from 'twilio';
 import { User } from '../../entity/User';
 import { logger } from '../../logger';
 import { UserRoleEnum } from '../../shared/enums';
+import {
+  UserAccessDeniedError,
+  UserNotFoundError,
+  UserOtpRequestTooSoonException,
+  UserPhoneNumberAlreadyExistsError,
+  UserPhoneNumberBlockedError,
+  UserPhoneNumberIsRequiredError,
+  UserRetryOtpError,
+  UserTokenRefreshError,
+} from '../../shared/errors/user';
 import { dbRepo } from '../database/database.service';
 import { RedisService } from '../redis/redis.service';
 import { TokenService } from './utils/generateTokens';
@@ -57,12 +60,14 @@ export class AuthService {
       logger.error(
         `AuthService.signupInitiate: Phone number ${phoneNumber} already registered`,
       );
-      throw new BadRequestException('The phone number is already registered.');
+      throw new UserPhoneNumberAlreadyExistsError(
+        `Phone number ${phoneNumber} is already registered`,
+      );
     }
 
     await this.validateOtp(phoneNumber, otp);
     const onboardingToken =
-      await this.tokenService.generateOnboardingToken(phoneNumber);
+      this.tokenService.generateOnboardingToken(phoneNumber);
 
     return onboardingToken;
   }
@@ -82,16 +87,16 @@ export class AuthService {
       logger.error(
         `AuthService.login: User with phone number ${phoneNumber} not found`,
       );
-      throw new NotFoundException('User not found.');
+      throw new UserNotFoundError(
+        `User with phone number ${phoneNumber} not found`,
+      );
     }
 
     if (user.role !== role) {
       logger.error(
         `AuthService.login: Role mismatch. Expected ${role}, got ${user.role}`,
       );
-      throw new ForbiddenException(
-        `User role mismatch. Expected ${role} but got ${user.role}`,
-      );
+      throw new UserAccessDeniedError(`Role mismatch. Expected ${role}`);
     }
 
     const accessToken = this.tokenService.generateAccessToken(
@@ -113,14 +118,18 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
 
-      const user = await dbRepo(User).findOne({
+      const user: Pick<User, 'id' | 'phoneNumber' | 'role'> = await dbRepo(
+        User,
+      ).findOne({
         where: { id: payload.userId },
       });
       if (!user) {
         logger.error(
           `AuthService.refreshToken: User with ID ${payload.userId} not found`,
         );
-        throw new NotFoundException('User not found.');
+        throw new UserNotFoundError(
+          `User ${user.id} with ${user.phoneNumber} not found`,
+        );
       }
 
       const newAccessToken = this.tokenService.generateAccessToken(
@@ -131,11 +140,11 @@ export class AuthService {
       const newRefreshToken = this.tokenService.generateRefreshToken(user.id);
 
       return { accessToken: newAccessToken, refreshToken: newRefreshToken };
-    } catch (error: any) {
+    } catch (error) {
       logger.error(
         `AuthService.refreshToken: Failed to refresh token. Error: ${error}`,
       );
-      throw new UnauthorizedException('Failed to refresh token.');
+      throw new UserTokenRefreshError('Failed to refresh token');
     }
   }
 
@@ -159,9 +168,7 @@ export class AuthService {
       logger.error(
         `AuthService.manageOtpRequests: Rate limit reached. Wait ${waitTime} seconds`,
       );
-      throw new BadRequestException(
-        `Please wait ${waitTime} seconds before requesting a new OTP.`,
-      );
+      throw new UserOtpRequestTooSoonException(waitTime);
     }
 
     if (requests <= 3) {
@@ -172,8 +179,8 @@ export class AuthService {
       logger.error(
         'AuthService.manageOtpRequests: Too many OTP requests. User banned for 24 hours',
       );
-      throw new BadRequestException(
-        'Too many OTP requests. You are banned for 24 hours.',
+      throw new UserPhoneNumberBlockedError(
+        'Too many OTP requests. Please try again after 24 hours.',
       );
     }
   }
@@ -188,12 +195,12 @@ export class AuthService {
   }
 
   private async sendOtp(phoneNumber: string, otp: string): Promise<void> {
-    logger.debug(`AuthService.sendOtp: Sending OTP to ${phoneNumber}`);
     if (!phoneNumber) {
       logger.error('AuthService.sendOtp: Phone number is required to send OTP');
-      throw new BadRequestException('Phone number is required to send OTP.');
+      throw new UserPhoneNumberIsRequiredError('Phone number is required');
     }
 
+    logger.debug(`AuthService.sendOtp: Sending OTP to ${phoneNumber}`);
     try {
       await this.twilioClient.messages.create({
         body: `Your OTP for NOVATECH SOL is ${otp}`,
@@ -220,27 +227,21 @@ export class AuthService {
     const otpExists = await this.redisService.get(otpRequestKey);
     if (!otpExists) {
       logger.error(
-        'AuthService.validateOtp: No OTP request found for this number',
+        `AuthService.validateOtp: No OTP request found for this number ${phoneNumber}`,
       );
-      throw new BadRequestException(
-        'No OTP request was found associated with this number.',
-      );
+      throw new UserRetryOtpError(`Please request a new OTP.`);
     }
 
     const storedSecret = await this.redisService.get(otpKey);
     if (!storedSecret) {
       logger.error('AuthService.validateOtp: OTP expired');
-      throw new BadRequestException(
-        "The OTP you're trying to verify has expired, please retry!",
-      );
+      throw new UserRetryOtpError(`Please request a new OTP.`);
     }
 
     const isValid = this.otpService.verifyOTP(inputOtp, storedSecret);
     if (!isValid) {
       logger.error('AuthService.validateOtp: Invalid OTP');
-      throw new BadRequestException(
-        "The OTP you're trying to verify is incorrect, please retry!",
-      );
+      throw new UserRetryOtpError(`Please request a new OTP.`);
     }
 
     await this.redisService.del(otpKey);
