@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { logger } from '../../logger';
 import { UserRoleEnum } from '../../shared/enums';
 import { IApiResponse } from '../../shared/interface';
 import { AuthService } from './auth.service';
@@ -23,7 +22,6 @@ export class AuthController {
     @Body('phoneNumber') phoneNumber: string,
   ): Promise<IApiResponse<null>> {
     await this.authService.requestOtp(phoneNumber);
-
     return { success: true, message: 'OTP sent successfully.', data: null };
   }
 
@@ -33,16 +31,12 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
-    logger.debug(
-      `AuthController.verifyOtp: Verifying OTP for phoneNumber: ${phoneNumber}`,
-    );
     const onboardingToken = await this.authService.signupInitiate(
       phoneNumber,
       otp,
     );
 
     res.setHeader('x-onboarding-token', onboardingToken);
-
     return { success: true, message: 'OTP verified successfully.', data: null };
   }
 
@@ -53,9 +47,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
-    logger.debug(
-      `AuthController.login: Login request for phoneNumber: ${phoneNumber}, role: ${role}`,
-    );
     const { accessToken, refreshToken } = await this.authService.login(
       phoneNumber,
       otp,
@@ -82,16 +73,12 @@ export class AuthController {
     @Req() req: Request,
   ): Promise<IApiResponse<null>> {
     const refreshToken = req.cookies['refresh_token'];
-
     if (!refreshToken) {
       throw new ForbiddenException('Refresh token not found.');
     }
 
     const { accessToken, refreshToken: newRefreshToken } =
       await this.authService.refreshToken(refreshToken);
-    logger.debug(
-      'AuthController.refreshToken: Refresh token validated, setting new tokens in cookies',
-    );
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,
