@@ -7,7 +7,7 @@ import {
   MAX_QUERY_EXECUTION_TIME,
 } from '../../constants';
 
-const createDataSource = async (): Promise<DataSource> => {
+const createDataSource = (): DataSource => {
   const connectionOptions = {
     name: 'default',
     type: process.env.TYPEORM_CONNECTION,
@@ -37,6 +37,6 @@ const createDataSource = async (): Promise<DataSource> => {
   return new DataSource(connectionOptions);
 };
 
-export function primaryDataSource(): Promise<DataSource> {
+export function primaryDataSource(): DataSource {
   return createDataSource();
 }

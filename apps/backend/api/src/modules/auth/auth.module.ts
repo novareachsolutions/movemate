@@ -7,13 +7,14 @@ import { RedisService } from '../redis/redis.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CryptoService } from './utils/crypto';
+import { TokenService } from './utils/generateTokens';
 import { OtpService } from './utils/otp';
 
 @Module({
   imports: [
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
+      useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '60d' },
       }),
@@ -22,7 +23,13 @@ import { OtpService } from './utils/otp';
     RedisModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, RedisService, OtpService, CryptoService],
+  providers: [
+    AuthService,
+    RedisService,
+    OtpService,
+    CryptoService,
+    TokenService,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

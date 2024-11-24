@@ -16,7 +16,7 @@ export class DatabaseService {
   private primaryDataSource: DataSource;
   private secondaryDataSource: DataSource;
 
-  public static async initialize() {
+  public static async initialize(): Promise<void> {
     if (DatabaseService.instance === null) {
       DatabaseService.instance = new DatabaseService();
       await DatabaseService.instance.connect();
@@ -27,36 +27,6 @@ export class DatabaseService {
     if (DatabaseService.instance) {
       await DatabaseService.instance.close();
       DatabaseService.instance = null;
-    }
-  }
-
-  public async connect(): Promise<void> {
-    if (!this.primaryDataSource?.isInitialized) {
-      logger.info('Connecting to the database...');
-      this.primaryDataSource = await primaryDataSource();
-      await this.primaryDataSource.initialize();
-      logger.info('Connection to the database established');
-    }
-
-    if (!this.secondaryDataSource?.isInitialized) {
-      logger.info('Connecting to the read replica database...');
-      this.secondaryDataSource = await readReplicaDataSource();
-      await this.secondaryDataSource.initialize();
-      logger.info('Connection to the read replica database established');
-    }
-  }
-
-  public async close(): Promise<void> {
-    if (this.primaryDataSource?.isInitialized) {
-      logger.info('Closing connection to the database...');
-      await this.primaryDataSource.destroy();
-      logger.info('Connection to the database closed');
-    }
-
-    if (this.secondaryDataSource?.isInitialized) {
-      logger.info('Closing read replica connection to the database...');
-      await this.secondaryDataSource.destroy();
-      logger.info('Read replica connection to the database closed');
     }
   }
 
@@ -96,7 +66,7 @@ export class DatabaseService {
 
   static methodInterceptor(): any {
     return {
-      get: (target: any, property: string) => {
+      get: (target: any, property: string): any => {
         if (typeof target[property] === 'function') {
           return (...args: any[]) => {
             DatabaseService.validateWhere(property, args);
@@ -108,7 +78,7 @@ export class DatabaseService {
     };
   }
 
-  static validateWhere(property: string, args: any[]) {
+  static validateWhere(property: string, args: any[]): void {
     let where: FindOptionsWhere<BaseEntity>[] | FindOptionsWhere<BaseEntity>;
     if (
       [
@@ -154,6 +124,36 @@ export class DatabaseService {
           );
         }
       }
+    }
+  }
+
+  public async connect(): Promise<void> {
+    if (!this.primaryDataSource?.isInitialized) {
+      logger.info('Connecting to the database...');
+      this.primaryDataSource = primaryDataSource();
+      await this.primaryDataSource.initialize();
+      logger.info('Connection to the database established');
+    }
+
+    if (!this.secondaryDataSource?.isInitialized) {
+      logger.info('Connecting to the read replica database...');
+      this.secondaryDataSource = readReplicaDataSource();
+      await this.secondaryDataSource.initialize();
+      logger.info('Connection to the read replica database established');
+    }
+  }
+
+  public async close(): Promise<void> {
+    if (this.primaryDataSource?.isInitialized) {
+      logger.info('Closing connection to the database...');
+      await this.primaryDataSource.destroy();
+      logger.info('Connection to the database closed');
+    }
+
+    if (this.secondaryDataSource?.isInitialized) {
+      logger.info('Closing read replica connection to the database...');
+      await this.secondaryDataSource.destroy();
+      logger.info('Read replica connection to the database closed');
     }
   }
 }

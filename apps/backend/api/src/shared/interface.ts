@@ -2,7 +2,7 @@ export interface ICustomRequest extends Request {
   userId?: number;
 }
 
-export interface ApiResponse<T> {
+export interface IApiResponse<T> {
   data: T | null;
   error?: {
     message: string;

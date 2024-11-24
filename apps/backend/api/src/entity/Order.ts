@@ -1,4 +1,3 @@
-import { OrderStatusEnum, OrderTypeEnum } from 'src/shared/enums';
 import {
   Column,
   Entity,
@@ -8,6 +7,7 @@ import {
   RelationId,
 } from 'typeorm';
 
+import { OrderStatusEnum, OrderTypeEnum } from '../shared/enums';
 import { Agent } from './Agent';
 import { BaseEntity } from './BaseEntity';
 import { DropLocation } from './DropLocation';

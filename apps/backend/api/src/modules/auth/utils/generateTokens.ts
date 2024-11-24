@@ -3,103 +3,52 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { generate as randToken } from 'rand-token';
 
-import { RedisService } from '../../../modules/redis/redis.service';
-import { CryptoService } from './crypto';
-
 @Injectable()
 export class TokenService {
   private readonly jwtService: JwtService;
-  private readonly redisService: RedisService;
-  private readonly cryptoService: CryptoService;
   private readonly configService: ConfigService;
 
-  constructor(
-    jwtService: JwtService,
-    redisService: RedisService,
-    cryptoService: CryptoService,
-    configService: ConfigService,
-  ) {
+  constructor(jwtService: JwtService, configService: ConfigService) {
     this.jwtService = jwtService;
-    this.redisService = redisService;
-    this.cryptoService = cryptoService;
     this.configService = configService;
   }
 
   generateAccessToken(
-    user: { id: string; phoneNumber: string; role: string },
-    xsrfToken: string,
+    userId: number,
+    phoneNumber: string,
+    role: string,
   ): string {
     const payload = {
-      sub: user.id,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
+      id: userId,
+      phoneNumber: phoneNumber,
+      role: role,
     };
 
     return this.jwtService.sign(payload, {
-      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
+      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}`,
       expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRY'),
     });
   }
 
-  generateRefreshToken(user: { id: string }): string {
-    const payload = { userId: user.id };
-
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRY'),
-    });
-  }
-
-  generateXsrfToken(length: number = 32): string {
-    return randToken(length);
-  }
-
-  generateOnboardingToken(phoneNumber: string): string {
-    const encryptedPhone = this.cryptoService.encrypt(phoneNumber);
-    const tokenId = randToken(24);
-
+  generateRefreshToken(userId: number): string {
     return this.jwtService.sign(
-      { phone: encryptedPhone, tokenId: tokenId },
+      { userId },
       {
-        secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
-        expiresIn: '60m',
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRY'),
       },
     );
   }
 
-  async verifyAccessToken(
-    accessToken: string,
-    xsrfToken: string,
-  ): Promise<any> {
-    return this.jwtService.verify(accessToken, {
-      secret: `${this.configService.get<string>('JWT_ACCESS_SECRET')}${xsrfToken}`,
-    });
-  }
+  generateOnboardingToken(phoneNumber: string): string {
+    const tokenId = randToken(24);
 
-  async verifyRefreshToken(refreshToken: string): Promise<any> {
-    return this.jwtService.verify(refreshToken, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-    });
-  }
-
-  async verifyOnboardingToken(token: string): Promise<boolean> {
-    try {
-      const payload = this.jwtService.verify(token, {
+    return this.jwtService.sign(
+      { phone: phoneNumber, tokenId: tokenId },
+      {
         secret: this.configService.get<string>('ONBOARDING_JWT_SECRET'),
-      });
-
-      if (!payload.phone || !payload.tokenId) return false;
-
-      const verifyPhone = await this.redisService.get(
-        `onboardingToken:${payload.tokenId}`,
-      );
-      if (!verifyPhone) return false;
-
-      // Decrypt the phone number to compare
-      const decryptedPhone = this.cryptoService.decrypt(payload.phone);
-      return verifyPhone === decryptedPhone;
-    } catch (error) {
-      throw new Error('Invalid or expired token');
-    }
+        expiresIn: this.configService.get<string>('ONBOARDING_JWT_EXPIRY'),
+      },
+    );
   }
 }

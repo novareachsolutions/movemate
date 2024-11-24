@@ -23,9 +23,8 @@ export type TAgentPartial = {
 };
 
 export type TGetAgentProfile = {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
+  id?: number;
+  createdAt?: Date;
 } & TAgentPartial;
 
 export type TAgentDocument = {

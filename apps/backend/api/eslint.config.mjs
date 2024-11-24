@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import rootConfig from '../../../eslint.config.mjs';
 
 const off = 0;

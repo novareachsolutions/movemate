@@ -1,13 +1,16 @@
 import {
   Body,
   Controller,
-  HttpCode,
-  HttpStatus,
+  ForbiddenException,
+  Headers,
   Post,
+  Req,
   Res,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
+import { UserRoleEnum } from '../../shared/enums';
+import { IApiResponse } from '../../shared/interface';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -15,26 +18,83 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('otp/request')
-  @HttpCode(HttpStatus.OK)
   async requestOtp(
-    @Body() requestOtpDto,
-  ): Promise<{ success: boolean; message: string }> {
-    const { phoneNumber } = requestOtpDto;
-    return this.authService.requestOtp(phoneNumber);
+    @Body('phoneNumber') phoneNumber: string,
+  ): Promise<IApiResponse<null>> {
+    await this.authService.requestOtp(phoneNumber);
+    return { success: true, message: 'OTP sent successfully.', data: null };
   }
 
   @Post('otp/verify')
-  @HttpCode(HttpStatus.OK)
-  async verifyOtp(@Body() verifyOtpDto, @Res() res: Response): Promise<void> {
-    const { phoneNumber, otp } = verifyOtpDto;
-    const { success, message, onboardingToken } =
-      await this.authService.signupInitiate(phoneNumber, otp);
-    res.cookie('onboarding_token', onboardingToken, {
+  async verifyOtp(
+    @Body() body: { phoneNumber: string; otp: string },
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<IApiResponse<null>> {
+    const { phoneNumber, otp } = body;
+    const onboardingToken = await this.authService.signupInitiate(
+      phoneNumber,
+      otp,
+    );
+
+    res.setHeader('x-onboarding-token', onboardingToken);
+    return { success: true, message: 'OTP verified successfully.', data: null };
+  }
+
+  @Post('login')
+  async login(
+    @Body() body: { phoneNumber: string; otp: string },
+    @Headers('role') role: UserRoleEnum,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<IApiResponse<null>> {
+    const { phoneNumber, otp } = body;
+    const { accessToken, refreshToken } = await this.authService.login(
+      phoneNumber,
+      otp,
+      role,
+    );
+
+    res.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: false,
-      maxAge: 60 * 24 * 60 * 60 * 1000,
+      secure: process.env.ENVIRONMEMNT === 'production',
+      maxAge: 60 * 60 * 1000,
+    });
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.ENVIRONMEMNT === 'production',
+      maxAge: 60 * 60 * 24 * 7 * 1000,
     });
 
-    res.status(HttpStatus.OK).json({ success, message });
+    return { success: true, message: 'Login successful.', data: null };
+  }
+
+  @Post('refresh-token')
+  async refreshToken(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+  ): Promise<IApiResponse<null>> {
+    const refreshToken = req.cookies['refresh_token'];
+    if (!refreshToken) {
+      throw new ForbiddenException('Refresh token not found.');
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.authService.refreshToken(refreshToken);
+
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.ENVIRONMEMNT === 'production',
+      maxAge: 60 * 60 * 1000,
+    });
+    res.cookie('refresh_token', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.ENVIRONMEMNT === 'production',
+      maxAge: 60 * 60 * 24 * 7 * 1000,
+    });
+
+    return {
+      success: true,
+      message: 'Tokens refreshed successfully.',
+      data: null,
+    };
   }
 }

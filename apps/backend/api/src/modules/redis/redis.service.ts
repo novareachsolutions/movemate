@@ -1,31 +1,20 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis, { RedisOptions } from 'ioredis';
 
 import { logger } from '../../logger';
 
 @Injectable()
-export class RedisService implements OnModuleInit {
+export class RedisService {
   private readonly redisClient: Redis;
-
-  private setupEventListeners(client: Redis) {
-    client.on('connect', () => {
-      logger.info('Connected to Redis server');
-    });
-    client.on('error', (error: unknown) => {
-      logger.error('Error connecting to Redis:', error);
-    });
-  }
 
   constructor(private readonly configService: ConfigService) {
     const redisOptions: RedisOptions = {
-      host: this.configService.get<string>('REDIS_HOST', '127.0.0.1'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-      password: this.configService.get<string>('REDIS_PASSWORD'),
+      host: this.configService.get<string>('REDIS_HOST'),
+      port: this.configService.get<number>('REDIS_PORT'),
     };
     this.redisClient = new Redis(redisOptions);
 
-    this.setupEventListeners(this.redisClient);
     this.redisClient.on('connect', () => {
       logger.info('Connected to Redis server');
     });
@@ -34,8 +23,6 @@ export class RedisService implements OnModuleInit {
       logger.error('Error connecting to Redis:', error);
     });
   }
-
-  onModuleInit() {}
 
   async set(
     key: string,

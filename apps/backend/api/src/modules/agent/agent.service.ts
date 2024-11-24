@@ -1,18 +1,20 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 
-import { dbReadRepo, dbRepo } from '../../config/database/database.service';
 import { Agent } from '../../entity/Agent';
 import { AgentDocument } from '../../entity/AgentDocument';
 import { AgentReview } from '../../entity/AgentReview';
 import { RequiredDocument } from '../../entity/RequiredDocument';
 import { logger } from '../../logger';
 import { UserRoleEnum } from '../../shared/enums';
+import {
+  UserAlreadyExistsError,
+  UserDocumentAlreadyExistsError,
+  UserInvalidDocumentError,
+  UserNotFoundError,
+} from '../../shared/errors/user';
 import { filterEmptyValues } from '../../utils/filter';
+import { dbReadRepo, dbRepo } from '../database/database.service';
 import {
   TAgent,
   TAgentDocument,
@@ -32,9 +34,8 @@ export class AgentService {
       logger.error(
         `AgentService.createAgent: Agent with ABN number ${agent.abnNumber} already exists.`,
       );
-      throw new BadRequestException(
-        `Agent with this ABN number already exists. Provided ABN number: ${agent.abnNumber}`,
-      );
+      throw new UserAlreadyExistsError(`
+        Agent with ABN number ${agent.abnNumber} already exists.`);
     }
 
     const response = await dbRepo(Agent).save({
@@ -51,7 +52,7 @@ export class AgentService {
       relations: ['user'],
     });
     if (!agent) {
-      throw new NotFoundException(`Agent with ID ${agentId} not found.`);
+      throw new UserNotFoundError(`Agent not found for ID ${agentId}`);
     }
 
     return agent;
@@ -65,11 +66,8 @@ export class AgentService {
     });
 
     if (!agent) {
-      throw new NotFoundException(
-        `No agent found with the provided details. Details: ${JSON.stringify(
-          input,
-        )}`,
-      );
+      throw new UserNotFoundError(`
+        Agent not found for input ${JSON.stringify(input)}`);
     }
 
     return agent;
@@ -83,13 +81,6 @@ export class AgentService {
     id: number,
     updateAgent: TAgentPartial,
   ): Promise<UpdateResult> {
-    const agent = await dbReadRepo(Agent).findOne({
-      where: { id },
-    });
-    if (!agent) {
-      throw new NotFoundException(`Agent profile not found for ID ${id}.`);
-    }
-
     const filteredUpdateAgent = filterEmptyValues(updateAgent);
     logger.debug(
       `Updating agent with ID ${id} with data: ${JSON.stringify(filteredUpdateAgent)}`,
@@ -111,9 +102,8 @@ export class AgentService {
     });
 
     if (!requiredDocument.documents.includes(uploadDocumnent.name)) {
-      throw new BadRequestException(
-        `Document ${uploadDocumnent.name} is not required for agents.`,
-      );
+      throw new UserInvalidDocumentError(`
+        ${uploadDocumnent.name} is not a valid document for agent.`);
     }
 
     const existingDocument = await dbReadRepo(AgentDocument).findOne({
@@ -121,9 +111,8 @@ export class AgentService {
     });
 
     if (existingDocument) {
-      throw new BadRequestException(
-        `Document ${uploadDocumnent.name} already exists for this agent.`,
-      );
+      throw new UserDocumentAlreadyExistsError(`
+        Document ${uploadDocumnent.name} already exists for agent.`);
     }
 
     const response = await dbRepo(AgentDocument).save({

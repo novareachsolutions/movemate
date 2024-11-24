@@ -1,11 +1,11 @@
-import { primaryDataSource } from './src/config/database/primaryDataSource';
+import { primaryDataSource } from './src/modules/database/primaryDataSource';
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 config();
 
 // Create and initialize the primaryDataSource asynchronously
 const dataSource = async (): Promise<DataSource> => {
-  const primaryDataSourceInstance = await primaryDataSource();
+  const primaryDataSourceInstance = primaryDataSource();
 
   return new DataSource({
     ...primaryDataSourceInstance.options,
