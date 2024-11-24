@@ -1,3 +1,10 @@
+# root
 node_modules/
-env
+out/
+.env
 .skip-commit-checks
+
+
+# Backend
+apps/backend/node_modules/
+app/backend/.env
