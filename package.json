@@ -7,7 +7,7 @@
   "private": true,
   "workspaces": [
     "apps/backend/*",
-    "apps/frontend/web/admin/*"
+    "apps/frontend/web/admin"
   ],
   "devDependencies": {
     "@commitlint/cli": "^19.4.0",
