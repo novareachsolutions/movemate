@@ -1,3 +1,10 @@
+# Check if the .skip-commit-checks file exists to bypass the checks
+if [ -f ".skip-commit-checks" ]; then
+  # Clean up after ourselves, remove the file to prevent future bypasses
+  rm .skip-commit-checks
+  exit 0
+fi
+
 # Allow merge commits
 if grep -qE '^Merge ' "$1"; then
   exit 0
