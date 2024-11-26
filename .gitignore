@@ -8,3 +8,4 @@ out/
 # Backend
 apps/backend/node_modules/
 app/backend/.env
+.DS_Store
