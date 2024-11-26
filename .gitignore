@@ -1,1 +1,11 @@
+# root
+node_modules/
+out/
+.env
+.skip-commit-checks
+
+
+# Backend
+apps/backend/node_modules/
+app/backend/.env
 .DS_store
