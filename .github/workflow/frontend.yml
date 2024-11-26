@@ -7,12 +7,6 @@ on:
       - "apps/frontend/web/admin/**"
       - "package.json"
       - "yarn.lock"
-  pull_request:
-    branches: [main]
-    paths:
-      - "apps/frontend/web/admin/**"
-      - "package.json"
-      - "yarn.lock"
 
 jobs:
   build-web:
