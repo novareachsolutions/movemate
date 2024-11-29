@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { User } from "../../entity/User";
 import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
 import { UpdateResult, DeleteResult } from "typeorm";
