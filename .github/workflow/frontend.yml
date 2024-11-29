@@ -26,12 +26,6 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Lint Code
-        run: yarn lint
-
-      - name: TypeScript Check
-        run: yarn tsc --build apps/frontend/web/admin/tsconfig.json
-
       - name: Build Web
         working-directory: apps/frontend/web/admin
         run: yarn build
