@@ -9,6 +9,7 @@ import { UpdateResult, DeleteResult } from "typeorm";
 import { dbReadRepo, dbRepo } from "../database/database.service";
 import { logger } from "../../logger";
 import { filterEmptyValues } from "../../utils/filter";
+import { UserNotFoundError } from "../../shared/errors/user";
 
 @Injectable()
 export class UserService {
@@ -17,12 +18,11 @@ export class UserService {
    * @param createUserDto Data Transfer Object for creating a user.
    * @returns The created user entity.
    */
-  async createUser(createUserDto: TCreateUser): Promise<User> {
+  async createUser(createUserDto: TCreateUser): Promise<number> {
     const { email, phoneNumber } = createUserDto;
 
-    // Check if email or phone number already exists
     const existingUser = await dbReadRepo(User).findOne({
-      where: [{ email }, { phoneNumber }],
+      where: { email, phoneNumber },
     });
 
     if (existingUser) {
@@ -34,8 +34,8 @@ export class UserService {
       );
     }
 
-    const user = dbRepo(User).create(createUserDto);
-    return await dbRepo(User).save(user);
+    const user: Pick<User, "id"> = await dbRepo(User).save(createUserDto);
+    return user.id;
   }
 
   /**
@@ -44,15 +44,9 @@ export class UserService {
    * @returns The user entity.
    */
   async getUserById(id: number): Promise<User> {
-    const user = await dbReadRepo(User).findOne({
+    return await dbReadRepo(User).findOneOrFail({
       where: { id },
     });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
-    }
-
-    return user;
   }
 
   /**
@@ -62,19 +56,9 @@ export class UserService {
    */
   async getUserProfile(getUserProfileDto: TGetUserProfile): Promise<User> {
     const filteredInput = filterEmptyValues(getUserProfileDto);
-    const user = await dbReadRepo(User).findOne({
+    return await dbReadRepo(User).findOneOrFail({
       where: filteredInput,
     });
-
-    if (!user) {
-      throw new NotFoundException(
-        `No user found with the provided details: ${JSON.stringify(
-          getUserProfileDto
-        )}`
-      );
-    }
-
-    return user;
   }
 
   /**
@@ -98,12 +82,12 @@ export class UserService {
     const user = await dbReadRepo(User).findOne({ where: { id } });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
+      throw new UserNotFoundError(`User with ID ${id} not found.`);
     }
 
     const filteredUpdateUser = filterEmptyValues(updateUserDto);
-    logger.debug(
-      `Updating user with ID ${id} with data: ${JSON.stringify(filteredUpdateUser)}`
+    logger.info(
+      `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(filteredUpdateUser)}`
     );
 
     return await dbRepo(User).update(id, filteredUpdateUser);
@@ -115,7 +99,7 @@ export class UserService {
    * @returns The result of the delete operation.
    */
   async deleteUser(id: string): Promise<DeleteResult> {
-    logger.debug(`Deleting user with ID ${id}`);
+    logger.info(`UserService.deleteUser: Deleting user with ID ${id}`);
     return await dbRepo(User).softDelete(id);
   }
 }

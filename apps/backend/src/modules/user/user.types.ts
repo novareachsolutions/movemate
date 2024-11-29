@@ -3,7 +3,7 @@ import { UserRoleEnum } from "../../shared/enums";
 /**
  * Data Transfer Object for creating a user.
  */
-export interface TCreateUser {
+export type TCreateUser = {
   phoneNumber: string;
   role: UserRoleEnum;
   firstName: string;
@@ -13,13 +13,12 @@ export interface TCreateUser {
   suburb?: string;
   state?: string;
   postalCode?: number;
-  // Add other necessary fields
-}
+};
 
 /**
  * Data Transfer Object for updating a user.
  */
-export interface TUpdateUser {
+export type TUpdateUser = {
   phoneNumber?: string;
   role?: UserRoleEnum;
   firstName?: string;
@@ -29,14 +28,12 @@ export interface TUpdateUser {
   suburb?: string;
   state?: string;
   postalCode?: number;
-  // Add other fields that can be updated
-}
+};
 
 /**
  * Data Transfer Object for retrieving user profile based on specific criteria.
  */
-export interface TGetUserProfile {
+export type TGetUserProfile = {
   email?: string;
   phoneNumber?: string;
-  // Add other criteria as needed
-}
+};
