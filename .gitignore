@@ -5,6 +5,5 @@ out/
 .skip-commit-checks
 
 
-# Backend
-apps/backend/node_modules/
-app/backend/.env
+apps/backend/volumes/*
+
