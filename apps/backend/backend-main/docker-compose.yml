@@ -1,0 +1,28 @@
+services:
+  redis:
+    image: redis:5.0-alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    command: ['redis-server', '--appendonly', 'yes']
+    hostname: redis
+    volumes:
+      - ./volumes/redis-data:/data
+
+  postgres:
+    image: postgres:12.1-alpine
+    container_name: postgres
+    ports:
+      - '${TYPEORM_PORT}:5432'
+    command: ['postgres', '-c', 'log_statement=all']
+    environment:
+      POSTGRES_USER: ${TYPEORM_USERNAME}
+      POSTGRES_PASSWORD: ${TYPEORM_PASSWORD}
+      POSTGRES_DB: ${TYPEORM_DATABASE}
+    volumes:
+      - ./volumes/postgres-data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ['CMD', 'pg_isready -U postgres']
+      interval: 1m30s
+      timeout: 30s
+      retries: 10
