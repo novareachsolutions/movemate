@@ -7,6 +7,7 @@ import {
   Req,
   Res,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Request, Response } from "express";
 
 import { UserRoleEnum } from "../../shared/enums";
@@ -15,7 +16,10 @@ import { AuthService } from "./auth.service";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Post("otp/request")
   async requestOtp(
@@ -36,7 +40,7 @@ export class AuthController {
       otp
     );
 
-    res.setHeader("x-onboarding-token", onboardingToken);
+    res.setHeader("onboarding_token", onboardingToken);
     return { success: true, message: "OTP verified successfully.", data: null };
   }
 
@@ -55,19 +59,21 @@ export class AuthController {
 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.ENVIRONMEMNT === "production",
-      maxAge: 60 * 60 * 1000,
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.ENVIRONMEMNT === "production",
-      maxAge: 60 * 60 * 24 * 7 * 1000,
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
     });
 
     return { success: true, message: "Login successful.", data: null };
   }
 
-  @Post("refresh-token")
+  @Post("refresh_token")
   async refreshToken(
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request
@@ -82,12 +88,12 @@ export class AuthController {
 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.ENVIRONMEMNT === "production",
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
       maxAge: 60 * 60 * 1000,
     });
     res.cookie("refresh_token", newRefreshToken, {
       httpOnly: true,
-      secure: process.env.ENVIRONMEMNT === "production",
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
       maxAge: 60 * 60 * 24 * 7 * 1000,
     });
 
