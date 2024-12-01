@@ -5,7 +5,7 @@ import { UpdateResult, DeleteResult } from "typeorm";
 import { dbReadRepo, dbRepo } from "../database/database.service";
 import { logger } from "../../logger";
 import { filterEmptyValues } from "../../utils/filter";
-import { UserNotFoundError } from "../../shared/errors/user";
+import { UserAlreadyExistsError } from "../../shared/errors/user";
 
 @Injectable()
 export class UserService {
@@ -25,8 +25,8 @@ export class UserService {
       logger.error(
         `UserService.createUser: User with email ${email} or phone number ${phoneNumber} already exists.`
       );
-      throw new BadRequestException(
-        `User with the provided email or phone number already exists.`
+      throw new UserAlreadyExistsError(
+        `User with the provided email ${email} or phone number ${phoneNumber} already exists.`
       );
     }
 
