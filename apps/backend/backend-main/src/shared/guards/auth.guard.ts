@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedError("Token not found");
     }
 
-    const payload = this.verifyToken(token, "JWT_ACCESS_SECRET");
+    const payload = this.verifyToken(token, "jwt.accessSecret");
     if (payload) {
       this.setUserInRequest(request, payload);
       return true;
@@ -33,7 +33,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedError("Refresh token not found");
     }
 
-    const refreshPayload = this.verifyToken(refreshToken, "JWT_REFRESH_SECRET");
+    const refreshPayload = this.verifyToken(refreshToken, "jwt.refreshSecret");
     if (!refreshPayload) {
       throw new UnauthorizedError("Invalid refresh token");
     }
@@ -41,7 +41,7 @@ export class AuthGuard implements CanActivate {
     const newAccessToken = this.generateAccessToken(refreshPayload);
     response.cookie("access_token", newAccessToken, {
       httpOnly: true,
-      secure: process.env.ENVIRONMENT === "production",
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 1000, // 1 hour
     });
@@ -73,7 +73,7 @@ export class AuthGuard implements CanActivate {
         phoneNumber: payload.phoneNumber,
       },
       {
-        secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
+        secret: this.configService.get<string>("jwt.accessSecret"),
         expiresIn: "15m",
       }
     );
