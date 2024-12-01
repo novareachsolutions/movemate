@@ -6,5 +6,5 @@ out/
 .DS_Store
 
 # backend
-apps/backend/volumes/*
+apps/backend/backend-main/volumes/*
 
