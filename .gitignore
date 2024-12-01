@@ -3,9 +3,10 @@ node_modules/
 out/
 .env
 .skip-commit-checks
+.DS_Store
 
-
-# Backend
+# backend
+apps/backend/volumes/*
 apps/backend/node_modules/
 app/backend/.env
 .DS_store
