@@ -6,7 +6,5 @@ out/
 .DS_Store
 
 # backend
-apps/backend/volumes/*
-apps/backend/node_modules/
-app/backend/.env
-.DS_store
+apps/backend/backend-main/volumes/*
+
