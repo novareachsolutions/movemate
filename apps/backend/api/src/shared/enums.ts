@@ -31,6 +31,11 @@ export enum OrderTypeEnum {
   PICKUP = 'PICKUP',
 }
 
+export enum CancellationSourceEnum {
+  CUSTOMER = 'CUSTOMER',
+  AGENT = 'AGENT',
+}
+
 // User
 export enum UserRoleEnum {
   AGENT = 'AGENT',
