@@ -13,12 +13,12 @@ services:
     image: postgres:12.1-alpine
     container_name: postgres
     ports:
-      - '5432:5432'
+      - '${TYPEORM_PORT}:5432'
     command: ['postgres', '-c', 'log_statement=all']
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: movemate
+      POSTGRES_USER: ${TYPEORM_USERNAME}
+      POSTGRES_PASSWORD: ${TYPEORM_PASSWORD}
+      POSTGRES_DB: ${TYPEORM_DATABASE}
     volumes:
       - ./volumes/postgres-data:/var/lib/postgresql/data/
     healthcheck:
