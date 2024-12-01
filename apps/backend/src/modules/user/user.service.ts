@@ -5,7 +5,10 @@ import { UpdateResult, DeleteResult } from "typeorm";
 import { dbReadRepo, dbRepo } from "../database/database.service";
 import { logger } from "../../logger";
 import { filterEmptyValues } from "../../utils/filter";
-import { UserAlreadyExistsError } from "../../shared/errors/user";
+import {
+  UserAlreadyExistsError,
+  UserNotFoundError,
+} from "../../shared/errors/user";
 
 @Injectable()
 export class UserService {
