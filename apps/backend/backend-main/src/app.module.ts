@@ -4,6 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import configuration from "./config/configuration";
 import { AgentModule } from "./modules/agent/agent.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { DatabaseModule } from "./modules/database/database.module";
@@ -16,6 +17,7 @@ import { RoleGuard } from "./shared/guards/roles.guard";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [configuration],
     }),
     DatabaseModule,
     RedisModule,
