@@ -171,7 +171,7 @@ export class AuthService {
       throw new UserOtpRequestTooSoonException(waitTime);
     }
 
-    if (requests <= 3) {
+    if (requests <= 100) {
       const newTtw = now + requests * 30 * 1000;
       await this.redisService.set(ttwKey, newTtw.toString(), "EX", 86400);
     } else {

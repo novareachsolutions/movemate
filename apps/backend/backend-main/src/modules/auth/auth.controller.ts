@@ -36,7 +36,7 @@ export class AuthController {
       otp
     );
 
-    res.setHeader("x-onboarding-token", onboardingToken);
+    res.setHeader("onboarding_token", onboardingToken);
     return { success: true, message: "OTP verified successfully.", data: null };
   }
 
@@ -55,19 +55,21 @@ export class AuthController {
 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.ENVIRONMEMNT === "production",
-      maxAge: 60 * 60 * 1000,
+      secure: process.env.ENVIRONMENT === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.ENVIRONMEMNT === "production",
-      maxAge: 60 * 60 * 24 * 7 * 1000,
+      secure: process.env.ENVIRONMENT === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
     });
 
     return { success: true, message: "Login successful.", data: null };
   }
 
-  @Post("refresh-token")
+  @Post("refresh_token")
   async refreshToken(
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request
