@@ -1,3 +1,5 @@
+// src/modules/order/entities/send-package-order.entity.ts
+
 import { Entity, Column } from 'typeorm';
 import { Order } from '.';
 

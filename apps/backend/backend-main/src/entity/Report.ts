@@ -1,23 +1,23 @@
-// src/modules/order/entities/order-review.entity.ts
+// src/modules/order/entities/report.entity.ts
 
 import { Column, Entity, Index, ManyToOne, RelationId } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
 import { Order } from './Order';
 
-@Index('IDX_review_customerId', ['customerId'], {
+@Index('IDX_report_customerId', ['customerId'], {
   where: '"deletedAt" IS NULL',
 })
-@Index('IDX_review_orderId', ['orderId'], {
+@Index('IDX_report_orderId', ['orderId'], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
-export class OrderReview extends BaseEntity {
-  @Column({ type: 'float', nullable: false })
-  rating: number;
+export class Report extends BaseEntity {
+  @Column({ type: 'varchar', nullable: false })
+  reason: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  comment: string;
+  @Column({ type: 'text', nullable: true })
+  details: string;
 
   @ManyToOne(() => User, {
     cascade: true,
@@ -27,11 +27,11 @@ export class OrderReview extends BaseEntity {
   })
   customer: User;
 
-  @RelationId((review: OrderReview) => review.customer)
+  @RelationId((report: Report) => report.customer)
   @Column({ type: 'integer' })
   customerId: number;
 
-  @ManyToOne(() => Order, {
+  @ManyToOne(() => Order, (order) => order.report, {
     cascade: true,
     deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
@@ -39,7 +39,7 @@ export class OrderReview extends BaseEntity {
   })
   order: Order;
 
-  @RelationId((review: OrderReview) => review.order)
+  @RelationId((report: Report) => report.order)
   @Column({ type: 'integer' })
   orderId: number;
 }
