@@ -57,10 +57,10 @@ export abstract class Order extends BaseEntity {
   @Column({ type: 'integer' })
   dropLocationId: number;
 
-  @Column({ nullable: true })
-  distance: number;
+  @Column({ nullable: false })
+  estimatedDistance: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   estimatedTime: number;
 
   @ManyToOne(() => User, {
