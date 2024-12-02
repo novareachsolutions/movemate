@@ -13,8 +13,8 @@ import { DropLocation } from '../DropLocation';
 import {
   OrderStatusEnum,
   OrderTypeEnum,
-  CancellationSourceEnum,
-  PaymentStatusEnum
+  PaymentStatusEnum,
+  UserRoleEnum
 } from '../../shared/enums';
 import { Report } from '../Report';
 
@@ -102,7 +102,7 @@ export abstract class Order extends BaseEntity {
     type: 'varchar',
     nullable: true,
   })
-  canceledBy: CancellationSourceEnum;
+  canceledBy: UserRoleEnum;
 
   @ManyToOne(() => Agent, {
     cascade: true,
