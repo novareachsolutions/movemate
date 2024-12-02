@@ -1,11 +1,9 @@
 import {
-  Entity,
   Column,
   ManyToOne,
-  Index,
-  RelationId,
   OneToOne,
   JoinColumn,
+  RelationId,
 } from 'typeorm';
 import { User } from '../User';
 import { Agent } from '../Agent';
@@ -16,13 +14,11 @@ import {
   OrderStatusEnum,
   OrderTypeEnum,
   CancellationSourceEnum,
+  PaymentStatusEnum
 } from '../../shared/enums';
+import { Report } from '../Report';
 
-@Index('IDX_order_customerId', ['customerId'], { where: '"deletedAt" IS NULL' })
-@Index('IDX_order_agentId', ['agentId'], { where: '"deletedAt" IS NULL' })
-@Index('IDX_order_status', ['status'], { where: '"deletedAt" IS NULL' })
-@Entity()
-export class Order extends BaseEntity {
+export abstract class Order extends BaseEntity {
   @Column({
     type: 'varchar',
     default: OrderStatusEnum.PENDING,
@@ -82,13 +78,13 @@ export class Order extends BaseEntity {
     cascade: true,
     deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
+    nullable: true,
   })
   agent: Agent;
 
   @RelationId((order: Order) => order.agent)
   @Column({ type: 'integer', nullable: true })
   agentId: number;
-
 
   @Column({ type: 'float', nullable: true })
   price: number;
@@ -112,6 +108,7 @@ export class Order extends BaseEntity {
     cascade: true,
     deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
+    nullable: true,
   })
   assignedAgent: Agent;
 
@@ -131,9 +128,21 @@ export class Order extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   completedAt: Date;
 
-  @Column({ type: 'text', nullable: true })
-  report: string;
+  @Column({
+    type: 'varchar',
+    default: PaymentStatusEnum.NOT_PAID,
+    nullable: false,
+  })
+  paymentStatus: PaymentStatusEnum;
 
-  @Column({ type: 'text', nullable: true })
-  review: string;
+  @OneToOne(() => Report, (report) => report.order, {
+    cascade: true,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  report: Report;
+
+  @RelationId((order: Order) => order.report)
+  @Column({ type: 'integer', nullable: true })
+  reportId: number;
 }

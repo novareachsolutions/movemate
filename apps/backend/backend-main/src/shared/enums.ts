@@ -33,7 +33,7 @@ export enum OrderTypeEnum {
 
 export enum CancellationSourceEnum {
   CUSTOMER = 'CUSTOMER',
-  AGENT = 'AGENT',
+  AGENT = 'AGENT'
 }
 
 // User
@@ -42,4 +42,12 @@ export enum UserRoleEnum {
   AGENT = "AGENT",
   CUSTOMER = "CUSTOMER",
   SUPPORT = "SUPPORT",
+}
+
+// Payment
+export enum PaymentStatusEnum {
+  NOT_PAID = 'NOT_PAID',
+  PAID = 'PAID',
+  ERROR = 'ERROR',
+  REFUNDED = 'REFUNDED',
 }
