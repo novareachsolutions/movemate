@@ -20,11 +20,7 @@ import {
 } from '../../shared/enums';
 import { Report } from '../Report';
 
-@Index('IDX_order_customerId', ['customerId'], { where: '"deletedAt" IS NULL' })
-@Index('IDX_order_agentId', ['agentId'], { where: '"deletedAt" IS NULL' })
-@Index('IDX_order_status', ['status'], { where: '"deletedAt" IS NULL' })
-@Entity()
-export class Order extends BaseEntity {
+export abstract class Order extends BaseEntity {
   @Column({
     type: 'varchar',
     default: OrderStatusEnum.PENDING,
