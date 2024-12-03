@@ -1,6 +1,6 @@
 import { Column, Entity, OneToOne, RelationId } from "typeorm";
 import { BaseEntity } from "./BaseEntity";
-import { SendPackageOrder } from "./SendAPackage";
+import { SendPackageOrder } from "./Order/SendAPackage";
 
 @Entity()
 export class PickupLocation extends BaseEntity {
