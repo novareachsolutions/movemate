@@ -6,18 +6,18 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { DropLocation } from '../DropLocation';
-import { PickupLocation } from '../PickupLocation';
-import { Report } from '../Report';
-import { BaseEntity } from '../BaseEntity';
-import { User } from '../User';
+import { DropLocation } from './DropLocation';
+import { PickupLocation } from './PickupLocation';
+import { Report } from './Report';
+import { BaseEntity } from './BaseEntity';
+import { User } from './User';
 import {
   OrderStatusEnum,
   OrderTypeEnum,
   PaymentStatusEnum,
   UserRoleEnum,
-} from '../../shared/enums';
-import { Agent } from '../Agent';
+} from '../shared/enums';
+import { Agent } from './Agent';
 
 @Entity()
 export class SendPackageOrder extends BaseEntity {
