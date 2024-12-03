@@ -1,26 +1,44 @@
 import {
   Entity,
   Column,
-  ManyToOne,
-  OneToOne,
-  JoinColumn,
-  Index,
   RelationId,
+  ManyToOne,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
-import { User } from '../User';
-import { Agent } from '../Agent';
-import { BaseEntity } from '../BaseEntity';
-import { PickupLocation } from '../PickupLocation';
-import { DropLocation } from '../DropLocation';
+import { DropLocation } from './DropLocation';
+import { PickupLocation } from './PickupLocation';
+import { Report } from './Report';
+import { BaseEntity } from './BaseEntity';
+import { User } from './User';
 import {
   OrderStatusEnum,
   OrderTypeEnum,
-  CancellationSourceEnum,
-  PaymentStatusEnum
-} from '../../shared/enums';
-import { Report } from '../Report';
+  PaymentStatusEnum,
+  UserRoleEnum,
+} from '../shared/enums';
+import { Agent } from './Agent';
 
-export abstract class Order extends BaseEntity {
+@Entity()
+export class SendPackageOrder extends BaseEntity {
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  senderName: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: false })
+  senderPhoneNumber: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  receiverName: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: false })
+  receiverPhoneNumber: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  packageType: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  deliveryInstructions: string;
+
   @Column({
     type: 'varchar',
     default: OrderStatusEnum.PENDING,
@@ -37,54 +55,50 @@ export abstract class Order extends BaseEntity {
 
   @OneToOne(() => PickupLocation, {
     cascade: true,
-    deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
   })
   @JoinColumn()
   pickupLocation: PickupLocation;
 
-  @RelationId((order: Order) => order.pickupLocation)
+  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.pickupLocation)
   @Column({ type: 'integer' })
   pickupLocationId: number;
 
   @OneToOne(() => DropLocation, {
     cascade: true,
-    deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
   })
   @JoinColumn()
   dropLocation: DropLocation;
 
-  @RelationId((order: Order) => order.dropLocation)
+  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.dropLocation)
   @Column({ type: 'integer' })
   dropLocationId: number;
 
-  @Column({ nullable: true })
-  distance: number;
+  @Column({ nullable: false })
+  estimatedDistance: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   estimatedTime: number;
 
   @ManyToOne(() => User, {
     cascade: true,
-    deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
   })
   customer: User;
 
-  @RelationId((order: Order) => order.customer)
+  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.customer)
   @Column({ type: 'integer' })
   customerId: number;
 
   @ManyToOne(() => Agent, {
     cascade: true,
-    deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
     nullable: true,
   })
   agent: Agent;
 
-  @RelationId((order: Order) => order.agent)
+  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.agent)
   @Column({ type: 'integer', nullable: true })
   agentId: number;
 
@@ -104,17 +118,16 @@ export abstract class Order extends BaseEntity {
     type: 'varchar',
     nullable: true,
   })
-  canceledBy: CancellationSourceEnum;
+  canceledBy: UserRoleEnum;
 
   @ManyToOne(() => Agent, {
     cascade: true,
-    deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
     nullable: true,
   })
   assignedAgent: Agent;
 
-  @RelationId((order: Order) => order.assignedAgent)
+  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.assignedAgent)
   @Column({ type: 'integer', nullable: true })
   assignedAgentId: number;
 
@@ -137,14 +150,14 @@ export abstract class Order extends BaseEntity {
   })
   paymentStatus: PaymentStatusEnum;
 
-  @OneToOne(() => Report, (report) => report.order, {
+  @OneToOne(() => Report, (report) => report.sendPackageOrder, {
     cascade: true,
     nullable: true,
     onDelete: 'SET NULL',
   })
   report: Report;
 
-  @RelationId((order: Order) => order.report)
+  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.report)
   @Column({ type: 'integer', nullable: true })
   reportId: number;
 }

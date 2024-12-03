@@ -1,14 +1,12 @@
-// src/modules/order/entities/report.entity.ts
-
 import { Column, Entity, Index, ManyToOne, RelationId } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
-import { Order } from './Order';
+import { SendPackageOrder } from './SendAPackage';
 
 @Index('IDX_report_customerId', ['customerId'], {
   where: '"deletedAt" IS NULL',
 })
-@Index('IDX_report_orderId', ['orderId'], {
+@Index('IDX_report_orderId', ['sendPackageOrderId'], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
@@ -31,15 +29,14 @@ export class Report extends BaseEntity {
   @Column({ type: 'integer' })
   customerId: number;
 
-  @ManyToOne(() => Order, (order) => order.report, {
-    cascade: true,
+  @ManyToOne(() => SendPackageOrder, (sendPackageOrder) => sendPackageOrder.report, {
     deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
     nullable: false,
   })
-  order: Order;
+  sendPackageOrder: SendPackageOrder;
 
-  @RelationId((report: Report) => report.order)
+  @RelationId((report: Report) => report.sendPackageOrder)
   @Column({ type: 'integer' })
-  orderId: number;
+  sendPackageOrderId: number;
 }

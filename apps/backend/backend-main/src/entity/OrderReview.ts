@@ -1,14 +1,13 @@
 // src/modules/order/entities/order-review.entity.ts
 
-import { Column, Entity, Index, ManyToOne, RelationId } from 'typeorm';
-import { BaseEntity } from './BaseEntity';
-import { User } from './User';
-import { Order } from './Order';
+import { BaseEntity } from "./BaseEntity";
+import { User } from "./User";
+import { SendPackageOrder } from "./SendAPackage";
 
 @Index('IDX_review_customerId', ['customerId'], {
   where: '"deletedAt" IS NULL',
 })
-@Index('IDX_review_orderId', ['orderId'], {
+@Index("IDX_review_orderId", ["sendPackageOrderId"], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
@@ -31,15 +30,15 @@ export class OrderReview extends BaseEntity {
   @Column({ type: 'integer' })
   customerId: number;
 
-  @ManyToOne(() => Order, {
+  @ManyToOne(() => SendPackageOrder, {
     cascade: true,
     deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
     nullable: false,
   })
-  order: Order;
+  sendPackageOrder: SendPackageOrder;
 
-  @RelationId((review: OrderReview) => review.order)
-  @Column({ type: 'integer' })
-  orderId: number;
+  @RelationId((review: OrderReview) => review.sendPackageOrder)
+  @Column({ type: "integer" })
+  sendPackageOrderId: number;
 }
