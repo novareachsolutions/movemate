@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "name": "Debug Start:Dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["run", "start:dev"],
+      "cwd": "${workspaceFolder}/apps/backend/backend-main",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "outFiles": ["${workspaceFolder}/apps/backend/backend-main/out/**/*.js"],
+      "sourceMaps": true
+    }
+  ]
+}
