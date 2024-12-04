@@ -1,13 +1,13 @@
 import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
 
 import { BaseEntity } from "./BaseEntity";
+import { Order } from "./Order";
 import { User } from "./User";
-import { SendPackageOrder } from "./SendAPackage";
 
 @Index("IDX_review_customerId", ["customerId"], {
   where: '"deletedAt" IS NULL',
 })
-@Index("IDX_review_orderId", ["sendPackageOrderId"], {
+@Index("IDX_review_orderId", ["orderId"], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
@@ -30,15 +30,15 @@ export class OrderReview extends BaseEntity {
   @Column({ type: "integer" })
   customerId: number;
 
-  @ManyToOne(() => SendPackageOrder, {
+  @ManyToOne(() => Order, {
     cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
     onDelete: "CASCADE",
     nullable: false,
   })
-  sendPackageOrder: SendPackageOrder;
+  order: Order;
 
-  @RelationId((review: OrderReview) => review.sendPackageOrder)
+  @RelationId((review: OrderReview) => review.order)
   @Column({ type: "integer" })
-  sendPackageOrderId: number;
+  orderId: number;
 }
