@@ -1,7 +1,8 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { StripeService } from "./stripe.service";
-import { logger } from "../../logger";
 import Stripe from "stripe";
+
+import { logger } from "../../logger";
+import { StripeService } from "./stripe.service";
 
 @Controller("stripe")
 export class StripeController {
@@ -37,7 +38,7 @@ export class StripeController {
     @Body("amount") amount: number,
     @Body("currency") currency: string,
     @Body("description") description: string
-  ) {
+  ): Promise<{ success: boolean; data: Stripe.PaymentIntent }> {
     logger.debug(
       `StripeController.createPaymentIntent: Creating payment intent for user ID ${userId} with amount ${amount} ${currency}`
     );

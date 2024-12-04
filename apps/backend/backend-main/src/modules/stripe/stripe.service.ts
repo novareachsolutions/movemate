@@ -1,9 +1,10 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Stripe from "stripe";
+
+import { User } from "../../entity/User";
 import { logger } from "../../logger";
 import { dbRepo } from "../database/database.service";
-import { User } from "../../entity/User";
 
 @Injectable()
 export class StripeService {
