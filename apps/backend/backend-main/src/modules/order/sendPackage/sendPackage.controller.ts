@@ -10,13 +10,13 @@ import {
 import { UserRoleEnum } from '../../../shared/enums';
 import { SendAPackageService } from './sendPackage.service';
 import { IApiResponse } from '../../../shared/interface';
-import { Order } from '../../../entity/Order';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { Report } from '../../../entity/Report';
 import { OrderReview } from '../../../entity/OrderReview';
+import { SendPackageOrder } from '../../../entity/SendAPackage';
 
 
-@Controller('send-package')
+@Controller('order/send-package')
 export class SendPackageController {
     constructor(private readonly sendPackageService: SendAPackageService) { }
 
@@ -24,7 +24,7 @@ export class SendPackageController {
     @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
     async createSendPackageOrder(
         @Body() data: any,
-    ): Promise<IApiResponse<Order>> {
+    ): Promise<IApiResponse<SendPackageOrder>> {
         const createdOrder = await this.sendPackageService.create(data);
         return {
             success: true,
@@ -38,7 +38,7 @@ export class SendPackageController {
     async cancelOrder(
         @Param('orderId', ParseIntPipe) orderId: number,
         @Body('reason') reason: string,
-    ): Promise<IApiResponse<Order>> {
+    ): Promise<IApiResponse<SendPackageOrder>> {
         if (!reason) {
             throw new BadRequestException('Cancellation reason is required');
         }
@@ -50,7 +50,7 @@ export class SendPackageController {
         };
     }
 
-    @Post(':orderId/report')
+    @Post(':orderId/reportagent')
     @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
     async reportAgent(
         @Param('orderId', ParseIntPipe) orderId: number,
@@ -93,7 +93,7 @@ export class SendPackageController {
     @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.AGENT, UserRoleEnum.ADMIN)
     async getOrderDetails(
         @Param('orderId', ParseIntPipe) orderId: number,
-    ): Promise<IApiResponse<Order>> {
+    ): Promise<IApiResponse<SendPackageOrder>> {
         const data = await this.sendPackageService.getOrderDetails(orderId);
         return {
             success: true,

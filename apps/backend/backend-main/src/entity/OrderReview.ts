@@ -1,8 +1,7 @@
-// src/modules/order/entities/order-review.entity.ts
-
 import { BaseEntity } from "./BaseEntity";
 import { User } from "./User";
 import { SendPackageOrder } from "./SendAPackage";
+import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
 
 @Index('IDX_review_customerId', ['customerId'], {
   where: '"deletedAt" IS NULL',
