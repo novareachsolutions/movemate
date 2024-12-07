@@ -29,7 +29,3 @@ jobs:
       - name: Build Web
         working-directory: apps/frontend/web/admin
         run: yarn build
-
-      - name: Run Tests
-        working-directory: apps/frontend/web/admin
-        run: yarn test

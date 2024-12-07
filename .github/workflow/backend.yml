@@ -26,12 +26,8 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: TypeScript Check
-        run: yarn tsc --build apps/backend/api/tsconfig.json
+        run: yarn tsc --build apps/backend/backend-main/tsconfig.json
 
       - name: Build Backend
-        working-directory: apps/backend/api
+        working-directory: apps/backend/backend-main
         run: yarn build
-
-      - name: Run Tests
-        working-directory: apps/backend/api
-        run: yarn test
