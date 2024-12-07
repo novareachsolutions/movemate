@@ -82,4 +82,13 @@ export class Order extends BaseEntity {
   @RelationId((order: Order) => order.agent)
   @Column({ type: "integer" })
   agentId: number;
+
+  @Column({ type: "varchar", nullable: true })
+  stripePaymentIntentId: string;
+
+  @Column({ type: "varchar", nullable: true })
+  stripeInvoicePaymentIntentId: string;
+
+  @Column({ type: "varchar", nullable: true })
+  paymentStatus: string;
 }

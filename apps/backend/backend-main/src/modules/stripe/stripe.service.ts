@@ -2,9 +2,7 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Stripe from "stripe";
 
-import { User } from "../../entity/User";
 import { logger } from "../../logger";
-import { dbRepo } from "../database/database.service";
 
 @Injectable()
 export class StripeService {
@@ -21,79 +19,27 @@ export class StripeService {
     });
   }
 
-  /**
-   * Creates a Stripe customer for the given user ID.
-   * valiates whether user existsm or not, and then creates a Stripe customer.
-   * @param userId The ID of the user to create a customer for.
-   * @returns The created Stripe customer.
-   */
-  async createCustomer(userId: number): Promise<Stripe.Customer> {
-    logger.debug(
-      `StripeService.createCustomer: Creating customer for user ID ${userId}`
-    );
-
-    const user = await dbRepo(User).findOneOrFail({ where: { id: userId } });
-
-    try {
-      const customer = await this.stripe.customers.create({
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`,
-        phone: user.phoneNumber,
-        metadata: {
-          userId: user.id.toString(),
-        },
-      });
-      logger.info(
-        `StripeService.createCustomer: Customer created with ID ${customer.id}`
-      );
-      return customer;
-    } catch (error) {
-      logger.error(
-        `StripeService.createCustomer: Failed to create customer. Error: ${error.message}`
-      );
-      throw new InternalServerErrorException("Failed to create customer");
-    }
+  getClient(): Stripe {
+    return this.stripe;
   }
 
-  /**
-   * Creates a Stripe payment intent for the given user ID, amount, currency, and description.
-   * Validates whether user exists or not, and then creates a Stripe payment intent.
-   * @param userId The ID of the user to create a payment intent for.
-   * @param amount The amount of the payment in cents.
-   * @param currency The three-letter currency code for the payment.
-   * @param description The description of the payment.
-   * @returns The created Stripe payment intent.
-   */
-  async createPaymentIntent(
-    userId: number,
-    amount: number,
-    currency: string = "usd",
-    description: string
-  ): Promise<Stripe.PaymentIntent> {
-    logger.debug(
-      `StripeService.createPaymentIntent: Creating payment intent for user ID ${userId}`
+  async constructEvent(payload: any, signature: string): Promise<Stripe.Event> {
+    const endpointSecret = this.configService.get<string>(
+      "STRIPE_WEBHOOK_SECRET",
     );
-
-    const user = await dbRepo(User).findOneOrFail({ where: { id: userId } });
-
     try {
-      const paymentIntent = await this.stripe.paymentIntents.create({
-        amount,
-        currency,
-        description,
-        metadata: {
-          userId: user.id.toString(),
-        },
-      });
-      logger.info(
-        `StripeService.createPaymentIntent: Payment intent created with ID ${paymentIntent.id}`
+      return await this.stripe.webhooks.constructEvent(
+        JSON.stringify(payload),
+        signature,
+        endpointSecret,
       );
-      return paymentIntent;
     } catch (error) {
       logger.error(
-        `StripeService.createPaymentIntent: Failed to create payment intent. Error: ${error.message}`
+        `StripeService.constructEvent: Error verifying webhook - ${error.message}`,
       );
-      throw new InternalServerErrorException("Failed to create payment intent");
+      throw new InternalServerErrorException(
+        "Invalid Stripe webhook signature",
+      );
     }
   }
 }

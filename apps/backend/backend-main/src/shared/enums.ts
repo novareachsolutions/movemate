@@ -18,6 +18,11 @@ export enum AgentRegistrationDocumentEnum {
   VEHICLE_REGISTRATION = "VEHICLE_REGISTRATION",
 }
 
+export enum SubscripionStatusEnum {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
 // Order
 export enum OrderStatusEnum {
   CANCELED = "CANCELED",

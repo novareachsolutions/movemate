@@ -1,53 +1,138 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Headers,
+  InternalServerErrorException,
+  Post,
+} from "@nestjs/common";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
+import { CustomerPaymentService } from "./customerPayment.service";
+import { RiderPaymentService } from "./riderPayment.service";
 import { StripeService } from "./stripe.service";
 
 @Controller("stripe")
 export class StripeController {
-  constructor(private readonly stripeService: StripeService) {}
+  constructor(
+    private readonly stripeService: StripeService,
+    private readonly customerPaymentService: CustomerPaymentService,
+    private readonly riderPaymentService: RiderPaymentService,
+  ) {}
 
-  /**
-   * Creates a Stripe Customer for a given user.
-   * @param userId The ID of the user to create the customer for.
-   * @returns The created Stripe Customer.
-   */
-  @Post("customer")
-  async createCustomer(
-    @Body("userId") userId: number
-  ): Promise<{ success: boolean; data: Stripe.Customer }> {
-    logger.debug(
-      `StripeController.createCustomer: Creating customer for user ID ${userId}`
-    );
-    const customer = await this.stripeService.createCustomer(userId);
-    return { success: true, data: customer };
+  // CUSTOMER FLOWS
+  @Post("send-package")
+  async processSendPackage(
+    @Body("userId") userId: number,
+    @Body("orderId") orderId: number,
+    @Body("amount") amount: number,
+  ): Promise<{ success: boolean; paymentIntent: any }> {
+    const paymentIntent =
+      await this.customerPaymentService.processSendPackagePayment(
+        userId,
+        orderId,
+        amount,
+      );
+    return { success: true, paymentIntent };
   }
 
-  /**
-   * Creates a Stripe Payment Intent for a given user.
-   * @param userId The ID of the user to create the payment intent for.
-   * @param amount The amount to charge, in the currency's smallest unit (e.g. 100 cents to charge $1.00).
-   * @param currency The 3-character currency code (ISO 4217) for the payment intent.
-   * @param description A human-readable description of the payment intent.
-   * @returns The created Stripe Payment Intent.
-   */
-  @Post("payment-intent")
-  async createPaymentIntent(
+  @Post("store-invoice-payment")
+  async processStoreInvoicePayment(
     @Body("userId") userId: number,
+    @Body("orderId") orderId: number,
     @Body("amount") amount: number,
-    @Body("currency") currency: string,
-    @Body("description") description: string
-  ): Promise<{ success: boolean; data: Stripe.PaymentIntent }> {
-    logger.debug(
-      `StripeController.createPaymentIntent: Creating payment intent for user ID ${userId} with amount ${amount} ${currency}`
-    );
-    const paymentIntent = await this.stripeService.createPaymentIntent(
-      userId,
+  ): Promise<{ success: boolean; paymentIntent: Stripe.PaymentIntent }> {
+    const paymentIntent =
+      await this.customerPaymentService.processStoreInvoicePayment(
+        userId,
+        orderId,
+        amount,
+      );
+    return { success: true, paymentIntent };
+  }
+
+  @Post("car-towing")
+  async processCarTowingPayment(
+    @Body("userId") userId: number,
+    @Body("orderId") orderId: number,
+    @Body("amount") amount: number,
+  ): Promise<{ success: boolean; paymentIntent: Stripe.PaymentIntent }> {
+    const paymentIntent =
+      await this.customerPaymentService.processCarTowingPayment(
+        userId,
+        orderId,
+        amount,
+      );
+    return { success: true, paymentIntent };
+  }
+
+  // RIDER FLOWS
+  @Post("rider-subscription")
+  async subscribeRider(
+    @Body("agentId") agentId: number,
+    @Body("amount") amount: number,
+  ): Promise<{ success: boolean; message: string }> {
+    const message = await this.riderPaymentService.subscribeRider(
+      agentId,
       amount,
-      currency,
-      description
     );
-    return { success: true, data: paymentIntent };
+    return { success: true, message };
+  }
+
+  @Post("rider-trip-payment")
+  async payRiderPerTrip(
+    @Body("agentId") agentId: number,
+    @Body("amount") amount: number,
+  ): Promise<{ success: boolean }> {
+    await this.riderPaymentService.processTripPayment(agentId, amount);
+    return { success: true };
+  }
+
+  @Post("rider-withdraw")
+  async riderWithdraw(
+    @Body("agentId") agentId: number,
+    @Body("immediate") immediate: boolean,
+  ): Promise<{ success: boolean }> {
+    await this.riderPaymentService.withdrawRiderFunds(agentId, immediate);
+    return { success: true };
+  }
+
+  // STRIPE WEBHOOK
+  @Post("webhook")
+  async handleWebhook(
+    @Body() eventBody: any,
+    @Headers("stripe-signature") signature: string,
+  ): Promise<{ received: boolean }> {
+    let event: Stripe.Event;
+    try {
+      event = await this.stripeService.constructEvent(eventBody, signature);
+    } catch (err) {
+      logger.error(
+        `StripeController.handleWebhook: Invalid signature - ${err.message}`,
+      );
+      throw new InternalServerErrorException(
+        "Invalid Stripe webhook signature",
+      );
+    }
+
+    switch (event.type) {
+      case "payment_intent.succeeded":
+        await this.customerPaymentService.handlePaymentIntentSucceeded(
+          event.data.object as Stripe.PaymentIntent,
+        );
+        break;
+      case "payment_intent.payment_failed":
+        await this.customerPaymentService.handlePaymentIntentFailed(
+          event.data.object as Stripe.PaymentIntent,
+        );
+        break;
+      // Additional event types as needed
+      default:
+        logger.debug(
+          `StripeController.handleWebhook: Received unhandled event type ${event.type}`,
+        );
+    }
+
+    return { received: true };
   }
 }

@@ -12,7 +12,7 @@ export class RoleGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.get<string[]>(
       ROLES_KEY,
-      context.getHandler()
+      context.getHandler(),
     );
     if (!requiredRoles) {
       return true;
@@ -29,10 +29,10 @@ export class RoleGuard implements CanActivate {
     const hasRole = requiredRoles.includes(user.role);
     if (!hasRole) {
       logger.warn(
-        `RoleGuard.canActivate: User ${user.id} does not have required role`
+        `RoleGuard.canActivate: User ${user.id} does not have required role`,
       );
       throw new ForbiddenError(
-        "You do not have permission to access this resource"
+        "You do not have permission to access this resource",
       );
     }
 

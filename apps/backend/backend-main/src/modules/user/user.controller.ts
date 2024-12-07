@@ -1,18 +1,19 @@
 import {
-  Controller,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
   Get,
+  Param,
   ParseUUIDPipe,
+  Post,
   Put,
 } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
-import { UpdateResult, DeleteResult } from "typeorm";
+import { DeleteResult, UpdateResult } from "typeorm";
+
 import { User } from "../../entity/User";
 import { IApiResponse } from "../../shared/interface";
+import { UserService } from "./user.service";
+import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Controller("user")
 export class UserController {
@@ -24,7 +25,7 @@ export class UserController {
    */
   @Post("signup")
   async createUser(
-    @Body() createUserDto: TCreateUser
+    @Body() createUserDto: TCreateUser,
   ): Promise<IApiResponse<number>> {
     const userId = await this.userService.createUser(createUserDto);
     return {
@@ -40,7 +41,7 @@ export class UserController {
    */
   @Get("profile/:id")
   async getUserById(
-    @Param("id", ParseUUIDPipe) id: number
+    @Param("id", ParseUUIDPipe) id: number,
   ): Promise<IApiResponse<User>> {
     const user = await this.userService.getUserById(id);
     return {
@@ -56,7 +57,7 @@ export class UserController {
    */
   @Post("profile")
   async getUserProfile(
-    @Body() getUserProfileDto: TGetUserProfile
+    @Body() getUserProfileDto: TGetUserProfile,
   ): Promise<IApiResponse<User>> {
     const user = await this.userService.getUserProfile(getUserProfileDto);
     return {
@@ -87,7 +88,7 @@ export class UserController {
   @Put("profile/:id")
   async updateUser(
     @Param("id", ParseUUIDPipe) id: number,
-    @Body() updateUserDto: TUpdateUser
+    @Body() updateUserDto: TUpdateUser,
   ): Promise<IApiResponse<UpdateResult>> {
     const result = await this.userService.updateUser(id, updateUserDto);
     return {
@@ -103,7 +104,7 @@ export class UserController {
    */
   @Delete("profile/:id")
   async deleteUser(
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<IApiResponse<DeleteResult>> {
     const result = await this.userService.deleteUser(id);
     return {

@@ -1,14 +1,15 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { DeleteResult, UpdateResult } from "typeorm";
+
 import { User } from "../../entity/User";
-import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
-import { UpdateResult, DeleteResult } from "typeorm";
-import { dbReadRepo, dbRepo } from "../database/database.service";
 import { logger } from "../../logger";
-import { filterEmptyValues } from "../../utils/filter";
 import {
   UserAlreadyExistsError,
   UserNotFoundError,
 } from "../../shared/errors/user";
+import { filterEmptyValues } from "../../utils/filter";
+import { dbReadRepo, dbRepo } from "../database/database.service";
+import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Injectable()
 export class UserService {
@@ -26,10 +27,10 @@ export class UserService {
 
     if (existingUser) {
       logger.error(
-        `UserService.createUser: User with email ${email} or phone number ${phoneNumber} already exists.`
+        `UserService.createUser: User with email ${email} or phone number ${phoneNumber} already exists.`,
       );
       throw new UserAlreadyExistsError(
-        `User with the provided email ${email} or phone number ${phoneNumber} already exists.`
+        `User with the provided email ${email} or phone number ${phoneNumber} already exists.`,
       );
     }
 
@@ -76,7 +77,7 @@ export class UserService {
    */
   async updateUser(
     id: number,
-    updateUserDto: TUpdateUser
+    updateUserDto: TUpdateUser,
   ): Promise<UpdateResult> {
     const user = await dbReadRepo(User).findOne({ where: { id } });
 
@@ -86,7 +87,7 @@ export class UserService {
 
     const filteredUpdateUser = filterEmptyValues(updateUserDto);
     logger.info(
-      `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(filteredUpdateUser)}`
+      `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(filteredUpdateUser)}`,
     );
 
     return await dbRepo(User).update(id, filteredUpdateUser);

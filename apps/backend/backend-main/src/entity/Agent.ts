@@ -1,7 +1,11 @@
 import { Column, Entity, Index, OneToOne, RelationId, Unique } from "typeorm";
 
 import { TAgent } from "../modules/agent/agent.types";
-import { AgentStatusEnum, AgentTypeEnum } from "../shared/enums";
+import {
+  AgentStatusEnum,
+  AgentTypeEnum,
+  SubscripionStatusEnum,
+} from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
 import { User } from "./User";
 
@@ -48,4 +52,23 @@ export class Agent extends BaseEntity implements TAgent {
     nullable: false,
   })
   status: AgentStatusEnum;
+
+  @Column({ type: "varchar", nullable: true })
+  stripeAccountId: string;
+
+  @Column({ type: "decimal", default: 0, precision: 10, scale: 2 })
+  walletBalance: number;
+
+  @Column({
+    type: "varchar",
+    default: SubscripionStatusEnum.INACTIVE,
+    nullable: true,
+  })
+  subscriptionStatus: SubscripionStatusEnum;
+
+  @Column({ type: "timestamp", nullable: true })
+  subscriptionExpiresAt: Date;
+
+  @Column({ type: "decimal", default: 0.1, precision: 5, scale: 2 })
+  commissionRate: number;
 }
