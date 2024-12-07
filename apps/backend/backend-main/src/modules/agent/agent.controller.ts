@@ -6,7 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put
+  Put,
 } from "@nestjs/common";
 import { UpdateResult } from "typeorm";
 
@@ -19,7 +19,7 @@ import {
   TAgent,
   TAgentDocument,
   TAgentPartial,
-  TGetAgentProfile
+  TGetAgentProfile,
 } from "./agent.types";
 
 @Controller("agent")
@@ -32,31 +32,31 @@ export class AgentController {
     return {
       success: true,
       message: "Agent created successfully.",
-      data
+      data,
     };
   }
 
   @Get("profile/:id")
   async getProfileById(
-    @Param("id", ParseIntPipe) id: number
+    @Param("id", ParseIntPipe) id: number,
   ): Promise<IApiResponse<Agent>> {
     const data = await this.agentService.getAgentById(id);
     return {
       success: true,
       message: "Agent profile retrieved successfully.",
-      data
+      data,
     };
   }
 
   @Get("profile")
   async getProfileByValue(
-    @Body() agent: TGetAgentProfile
+    @Body() agent: TGetAgentProfile,
   ): Promise<IApiResponse<Agent>> {
     const data = await this.agentService.getAgentProfile(agent);
     return {
       success: true,
       message: "Agent profile retrieved successfully.",
-      data
+      data,
     };
   }
 
@@ -66,84 +66,84 @@ export class AgentController {
     return {
       success: true,
       message: "All agents retrieved successfully.",
-      data
+      data,
     };
   }
 
   @Put("profile/:id")
   async updateProfile(
     @Param("id", ParseIntPipe) id: number,
-    @Body() updateAgent: TAgentPartial
+    @Body() updateAgent: TAgentPartial,
   ): Promise<IApiResponse<UpdateResult>> {
     const data = await this.agentService.updateAgentProfile(id, updateAgent);
     return {
       success: true,
       message: "Agent profile updated successfully.",
-      data
+      data,
     };
   }
 
   @Delete("profile/:id")
   async delete(
-    @Param("id", ParseIntPipe) agentId: number
+    @Param("id", ParseIntPipe) agentId: number,
   ): Promise<IApiResponse<UpdateResult>> {
     const data = await this.agentService.deleteAgent(agentId);
     return {
       success: true,
       message: "Agent deleted successfully.",
-      data
+      data,
     };
   }
 
   @Post("profile/:id/document")
   async uploadDocument(
     @Param("id", ParseIntPipe) agentId: number,
-    @Body() uploadDocument: TAgentDocument
+    @Body() uploadDocument: TAgentDocument,
   ): Promise<IApiResponse<AgentDocument>> {
     const data = await this.agentService.uploadDocument(
       agentId,
-      uploadDocument
+      uploadDocument,
     );
     return {
       success: true,
       message: "Document uploaded successfully.",
-      data
+      data,
     };
   }
 
   @Get("/:id/documents")
   async getDocuments(
-    @Param("id", ParseIntPipe) id: number
+    @Param("id", ParseIntPipe) id: number,
   ): Promise<IApiResponse<AgentDocument[]>> {
     const data = await this.agentService.getAgentDocuments(id);
     return {
       success: true,
       message: "Agent documents retrieved successfully.",
-      data
+      data,
     };
   }
 
   @Delete("/:id/documents/:documentId")
   async deleteDocument(
-    @Param("documentId", ParseIntPipe) documentId: number
+    @Param("documentId", ParseIntPipe) documentId: number,
   ): Promise<IApiResponse<UpdateResult>> {
     await this.agentService.deleteAgentDocument(documentId);
     return {
       success: true,
       message: "Document deleted successfully.",
-      data: null
+      data: null,
     };
   }
 
   @Get("/:id/reviews")
   async getReviews(
-    @Param("id", ParseIntPipe) agentId: number
+    @Param("id", ParseIntPipe) agentId: number,
   ): Promise<IApiResponse<AgentReview[]>> {
     const data = await this.agentService.getAgentReviews(agentId);
     return {
       success: true,
       message: "Agent reviews retrieved successfully.",
-      data
+      data,
     };
   }
 }

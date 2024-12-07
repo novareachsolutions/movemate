@@ -11,7 +11,7 @@ export class OnboardingGuard implements CanActivate {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -31,7 +31,7 @@ export class OnboardingGuard implements CanActivate {
         phoneNumber: payload.phone,
       };
       logger.debug(
-        `OnboardingGuard.canActivate: Token verified for phone number ${payload.phone}`
+        `OnboardingGuard.canActivate: Token verified for phone number ${payload.phone}`,
       );
     } catch (error) {
       logger.error("OnboardingGuard.canActivate: Invalid token", error);
@@ -45,12 +45,12 @@ export class OnboardingGuard implements CanActivate {
     const token = request.headers["onboarding_token"];
     if (token) {
       logger.debug(
-        "OnboardingGuard.extractTokenFromHeaders: Token extracted from headers"
+        "OnboardingGuard.extractTokenFromHeaders: Token extracted from headers",
       );
       return token;
     }
     logger.warn(
-      "OnboardingGuard.extractTokenFromHeaders: Token not found in headers"
+      "OnboardingGuard.extractTokenFromHeaders: Token not found in headers",
     );
     return null;
   }

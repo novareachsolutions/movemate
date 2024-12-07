@@ -18,12 +18,12 @@ import { AuthService } from "./auth.service";
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   @Post("otp/request")
   async requestOtp(
-    @Body("phoneNumber") phoneNumber: string
+    @Body("phoneNumber") phoneNumber: string,
   ): Promise<IApiResponse<null>> {
     await this.authService.requestOtp(phoneNumber);
     return { success: true, message: "OTP sent successfully.", data: null };
@@ -32,12 +32,12 @@ export class AuthController {
   @Post("otp/verify")
   async verifyOtp(
     @Body() body: { phoneNumber: string; otp: string },
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
     const onboardingToken = await this.authService.signupInitiate(
       phoneNumber,
-      otp
+      otp,
     );
 
     res.setHeader("onboarding_token", onboardingToken);
@@ -48,13 +48,13 @@ export class AuthController {
   async login(
     @Body() body: { phoneNumber: string; otp: string },
     @Headers("role") role: UserRoleEnum,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
     const { accessToken, refreshToken } = await this.authService.login(
       phoneNumber,
       otp,
-      role
+      role,
     );
 
     res.cookie("access_token", accessToken, {
@@ -76,7 +76,7 @@ export class AuthController {
   @Post("refresh_token")
   async refreshToken(
     @Res({ passthrough: true }) res: Response,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<IApiResponse<null>> {
     const refreshToken = req.cookies["refresh_token"];
     if (!refreshToken) {
