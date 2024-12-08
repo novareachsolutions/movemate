@@ -1,7 +1,7 @@
 import { Column, Entity, OneToOne, RelationId } from "typeorm";
 
 import { BaseEntity } from "./BaseEntity";
-import { SendPackageOrder } from "./SendAPackage";
+import { SendPackageOrder } from "./SendPackageOrder";
 
 @Entity()
 export class DropLocation extends BaseEntity {
