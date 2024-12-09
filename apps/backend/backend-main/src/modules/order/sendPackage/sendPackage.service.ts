@@ -18,13 +18,14 @@ import {
     SendPackageReviewCommentRequiredError,
     SendPackageAlreadyReviewedError,
     SendPackageOrderNotCompletedError,
-    
+
 } from '../../../shared/errors/sendAPackage';
 import { SendPackageOrder } from '../../../entity/SendPackageOrder';
+import { TSendPackageOrder } from './sendPackage.types';
 
 @Injectable()
 export class SendAPackageService {
-    async create(data: any): Promise<SendPackageOrder> {
+    async create(data: TSendPackageOrder): Promise<SendPackageOrder> {
         logger.debug('SendAPackageService.createSendPackageOrder: Creating a new send package order');
         try {
             if (!data.pickupLocation || !data.dropLocation) {

@@ -5,6 +5,8 @@ import {
     Param,
     Get,
     ParseIntPipe,
+    UseGuards,
+    Req,
 } from '@nestjs/common';
 import { UserRoleEnum } from '../../../shared/enums';
 import { SendAPackageService } from './sendPackage.service';
@@ -13,6 +15,8 @@ import { Roles } from '../../../shared/decorators/roles.decorator';
 import { Report } from '../../../entity/Report';
 import { OrderReview } from '../../../entity/OrderReview';
 import { SendPackageOrder } from '../../../entity/SendPackageOrder';
+import { TSendPackageOrder } from './sendPackage.types';
+import { AuthGuard } from '../../../shared/guards/auth.guard';
 
 
 @Controller('order/send-package')
@@ -20,11 +24,17 @@ export class SendPackageController {
     constructor(private readonly sendPackageService: SendAPackageService) { }
 
     @Post('create')
+    @UseGuards(AuthGuard)
     @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
     async createSendPackageOrder(
-        @Body() data: any,
+        @Body() data: TSendPackageOrder,
+        @Req() req: any,
     ): Promise<IApiResponse<SendPackageOrder>> {
-        const createdOrder = await this.sendPackageService.create(data);
+        const customerId = req.user.id;
+        const createdOrder = await this.sendPackageService.create({
+            ...data,
+            customerId, // Dynamically set customerId from the request user
+        });
         return {
             success: true,
             message: 'Send package order created successfully.',
