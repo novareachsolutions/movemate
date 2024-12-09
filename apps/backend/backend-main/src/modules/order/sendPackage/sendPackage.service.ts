@@ -8,7 +8,6 @@ import {
 } from '../../../shared/enums';
 import { Report } from '../../../entity/Report';
 import { OrderReview } from '../../../entity/OrderReview';
-import { SendPackageOrder } from '../../../entity/SendAPackage';
 import { dbReadRepo, dbRepo } from '../../database/database.service';
 import {
     SendPackageCancellationReasonRequiredError,
@@ -26,6 +25,7 @@ import {
     SendPackageIssueReportError,
 } from '../../../shared/errors/sendAPackage';
 import { Between } from 'typeorm';
+import { SendPackageOrder } from '../../../entity/SendPackageOrder';
 
 @Injectable()
 export class SendAPackageService {
