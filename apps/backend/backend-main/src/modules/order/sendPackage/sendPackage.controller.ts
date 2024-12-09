@@ -13,7 +13,7 @@ import { IApiResponse } from '../../../shared/interface';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { Report } from '../../../entity/Report';
 import { OrderReview } from '../../../entity/OrderReview';
-import { SendPackageOrder } from '../../../entity/SendAPackage';
+import { SendPackageOrder } from '../../../entity/SendPackageOrder';
 
 
 @Controller('order/send-package')

@@ -8,7 +8,6 @@ import {
 } from '../../../shared/enums';
 import { Report } from '../../../entity/Report';
 import { OrderReview } from '../../../entity/OrderReview';
-import { SendPackageOrder } from '../../../entity/SendAPackage';
 import { dbReadRepo, dbRepo } from '../../database/database.service';
 import {
     SendPackageCancellationReasonRequiredError,
@@ -21,6 +20,7 @@ import {
     SendPackageOrderNotCompletedError,
     
 } from '../../../shared/errors/sendAPackage';
+import { SendPackageOrder } from '../../../entity/SendPackageOrder';
 
 @Injectable()
 export class SendAPackageService {
