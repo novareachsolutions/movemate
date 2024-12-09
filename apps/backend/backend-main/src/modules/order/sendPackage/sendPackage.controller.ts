@@ -5,7 +5,6 @@ import {
     Param,
     Get,
     ParseIntPipe,
-    BadRequestException,
 } from '@nestjs/common';
 import { UserRoleEnum } from '../../../shared/enums';
 import { SendAPackageService } from './sendPackage.service';
@@ -39,9 +38,6 @@ export class SendPackageController {
         @Param('orderId', ParseIntPipe) orderId: number,
         @Body('reason') reason: string,
     ): Promise<IApiResponse<SendPackageOrder>> {
-        if (!reason) {
-            throw new BadRequestException('Cancellation reason is required');
-        }
         const data = await this.sendPackageService.cancelOrder(orderId, reason);
         return {
             success: true,
@@ -57,9 +53,6 @@ export class SendPackageController {
         @Body('reason') reason: string,
         @Body('details') details: string,
     ): Promise<IApiResponse<Report>> {
-        if (!reason) {
-            throw new BadRequestException('Reason is required to report agent');
-        }
         const data = await this.sendPackageService.reportAgent(orderId, reason, details);
         return {
             success: true,
@@ -75,12 +68,6 @@ export class SendPackageController {
         @Body('rating') rating: number,
         @Body('comment') comment: string,
     ): Promise<IApiResponse<OrderReview>> {
-        if (rating < 1 || rating > 5) {
-            throw new BadRequestException('Rating must be between 1 and 5');
-        }
-        if (!comment) {
-            throw new BadRequestException('Comment is required for review');
-        }
         const data = await this.sendPackageService.leaveReview(orderId, rating, comment);
         return {
             success: true,
