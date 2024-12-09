@@ -377,26 +377,4 @@ export class SendAPackageService {
         }
     }
 
-    async getAdminOrderDetails(orderId: number): Promise<SendPackageOrder> {
-        logger.debug(`SendAPackageService.getAdminOrderDetails: Retrieving details for order ID ${orderId}`);
-        try {
-            const order = await dbReadRepo(SendPackageOrder).findOne({
-                where: { id: orderId },
-                relations: ['pickupLocation', 'dropLocation', 'customer', 'agent', 'report', 'review'],
-            });
-
-            if (!order) {
-                throw new SendPackageNotFoundError(`Order ID ${orderId} not found`);
-            }
-
-            logger.debug(`SendAPackageService.getAdminOrderDetails: Successfully retrieved details for order ID ${orderId}`);
-            return order;
-        } catch (error) {
-            logger.error(`SendAPackageService.getAdminOrderDetails: Failed to retrieve order ID ${orderId}. Error: ${error}`);
-            if (error instanceof SendPackageNotFoundError) {
-                throw error;
-            }
-            throw new InternalServerErrorException('Failed to retrieve order details');
-        }
-    }
 }
