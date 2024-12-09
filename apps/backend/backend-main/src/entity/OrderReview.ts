@@ -1,6 +1,6 @@
 import { BaseEntity } from "./BaseEntity";
 import { User } from "./User";
-import { SendPackageOrder } from "./SendAPackage";
+import { SendPackageOrder } from "./SendPackageOrder";
 import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
 
 @Index('IDX_review_customerId', ['customerId'], {
