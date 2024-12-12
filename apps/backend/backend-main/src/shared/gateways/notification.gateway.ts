@@ -19,7 +19,7 @@ export class NotificationGateway extends BaseSocketGateway {
   @SubscribeMessage("sendNotification")
   handleSendNotification(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     if (data.target === "agent") {
       this.sendMessageToRoom("agents", "notification", data);

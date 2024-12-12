@@ -20,7 +20,10 @@ export class DropLocation extends BaseEntity {
   @Column({ type: "float" })
   longitude: number;
 
-  @OneToOne(() => SendPackageOrder, (sendPackageOrder) => sendPackageOrder.dropLocation)
+  @OneToOne(
+    () => SendPackageOrder,
+    (sendPackageOrder) => sendPackageOrder.dropLocation,
+  )
   sendPackageOrder: SendPackageOrder;
 
   @RelationId((dropLocation: DropLocation) => dropLocation.sendPackageOrder)

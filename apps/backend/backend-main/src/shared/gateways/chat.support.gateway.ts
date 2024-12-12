@@ -19,7 +19,7 @@ export class ChatSupportGateway extends BaseSocketGateway {
   @SubscribeMessage("sendMessage")
   handleSendMessage(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToRoom(data.room, "newMessage", data);
   }
@@ -27,7 +27,7 @@ export class ChatSupportGateway extends BaseSocketGateway {
   @SubscribeMessage("sendPrivateMessage")
   handleSendPrivateMessage(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToClient(data.userId, "privateMessage", data);
   }

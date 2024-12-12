@@ -19,10 +19,15 @@ export class PickupLocation extends BaseEntity {
   @Column({ type: "float" })
   longitude: number;
 
-  @OneToOne(() => SendPackageOrder, (sendPackageOrder) => sendPackageOrder.pickupLocation)
+  @OneToOne(
+    () => SendPackageOrder,
+    (sendPackageOrder) => sendPackageOrder.pickupLocation,
+  )
   sendPackageOrder: SendPackageOrder;
 
-  @RelationId((pickupLocation: PickupLocation) => pickupLocation.sendPackageOrder)
+  @RelationId(
+    (pickupLocation: PickupLocation) => pickupLocation.sendPackageOrder,
+  )
   @Column({ type: "integer" })
   sendPackageOrderId: number;
 }
