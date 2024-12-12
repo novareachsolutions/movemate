@@ -1,9 +1,14 @@
 {
-  "name": "movemate",
+  "name": "@movemate/movemate",
   "version": "1.0.0",
   "repository": "https://github.com/novareach-solutions/movemate.git",
   "author": "novareach-solutions",
   "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "apps/backend",
+    "apps/frontend/web/admin"
+  ],
   "devDependencies": {
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
@@ -18,7 +23,12 @@
   },
   "scripts": {
     "prepare": "husky",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "install:all": "yarn install --frozen-lockfile",
+    "build": "yarn workspaces foreach run build",
+    "test": "yarn workspaces foreach run test",
+    "lint": "yarn workspaces foreach run lint",
+    "tsc": "yarn workspaces foreach run tsc"
   },
   "config": {
     "commitizen": {
