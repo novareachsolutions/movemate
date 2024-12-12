@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseUUIDPipe,
   Post,
   Put,
 } from "@nestjs/common";
@@ -40,9 +39,7 @@ export class UserController {
    * GET /user/profile/:id
    */
   @Get("profile/:id")
-  async getUserById(
-    @Param("id", ParseUUIDPipe) id: number,
-  ): Promise<IApiResponse<User>> {
+  async getUserById(@Param("id") id: number): Promise<IApiResponse<User>> {
     const user = await this.userService.getUserById(id);
     return {
       success: true,
@@ -87,7 +84,7 @@ export class UserController {
    */
   @Put("profile/:id")
   async updateUser(
-    @Param("id", ParseUUIDPipe) id: number,
+    @Param("id") id: number,
     @Body() updateUserDto: TUpdateUser,
   ): Promise<IApiResponse<UpdateResult>> {
     const result = await this.userService.updateUser(id, updateUserDto);
@@ -104,7 +101,7 @@ export class UserController {
    */
   @Delete("profile/:id")
   async deleteUser(
-    @Param("id", ParseUUIDPipe) id: string,
+    @Param("id") id: string,
   ): Promise<IApiResponse<DeleteResult>> {
     const result = await this.userService.deleteUser(id);
     return {
