@@ -19,7 +19,7 @@ export class CustomerNotificationGateway extends BaseSocketGateway {
   @SubscribeMessage("agentAcceptedRequest")
   handleAgentAcceptedRequest(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToClient(data.customerId, "agentAcceptedRequest", data);
   }
@@ -27,7 +27,7 @@ export class CustomerNotificationGateway extends BaseSocketGateway {
   @SubscribeMessage("agentArrived")
   handleAgentArrived(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToClient(data.customerId, "agentArrived", data);
   }
@@ -35,7 +35,7 @@ export class CustomerNotificationGateway extends BaseSocketGateway {
   @SubscribeMessage("requestCompleted")
   handleRequestCompleted(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToClient(data.customerId, "requestCompleted", data);
   }
@@ -43,7 +43,7 @@ export class CustomerNotificationGateway extends BaseSocketGateway {
   @SubscribeMessage("agentExpectedArrivalTime")
   handleAgentExpectedArrivalTime(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToClient(data.customerId, "agentExpectedArrivalTime", data);
   }
@@ -51,19 +51,19 @@ export class CustomerNotificationGateway extends BaseSocketGateway {
   @SubscribeMessage("agentExpectedRequestCompletionTime")
   handleAgentExpectedCompletionTime(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToClient(
       data.customerId,
       "agentExpectedCompletionTime",
-      data
+      data,
     );
   }
 
   @SubscribeMessage("agentStatus")
   handleAgentStatus(
     @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     this.sendMessageToClient(data.customerId, "agentStatus", data);
   }

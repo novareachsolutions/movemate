@@ -18,7 +18,7 @@ export abstract class BaseSocketGateway implements OnGatewayInit {
   @SubscribeMessage("event")
   handleEvent(
     @MessageBody() _data: any,
-    @ConnectedSocket() _client: Socket
+    @ConnectedSocket() _client: Socket,
   ): void {
     // Implement event handling logic
   }

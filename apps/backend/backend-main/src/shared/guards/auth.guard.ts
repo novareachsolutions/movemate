@@ -9,7 +9,7 @@ import { UnauthorizedError } from "../errors/authErrors";
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -75,7 +75,7 @@ export class AuthGuard implements CanActivate {
       {
         secret: this.configService.get<string>("jwt.accessSecret"),
         expiresIn: "15m",
-      }
+      },
     );
   }
 
@@ -86,7 +86,7 @@ export class AuthGuard implements CanActivate {
       phoneNumber: payload.phoneNumber,
     };
     logger.debug(
-      `AuthGuard.setUserInRequest: User ${payload.id} set in request`
+      `AuthGuard.setUserInRequest: User ${payload.id} set in request`,
     );
   }
 
@@ -94,12 +94,12 @@ export class AuthGuard implements CanActivate {
     const token = request.cookies?.access_token;
     if (token) {
       logger.debug(
-        "AuthGuard.extractTokenFromCookies: Token extracted from cookies"
+        "AuthGuard.extractTokenFromCookies: Token extracted from cookies",
       );
       return token;
     }
     logger.warn(
-      "AuthGuard.extractTokenFromCookies: Token not found in cookies"
+      "AuthGuard.extractTokenFromCookies: Token not found in cookies",
     );
     return null;
   }
@@ -108,12 +108,12 @@ export class AuthGuard implements CanActivate {
     const refreshToken = request.cookies?.refresh_token;
     if (refreshToken) {
       logger.debug(
-        "AuthGuard.extractRefreshTokenFromCookies: Refresh token extracted from cookies"
+        "AuthGuard.extractRefreshTokenFromCookies: Refresh token extracted from cookies",
       );
       return refreshToken;
     }
     logger.warn(
-      "AuthGuard.extractRefreshTokenFromCookies: Refresh token not found in cookies"
+      "AuthGuard.extractRefreshTokenFromCookies: Refresh token not found in cookies",
     );
     return null;
   }

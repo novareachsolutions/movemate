@@ -37,30 +37,30 @@ export class DatabaseService {
   }
 
   public static getReadReplicaRepository<T>(
-    entity: EntityTarget<T>
+    entity: EntityTarget<T>,
   ): Repository<T> {
     const readReplicaRepository =
       DatabaseService.instance.secondaryDataSource.getRepository<T>(entity);
     return new Proxy(
       readReplicaRepository,
-      DatabaseService.methodInterceptor()
+      DatabaseService.methodInterceptor(),
     );
   }
 
   public static executeQuery<T>(query: string, parameters?: any[]): Promise<T> {
     return DatabaseService.instance.primaryDataSource.manager.query<T>(
       query,
-      parameters
+      parameters,
     );
   }
 
   public static executeReadReplicaQuery<T>(
     query: string,
-    parameters?: any[]
+    parameters?: any[],
   ): Promise<T> {
     return DatabaseService.instance.secondaryDataSource.manager.query<T>(
       query,
-      parameters
+      parameters,
     );
   }
 
@@ -120,7 +120,7 @@ export class DatabaseService {
           findOptionsWhere[typedKey] === null
         ) {
           throw new Error(
-            `Invalid where clause: ${typedKey} cannot be undefined or null`
+            `Invalid where clause: ${typedKey} cannot be undefined or null`,
           );
         }
       }

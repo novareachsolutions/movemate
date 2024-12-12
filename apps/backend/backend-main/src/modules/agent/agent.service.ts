@@ -32,7 +32,7 @@ export class AgentService {
     });
     if (existingAgent) {
       logger.error(
-        `AgentService.createAgent: Agent with ABN number ${agent.abnNumber} already exists.`
+        `AgentService.createAgent: Agent with ABN number ${agent.abnNumber} already exists.`,
       );
       throw new UserAlreadyExistsError(`
         Agent with ABN number ${agent.abnNumber} already exists.`);
@@ -79,11 +79,11 @@ export class AgentService {
 
   async updateAgentProfile(
     id: number,
-    updateAgent: TAgentPartial
+    updateAgent: TAgentPartial,
   ): Promise<UpdateResult> {
     const filteredUpdateAgent = filterEmptyValues(updateAgent);
     logger.debug(
-      `Updating agent with ID ${id} with data: ${JSON.stringify(filteredUpdateAgent)}`
+      `Updating agent with ID ${id} with data: ${JSON.stringify(filteredUpdateAgent)}`,
     );
     return await dbRepo(Agent).update(id, filteredUpdateAgent);
   }
@@ -95,7 +95,7 @@ export class AgentService {
 
   async uploadDocument(
     agentId: number,
-    uploadDocumnent: TAgentDocument
+    uploadDocumnent: TAgentDocument,
   ): Promise<AgentDocument> {
     const requiredDocument = await dbReadRepo(RequiredDocument).findOne({
       where: { role: UserRoleEnum.AGENT },
