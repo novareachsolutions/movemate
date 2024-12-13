@@ -53,9 +53,10 @@ export class SendPackageOrder extends BaseEntity {
   })
   type: OrderTypeEnum;
 
-  @OneToOne(() => PickupLocation, {
-    cascade: true,
-    onDelete: 'CASCADE',
+  @ManyToOne(() => PickupLocation, {
+    deferrable: 'INITIALLY IMMEDIATE',
+    onDelete: 'SET NULL',
+    nullable: true
   })
   @JoinColumn()
   pickupLocation: PickupLocation;
@@ -64,9 +65,10 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'integer' })
   pickupLocationId: number;
 
-  @OneToOne(() => DropLocation, {
-    cascade: true,
-    onDelete: 'CASCADE',
+  @ManyToOne(() => DropLocation, {
+    deferrable: 'INITIALLY IMMEDIATE',
+    onDelete: 'SET NULL',
+    nullable: true
   })
   @JoinColumn()
   dropLocation: DropLocation;
@@ -75,15 +77,15 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'integer' })
   dropLocationId: number;
 
-  @Column({ nullable: false })
+  @Column({ type: "integer", nullable: false })
   estimatedDistance: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, type: "time" })
   estimatedTime: number;
 
   @ManyToOne(() => User, {
-    cascade: true,
-    onDelete: 'CASCADE',
+    deferrable: 'INITIALLY IMMEDIATE',
+    nullable: true
   })
   customer: User;
 
@@ -92,9 +94,9 @@ export class SendPackageOrder extends BaseEntity {
   customerId: number;
 
   @ManyToOne(() => Agent, {
-    cascade: true,
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
     nullable: true,
+    deferrable:"INITIALLY IMMEDIATE"
   })
   agent: Agent;
 
@@ -111,7 +113,7 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'float', nullable: true })
   actualTime: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   cancellationReason: string;
 
   @Column({
@@ -120,18 +122,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   canceledBy: UserRoleEnum;
 
-  @ManyToOne(() => Agent, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    nullable: true,
-  })
-  assignedAgent: Agent;
-
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.assignedAgent)
-  @Column({ type: 'integer', nullable: true })
-  assignedAgentId: number;
-
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   completionPhoto: string;
 
   @Column({ type: 'timestamp', nullable: true })
@@ -151,7 +142,6 @@ export class SendPackageOrder extends BaseEntity {
   paymentStatus: PaymentStatusEnum;
 
   @OneToOne(() => Report, (report) => report.sendPackageOrder, {
-    cascade: true,
     nullable: true,
     onDelete: 'SET NULL',
   })

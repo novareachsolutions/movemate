@@ -14,11 +14,10 @@ export class Report extends BaseEntity {
   @Column({ type: 'varchar', nullable: false })
   reason: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   details: string;
 
   @ManyToOne(() => User, {
-    cascade: true,
     deferrable: 'INITIALLY IMMEDIATE',
     onDelete: 'CASCADE',
     nullable: false,
