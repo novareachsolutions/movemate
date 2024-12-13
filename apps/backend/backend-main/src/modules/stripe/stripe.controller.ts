@@ -15,10 +15,10 @@ export class StripeController {
    */
   @Post("customer")
   async createCustomer(
-    @Body("userId") userId: number
+    @Body("userId") userId: number,
   ): Promise<{ success: boolean; data: Stripe.Customer }> {
     logger.debug(
-      `StripeController.createCustomer: Creating customer for user ID ${userId}`
+      `StripeController.createCustomer: Creating customer for user ID ${userId}`,
     );
     const customer = await this.stripeService.createCustomer(userId);
     return { success: true, data: customer };
@@ -37,16 +37,16 @@ export class StripeController {
     @Body("userId") userId: number,
     @Body("amount") amount: number,
     @Body("currency") currency: string,
-    @Body("description") description: string
+    @Body("description") description: string,
   ): Promise<{ success: boolean; data: Stripe.PaymentIntent }> {
     logger.debug(
-      `StripeController.createPaymentIntent: Creating payment intent for user ID ${userId} with amount ${amount} ${currency}`
+      `StripeController.createPaymentIntent: Creating payment intent for user ID ${userId} with amount ${amount} ${currency}`,
     );
     const paymentIntent = await this.stripeService.createPaymentIntent(
       userId,
       amount,
       currency,
-      description
+      description,
     );
     return { success: true, data: paymentIntent };
   }

@@ -8,3 +8,8 @@ out/
 # backend
 apps/backend/backend-main/volumes/*
 
+
+# Backend
+apps/backend/node_modules/
+app/backend/.env
+.DS_Store

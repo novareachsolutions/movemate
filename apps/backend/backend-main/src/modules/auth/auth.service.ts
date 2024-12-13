@@ -30,7 +30,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
   ) {
     const accountSid = this.configService.get<string>("TWILIO_ACCOUNT_SID");
     const authToken = this.configService.get<string>("TWILIO_AUTH_TOKEN");
@@ -52,16 +52,16 @@ export class AuthService {
 
   async signupInitiate(phoneNumber: string, otp: string): Promise<string> {
     logger.debug(
-      `AuthService.signupInitiate: Initiating signup for ${phoneNumber}`
+      `AuthService.signupInitiate: Initiating signup for ${phoneNumber}`,
     );
     const existingUser = await dbRepo(User).findOne({ where: { phoneNumber } });
 
     if (existingUser) {
       logger.error(
-        `AuthService.signupInitiate: Phone number ${phoneNumber} already registered`
+        `AuthService.signupInitiate: Phone number ${phoneNumber} already registered`,
       );
       throw new UserPhoneNumberAlreadyExistsError(
-        `Phone number ${phoneNumber} is already registered`
+        `Phone number ${phoneNumber} is already registered`,
       );
     }
 
@@ -75,26 +75,26 @@ export class AuthService {
   async login(
     phoneNumber: string,
     otp: string,
-    role: UserRoleEnum
+    role: UserRoleEnum,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     logger.debug(
-      `AuthService.login: Logging in user with phone number ${phoneNumber}`
+      `AuthService.login: Logging in user with phone number ${phoneNumber}`,
     );
     await this.validateOtp(phoneNumber, otp);
     const user = await dbRepo(User).findOne({ where: { phoneNumber } });
 
     if (!user) {
       logger.error(
-        `AuthService.login: User with phone number ${phoneNumber} not found`
+        `AuthService.login: User with phone number ${phoneNumber} not found`,
       );
       throw new UserNotFoundError(
-        `User with phone number ${phoneNumber} not found`
+        `User with phone number ${phoneNumber} not found`,
       );
     }
 
     if (user.role !== role) {
       logger.error(
-        `AuthService.login: Role mismatch. Expected ${role}, got ${user.role}`
+        `AuthService.login: Role mismatch. Expected ${role}, got ${user.role}`,
       );
       throw new UserAccessDeniedError(`Role mismatch. Expected ${role}`);
     }
@@ -102,7 +102,7 @@ export class AuthService {
     const accessToken = this.tokenService.generateAccessToken(
       user.id,
       user.phoneNumber,
-      user.role
+      user.role,
     );
     const refreshToken = this.tokenService.generateRefreshToken(user.id);
 
@@ -110,7 +110,7 @@ export class AuthService {
   }
 
   async refreshToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     logger.debug("AuthService.refreshToken: Refreshing token");
     try {
@@ -119,30 +119,30 @@ export class AuthService {
       });
 
       const user: Pick<User, "id" | "phoneNumber" | "role"> = await dbRepo(
-        User
+        User,
       ).findOne({
         where: { id: payload.userId },
       });
       if (!user) {
         logger.error(
-          `AuthService.refreshToken: User with ID ${payload.userId} not found`
+          `AuthService.refreshToken: User with ID ${payload.userId} not found`,
         );
         throw new UserNotFoundError(
-          `User ${user.id} with ${user.phoneNumber} not found`
+          `User ${user.id} with ${user.phoneNumber} not found`,
         );
       }
 
       const newAccessToken = this.tokenService.generateAccessToken(
         user.id,
         user.phoneNumber,
-        user.role
+        user.role,
       );
       const newRefreshToken = this.tokenService.generateRefreshToken(user.id);
 
       return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
       logger.error(
-        `AuthService.refreshToken: Failed to refresh token. Error: ${error}`
+        `AuthService.refreshToken: Failed to refresh token. Error: ${error}`,
       );
       throw new UserTokenRefreshError("Failed to refresh token");
     }
@@ -159,14 +159,14 @@ export class AuthService {
 
     const currentTtw = parseInt(
       (await this.redisService.get(ttwKey)) || "0",
-      10
+      10,
     );
     const now = Date.now();
 
     if (now < currentTtw) {
       const waitTime = Math.ceil((currentTtw - now) / 1000);
       logger.error(
-        `AuthService.manageOtpRequests: Rate limit reached. Wait ${waitTime} seconds`
+        `AuthService.manageOtpRequests: Rate limit reached. Wait ${waitTime} seconds`,
       );
       throw new UserOtpRequestTooSoonException(waitTime);
     }
@@ -177,10 +177,10 @@ export class AuthService {
     } else {
       await this.redisService.set(`ban:${phoneNumber}`, "banned", "EX", 86400);
       logger.error(
-        "AuthService.manageOtpRequests: Too many OTP requests. User banned for 24 hours"
+        "AuthService.manageOtpRequests: Too many OTP requests. User banned for 24 hours",
       );
       throw new UserPhoneNumberBlockedError(
-        "Too many OTP requests. Please try again after 24 hours."
+        "Too many OTP requests. Please try again after 24 hours.",
       );
     }
   }
@@ -208,7 +208,7 @@ export class AuthService {
         to: phoneNumber,
       });
       logger.debug(
-        `AuthService.sendOtp: OTP sent successfully to ${phoneNumber}`
+        `AuthService.sendOtp: OTP sent successfully to ${phoneNumber}`,
       );
     } catch (error: any) {
       logger.error(`Failed to send OTP. Error: ${error}`);
@@ -218,7 +218,7 @@ export class AuthService {
 
   private async validateOtp(
     phoneNumber: string,
-    inputOtp: string
+    inputOtp: string,
   ): Promise<void> {
     logger.debug(`AuthService.validateOtp: Validating OTP for ${phoneNumber}`);
     const otpKey = `otp:${phoneNumber}`;
@@ -227,7 +227,7 @@ export class AuthService {
     const otpExists = await this.redisService.get(otpRequestKey);
     if (!otpExists) {
       logger.error(
-        `AuthService.validateOtp: No OTP request found for this number ${phoneNumber}`
+        `AuthService.validateOtp: No OTP request found for this number ${phoneNumber}`,
       );
       throw new UserRetryOtpError(`Please request a new OTP.`);
     }

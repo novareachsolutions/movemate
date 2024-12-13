@@ -29,7 +29,7 @@ export class StripeService {
    */
   async createCustomer(userId: number): Promise<Stripe.Customer> {
     logger.debug(
-      `StripeService.createCustomer: Creating customer for user ID ${userId}`
+      `StripeService.createCustomer: Creating customer for user ID ${userId}`,
     );
 
     const user = await dbRepo(User).findOneOrFail({ where: { id: userId } });
@@ -44,12 +44,12 @@ export class StripeService {
         },
       });
       logger.info(
-        `StripeService.createCustomer: Customer created with ID ${customer.id}`
+        `StripeService.createCustomer: Customer created with ID ${customer.id}`,
       );
       return customer;
     } catch (error) {
       logger.error(
-        `StripeService.createCustomer: Failed to create customer. Error: ${error.message}`
+        `StripeService.createCustomer: Failed to create customer. Error: ${error.message}`,
       );
       throw new InternalServerErrorException("Failed to create customer");
     }
@@ -68,10 +68,10 @@ export class StripeService {
     userId: number,
     amount: number,
     currency: string = "usd",
-    description: string
+    description: string,
   ): Promise<Stripe.PaymentIntent> {
     logger.debug(
-      `StripeService.createPaymentIntent: Creating payment intent for user ID ${userId}`
+      `StripeService.createPaymentIntent: Creating payment intent for user ID ${userId}`,
     );
 
     const user = await dbRepo(User).findOneOrFail({ where: { id: userId } });
@@ -86,12 +86,12 @@ export class StripeService {
         },
       });
       logger.info(
-        `StripeService.createPaymentIntent: Payment intent created with ID ${paymentIntent.id}`
+        `StripeService.createPaymentIntent: Payment intent created with ID ${paymentIntent.id}`,
       );
       return paymentIntent;
     } catch (error) {
       logger.error(
-        `StripeService.createPaymentIntent: Failed to create payment intent. Error: ${error.message}`
+        `StripeService.createPaymentIntent: Failed to create payment intent. Error: ${error.message}`,
       );
       throw new InternalServerErrorException("Failed to create payment intent");
     }

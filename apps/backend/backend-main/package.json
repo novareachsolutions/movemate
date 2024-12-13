@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@movemate/backend",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -31,6 +31,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^10.0.2",
+    "@nestjs/websockets": "^10.4.13",
     "dotenv": "^16.4.5",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-perfectionist": "^4.0.3",
@@ -41,6 +42,7 @@
     "rand-token": "^1.0.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.1",
     "stripe": "^17.4.0",
     "twilio": "^5.3.4",
     "typeorm": "^0.3.20",
