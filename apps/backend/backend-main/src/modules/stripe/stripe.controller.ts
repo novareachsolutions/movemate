@@ -2,6 +2,7 @@ import { Body, Controller, Post } from "@nestjs/common";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
+import { IApiResponse } from "../../shared/interface";
 import { StripeService } from "./stripe.service";
 
 @Controller("stripe")
@@ -15,13 +16,17 @@ export class StripeController {
    */
   @Post("customer")
   async createCustomer(
-    @Body("userId") userId: number,
-  ): Promise<{ success: boolean; data: Stripe.Customer }> {
+    @Body("userId") userId: number
+  ): Promise<IApiResponse<Stripe.Customer>> {
     logger.debug(
-      `StripeController.createCustomer: Creating customer for user ID ${userId}`,
+      `StripeController.createCustomer: Creating customer for user ID ${userId}`
     );
     const customer = await this.stripeService.createCustomer(userId);
-    return { success: true, data: customer };
+    return {
+      success: true,
+      data: customer,
+      message: "Customer created successfully",
+    };
   }
 
   /**
@@ -37,17 +42,21 @@ export class StripeController {
     @Body("userId") userId: number,
     @Body("amount") amount: number,
     @Body("currency") currency: string,
-    @Body("description") description: string,
-  ): Promise<{ success: boolean; data: Stripe.PaymentIntent }> {
+    @Body("description") description: string
+  ): Promise<IApiResponse<Stripe.PaymentIntent>> {
     logger.debug(
-      `StripeController.createPaymentIntent: Creating payment intent for user ID ${userId} with amount ${amount} ${currency}`,
+      `StripeController.createPaymentIntent: Creating payment intent for user ID ${userId} with amount ${amount} ${currency}`
     );
     const paymentIntent = await this.stripeService.createPaymentIntent(
       userId,
       amount,
       currency,
-      description,
+      description
     );
-    return { success: true, data: paymentIntent };
+    return {
+      success: true,
+      data: paymentIntent,
+      message: "Payment intent created successfully",
+    };
   }
 }
