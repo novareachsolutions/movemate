@@ -1,7 +1,6 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import Stripe from "stripe";
 
-import { logger } from "../../logger";
 import { IApiResponse } from "../../shared/interface";
 import { StripeService } from "./stripe.service";
 
@@ -16,11 +15,8 @@ export class StripeController {
    */
   @Post("customer")
   async createCustomer(
-    @Body("userId") userId: number
+    @Body("userId") userId: number,
   ): Promise<IApiResponse<Stripe.Customer>> {
-    logger.debug(
-      `StripeController.createCustomer: Creating customer for user ID ${userId}`
-    );
     const customer = await this.stripeService.createCustomer(userId);
     return {
       success: true,
@@ -42,16 +38,13 @@ export class StripeController {
     @Body("userId") userId: number,
     @Body("amount") amount: number,
     @Body("currency") currency: string,
-    @Body("description") description: string
+    @Body("description") description: string,
   ): Promise<IApiResponse<Stripe.PaymentIntent>> {
-    logger.debug(
-      `StripeController.createPaymentIntent: Creating payment intent for user ID ${userId} with amount ${amount} ${currency}`
-    );
     const paymentIntent = await this.stripeService.createPaymentIntent(
       userId,
       amount,
       currency,
-      description
+      description,
     );
     return {
       success: true,

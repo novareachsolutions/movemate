@@ -1,10 +1,15 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Stripe from "stripe";
 
 import { User } from "../../entity/User";
 import { logger } from "../../logger";
-import { dbRepo } from "../database/database.service";
+import {
+  MissingStripeApiKeyException,
+  StripeCustomerCreationException,
+  StripePaymentIntentCreationException,
+} from "../../shared/errors/stripe";
+import { dbReadRepo, dbRepo } from "../database/database.service";
 
 @Injectable()
 export class StripeService {
@@ -14,7 +19,7 @@ export class StripeService {
     const apiKey = this.configService.get<string>("STRIPE_API_KEY");
     if (!apiKey) {
       logger.error("StripeService: Stripe API key is not configured");
-      throw new InternalServerErrorException("Stripe API key is not set");
+      throw new MissingStripeApiKeyException();
     }
     this.stripe = new Stripe(apiKey, {
       apiVersion: "2024-11-20.acacia",
@@ -49,9 +54,11 @@ export class StripeService {
       return customer;
     } catch (error) {
       logger.error(
-        `StripeService.createCustomer: Failed to create customer. Error: ${error.message}`,
+        `StripeService.createCustomer: Failed to create customer. Error: ${error}`,
       );
-      throw new InternalServerErrorException("Failed to create customer");
+      throw new StripeCustomerCreationException(
+        `Failed to create Stripe customer: ${error.message}`,
+      );
     }
   }
 
@@ -74,7 +81,9 @@ export class StripeService {
       `StripeService.createPaymentIntent: Creating payment intent for user ID ${userId}`,
     );
 
-    const user = await dbRepo(User).findOneOrFail({ where: { id: userId } });
+    const user = await dbReadRepo(User).findOneOrFail({
+      where: { id: userId },
+    });
 
     try {
       const paymentIntent = await this.stripe.paymentIntents.create({
@@ -91,9 +100,11 @@ export class StripeService {
       return paymentIntent;
     } catch (error) {
       logger.error(
-        `StripeService.createPaymentIntent: Failed to create payment intent. Error: ${error.message}`,
+        `StripeService.createPaymentIntent: Failed to create payment intent. Error: ${error}`,
       );
-      throw new InternalServerErrorException("Failed to create payment intent");
+      throw new StripePaymentIntentCreationException(
+        `Failed to create payment intent: ${error.message}`,
+      );
     }
   }
 }
