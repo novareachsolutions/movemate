@@ -9,10 +9,8 @@ import {
   Post,
   UseGuards,
   Req,
-  HttpException,
-  HttpStatus,
 } from "@nestjs/common";
-import { UpdateResult, DeleteResult } from "typeorm";
+import { UpdateResult } from "typeorm";
 
 import { Agent } from "../../entity/Agent";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
@@ -33,20 +31,16 @@ export class AgentController {
   constructor(private readonly agentService: AgentService) { }
 
   /**
-   * ===========================
-   * Agent-Specific Routes
-   * ===========================
-   */
-
-  /**
-   * Agent Signup - Public Endpoint
-   * Allows new agents to register without authentication.
-   * Route: POST /agent/signup
+   * Agent Signup
+   * Endpoint: POST /agent/signup
+   * Description: Allows an agent to sign up by providing necessary details.
    */
   @Post("signup")
   @UseGuards(OnboardingGuard)
-  async create(@Req() request: ICustomRequest,
-    @Body() agent: TAgent): Promise<IApiResponse<Agent>> {
+  async create(
+    @Req() request: ICustomRequest,
+    @Body() agent: TAgent,
+  ): Promise<IApiResponse<Agent>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
     if (agent.user.phoneNumber && agent.user.phoneNumber !== phoneNumberFromGuard) {
       throw new UnauthorizedError(
@@ -63,9 +57,9 @@ export class AgentController {
   }
 
   /**
-   * Get Own Agent Profile
-   * Accessible by AGENT role.
-   * Route: GET /agent/profile
+   * Get Own Profile
+   * Endpoint: GET /agent/profile
+   * Description: Retrieves the authenticated agent's profile.
    */
   @Get("profile")
   @UseGuards(AuthGuard)
@@ -73,9 +67,8 @@ export class AgentController {
   async getOwnProfile(
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<Agent>> {
-    const user = request.user;
-
-    const agent = await this.agentService.getAgentByUserId(user.id);
+    const agentId = request.user.agent.id;
+    const agent = await this.agentService.getAgentById(agentId);
     return {
       success: true,
       message: "Agent profile retrieved successfully.",
@@ -84,9 +77,9 @@ export class AgentController {
   }
 
   /**
-   * Update Own Agent Profile
-   * Accessible by AGENT role.
-   * Route: PATCH /agent/profile
+   * Update Own Profile
+   * Endpoint: PATCH /agent/profile
+   * Description: Allows the authenticated agent to update their profile.
    */
   @Patch("profile")
   @UseGuards(AuthGuard)
@@ -95,12 +88,8 @@ export class AgentController {
     @Body() updateAgentPartial: TAgentPartial,
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<UpdateResult>> {
-    const user = request.user;
-
-    const agentId = await this.agentService.getAgentIdByUserId(user.id);
-    const isAdmin = false; // Agent updating their own profile
-
-    const data = await this.agentService.updateAgentProfile(agentId, updateAgentPartial, isAdmin);
+    const agentId = request.user.agent.id;
+    const data = await this.agentService.updateAgentProfile(agentId, updateAgentPartial);
     return {
       success: true,
       message: "Agent profile updated successfully.",
@@ -110,8 +99,8 @@ export class AgentController {
 
   /**
    * Submit Own Document
-   * Accessible by AGENT role.
-   * Route: POST /agent/document
+   * Endpoint: POST /agent/document
+   * Description: Allows the authenticated agent to submit a document.
    */
   @Post("document")
   @UseGuards(AuthGuard)
@@ -120,16 +109,11 @@ export class AgentController {
     @Body() submitDocumentDto: TAgentDocument,
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<TAgentDocument>> {
-    const user = request.user;
-
-    const agentId = await this.agentService.getAgentIdByUserId(user.id);
-
-    // Assign agentId to the document
+    const agentId = request.user.agent.id;
     const document: TAgentDocument = {
       ...submitDocumentDto,
       agentId,
     };
-
     const data = await this.agentService.submitDocument(agentId, document);
     return {
       success: true,
@@ -140,8 +124,8 @@ export class AgentController {
 
   /**
    * Remove Own Document
-   * Accessible by AGENT role.
-   * Route: DELETE /agent/document/:documentId
+   * Endpoint: DELETE /agent/document/:documentId
+   * Description: Allows the authenticated agent to remove a specific document.
    */
   @Delete("document/:documentId")
   @UseGuards(AuthGuard)
@@ -150,10 +134,7 @@ export class AgentController {
     @Param("documentId", ParseIntPipe) documentId: number,
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<null>> {
-    const user = request.user;
-
-    const agentId = await this.agentService.getAgentIdByUserId(user.id);
-
+    const agentId = request.user.agent.id;
     await this.agentService.removeDocument(agentId, documentId);
     return {
       success: true,
@@ -163,9 +144,9 @@ export class AgentController {
   }
 
   /**
-   * Set Own Agent Status (Online/Offline)
-   * Accessible by AGENT role.
-   * Route: PATCH /agent/status
+   * Set Own Agent Status
+   * Endpoint: PATCH /agent/status
+   * Description: Allows the authenticated agent to update their status.
    */
   @Patch("status")
   @UseGuards(AuthGuard)
@@ -175,10 +156,7 @@ export class AgentController {
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<UpdateResult>> {
     const { status } = body;
-    const user = request.user;
-
-    const agentId = await this.agentService.getAgentIdByUserId(user.id);
-
+    const agentId = request.user.agent.id;
     const data = await this.agentService.setAgentStatus(agentId, status);
     return {
       success: true,
@@ -188,15 +166,9 @@ export class AgentController {
   }
 
   /**
-   * ===========================
-   * Admin-Specific Routes
-   * ===========================
-   */
-
-  /**
-   * Get Any Agent Profile
-   * Accessible by ADMIN role.
-   * Route: GET /agent/profile/:id
+   * Get Agent Profile (Admin)
+   * Endpoint: GET /agent/profile/:id
+   * Description: Allows an admin to retrieve any agent's profile.
    */
   @Get("profile/:id")
   @UseGuards(AuthGuard)
@@ -213,9 +185,9 @@ export class AgentController {
   }
 
   /**
-   * Update Any Agent Profile
-   * Accessible by ADMIN role.
-   * Route: PATCH /agent/profile/:id
+   * Update Agent Profile (Admin)
+   * Endpoint: PATCH /agent/profile/:id
+   * Description: Allows an admin to update any agent's profile.
    */
   @Patch("profile/:id")
   @UseGuards(AuthGuard)
@@ -224,8 +196,7 @@ export class AgentController {
     @Param("id", ParseIntPipe) agentId: number,
     @Body() updateAgentPartial: TAgentPartial,
   ): Promise<IApiResponse<UpdateResult>> {
-    const isAdmin = true; // Admin updating any agent's profile
-
+    const isAdmin = true;
     const data = await this.agentService.updateAgentProfile(agentId, updateAgentPartial, isAdmin);
     return {
       success: true,
@@ -235,9 +206,9 @@ export class AgentController {
   }
 
   /**
-   * Submit Any Agent Document
-   * Accessible by ADMIN role.
-   * Route: POST /agent/document/:id
+   * Submit Agent Document (Admin)
+   * Endpoint: POST /agent/document/:id
+   * Description: Allows an admin to submit a document for any agent.
    */
   @Post("document/:id")
   @UseGuards(AuthGuard)
@@ -246,12 +217,10 @@ export class AgentController {
     @Param("id", ParseIntPipe) agentId: number,
     @Body() submitDocumentDto: TAgentDocument,
   ): Promise<IApiResponse<TAgentDocument>> {
-    // Assign agentId to the document
     const document: TAgentDocument = {
       ...submitDocumentDto,
       agentId,
     };
-
     const data = await this.agentService.submitDocument(agentId, document);
     return {
       success: true,
@@ -261,9 +230,9 @@ export class AgentController {
   }
 
   /**
-   * Remove Any Agent Document
-   * Accessible by ADMIN role.
-   * Route: DELETE /agent/document/:id/:documentId
+   * Remove Agent Document (Admin)
+   * Endpoint: DELETE /agent/document/:id/:documentId
+   * Description: Allows an admin to remove a specific document from any agent.
    */
   @Delete("document/:id/:documentId")
   @UseGuards(AuthGuard)
@@ -281,9 +250,9 @@ export class AgentController {
   }
 
   /**
-   * Get All Agents
-   * Accessible by ADMIN role.
-   * Route: GET /agent/list
+   * Get All Agents (Admin)
+   * Endpoint: GET /agent/list
+   * Description: Allows an admin to retrieve a list of all agents.
    */
   @Get("list")
   @UseGuards(AuthGuard)
@@ -298,33 +267,40 @@ export class AgentController {
   }
 
   /**
-   * Approve or Reject Any Agent
-   * Accessible by ADMIN role.
-   * Route: POST /agent/approve/:id
+   * Approve Agent (Admin)
+   * Endpoint: POST /agent/approve/:id
+   * Description: Allows an admin to approve a specific agent.
    */
   @Post("approve/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
-  async approveOrRejectAgent(
+  async approveAgent(
     @Param("id", ParseIntPipe) agentId: number,
-    @Body() body: { approve: boolean },
   ): Promise<IApiResponse<Agent>> {
-    const { approve } = body;
+    const data = await this.agentService.approveAgent(agentId);
+    return {
+      success: true,
+      message: "Agent approved successfully.",
+      data,
+    };
+  }
 
-    if (approve) {
-      const updatedAgent = await this.agentService.approveAgent(agentId);
-      return {
-        success: true,
-        message: "Agent approved successfully.",
-        data: updatedAgent,
-      };
-    } else {
-      const updatedAgent = await this.agentService.rejectAgent(agentId);
-      return {
-        success: true,
-        message: "Agent rejected successfully.",
-        data: updatedAgent,
-      };
-    }
+  /**
+   * Reject Agent (Admin)
+   * Endpoint: POST /agent/reject/:id
+   * Description: Allows an admin to reject a specific agent.
+   */
+  @Post("reject/:id")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
+  async rejectAgent(
+    @Param("id", ParseIntPipe) agentId: number,
+  ): Promise<IApiResponse<Agent>> {
+    const data = await this.agentService.rejectAgent(agentId);
+    return {
+      success: true,
+      message: "Agent rejected successfully.",
+      data,
+    };
   }
 }

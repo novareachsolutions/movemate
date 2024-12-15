@@ -3,28 +3,42 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { logger } from "../../logger";
 import { UnauthorizedError } from "../errors/authErrors";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Agent } from "../../entity/Agent";
+import { UserRoleEnum } from "../../shared/enums";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
+    @InjectRepository(Agent)
+    private agentRepository: Repository<Agent>,
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const accessToken = this.extractTokenFromHeaders(request);
 
-    // Validate Access Token
     if (accessToken) {
       const payload = this.verifyToken(accessToken, "JWT_ACCESS_SECRET");
       if (payload) {
         this.setUserInRequest(request, payload);
+        if (payload.role === UserRoleEnum.AGENT) {
+          const agent = await this.agentRepository.findOne({
+            where: { userId: payload.id },
+          });
+          if (agent) {
+            request.user.agent = { id: agent.id };
+          } else {
+            throw new UnauthorizedError("Agent profile not found.");
+          }
+        }
         return true;
       }
     }
 
-    // If Access Token is invalid or missing, throw UnauthorizedError
     throw new UnauthorizedError("Invalid or missing access token");
   }
 

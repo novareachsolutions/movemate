@@ -1,11 +1,11 @@
 import { Column, Entity, Index, ManyToOne, RelationId, Unique } from "typeorm";
-
 import { Agent } from "./Agent";
 import { BaseEntity } from "./BaseEntity";
+
 @Index("IDX_agent_document_agentId", ["agentId"], {
   where: '"deletedAt" IS NULL',
 })
-@Unique("UQ_agent_document_agentId", ["agentId"])
+@Unique("UQ_agent_document_agentId_name", ["agentId", "name"])
 @Entity()
 export class AgentDocument extends BaseEntity {
   @Column({ type: "varchar", nullable: false })
