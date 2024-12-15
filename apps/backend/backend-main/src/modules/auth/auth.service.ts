@@ -54,7 +54,7 @@ export class AuthService {
     logger.debug(
       `AuthService.signupInitiate: Initiating signup for ${phoneNumber}`,
     );
-    const existingUser = await dbRepo(User).findOne({ where: { phoneNumber } });
+    const existingUser = await dbRepo(User).findOneBy({ phoneNumber });
 
     if (existingUser) {
       logger.error(
@@ -81,6 +81,7 @@ export class AuthService {
       `AuthService.login: Logging in user with phone number ${phoneNumber}`,
     );
     await this.validateOtp(phoneNumber, otp);
+    console.log("here")
     const user = await dbRepo(User).findOne({ where: { phoneNumber } });
 
     if (!user) {
@@ -204,7 +205,7 @@ export class AuthService {
     try {
       await this.twilioClient.messages.create({
         body: `Your OTP for NOVATECH SOL is ${otp}`,
-        from: this.configService.get<string>("TW_PHONE_NUMBER"),
+        from: this.configService.get<string>("TWILIO_PHONE_NUMBER"),
         to: phoneNumber,
       });
       logger.debug(

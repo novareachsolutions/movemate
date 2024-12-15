@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { UpdateResult } from "typeorm";
-
 import { Agent } from "../../entity/Agent";
 import { AgentDocument } from "../../entity/AgentDocument";
 import { AgentReview } from "../../entity/AgentReview";
