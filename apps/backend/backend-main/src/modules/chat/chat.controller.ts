@@ -11,7 +11,7 @@ export class ChatController {
 
   @Post("message")
   async handleMessage(
-    @Body() data: TChatMessageInput
+    @Body() data: TChatMessageInput,
   ): Promise<IApiResponse<number>> {
     const chat = await this.chatService.saveChat(data);
     return {
@@ -23,7 +23,7 @@ export class ChatController {
 
   @Get(":chatRoomId")
   async getChatHistory(
-    @Param("chatRoomId") chatRoomId: string
+    @Param("chatRoomId") chatRoomId: string,
   ): Promise<IApiResponse<SupportChat[]>> {
     const history = await this.chatService.getChatHistory(chatRoomId);
     return {

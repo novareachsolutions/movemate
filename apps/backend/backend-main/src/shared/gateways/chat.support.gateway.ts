@@ -8,6 +8,7 @@ import { Socket } from "socket.io";
 
 import configuration from "../../config/configuration";
 import { ChatService } from "../../modules/chat/chat.service";
+import { TChatMessageInput } from "../../modules/chat/chat.types";
 import { BaseSocketGateway } from "./base.socket";
 
 const config = configuration();
@@ -23,31 +24,19 @@ export class ChatSupportGateway extends BaseSocketGateway {
 
   @SubscribeMessage("sendMessage")
   async handleSendMessage(
-    @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @MessageBody() data: TChatMessageInput,
+    @ConnectedSocket() _client: Socket,
   ): Promise<void> {
-    const chatMessageInput = {
-      channelId: data.room,
-      senderId: data.senderId,
-      recipientId: data.recipientId,
-      message: data.message,
-    };
-    await this.chatService.saveChat(chatMessageInput);
-    this.sendMessageToRoom(data.room, "newMessage", data);
+    await this.chatService.saveChat(data);
+    this.sendMessageToRoom(data.channelId, "newMessage", data);
   }
 
   @SubscribeMessage("sendPrivateMessage")
   async handleSendPrivateMessage(
-    @MessageBody() data: any,
-    @ConnectedSocket() _client: Socket
+    @MessageBody() data: TChatMessageInput,
+    @ConnectedSocket() _client: Socket,
   ): Promise<void> {
-    const chatMessageInput = {
-      channelId: data.room,
-      senderId: data.senderId,
-      recipientId: data.recipientId,
-      message: data.message,
-    };
-    await this.chatService.saveChat(chatMessageInput);
-    this.sendMessageToClient(data.userId, "privateMessage", data);
+    await this.chatService.saveChat(data);
+    this.sendMessageToClient(data.channelId, "privateMessage", data);
   }
 }
