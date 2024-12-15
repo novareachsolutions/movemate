@@ -2,7 +2,6 @@ import { Column, Entity, Index, ManyToOne, RelationId, Unique } from "typeorm";
 
 import { Agent } from "./Agent";
 import { BaseEntity } from "./BaseEntity";
-
 @Index("IDX_agent_document_agentId", ["agentId"], {
   where: '"deletedAt" IS NULL',
 })
