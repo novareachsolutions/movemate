@@ -56,8 +56,8 @@ export class UserController {
   * GET /user/me
   */
   @Get()
-  @Roles(UserRoleEnum.CUSTOMER)
   @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.CUSTOMER)
   async getCurrentUser(
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<User>> {
@@ -76,6 +76,7 @@ export class UserController {
    * GET /user/profile/:id
    */
   @Get("profile/:id")
+  @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getUserById(
     @Param("id", ParseUUIDPipe) id: number,
@@ -93,6 +94,7 @@ export class UserController {
    * POST /user/profile
    */
   @Post("profile")
+  @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getUserProfile(
     @Body() getUserProfileDto: TGetUserProfile,
@@ -110,6 +112,8 @@ export class UserController {
    * GET /user/list
    */
   @Get("list")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async getAllUsers(): Promise<IApiResponse<User[]>> {
     const users = await this.userService.getAllUsers();
     return {
@@ -124,6 +128,7 @@ export class UserController {
    * PUT /user/profile/:id
    */
   @Put("profile/:id")
+  @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
   async updateUser(
     @Param("id", ParseUUIDPipe) id: number,
@@ -142,6 +147,7 @@ export class UserController {
    * DELETE /user/profile/:id
    */
   @Delete("profile/:id")
+  @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
   async deleteUser(
     @Param("id", ParseUUIDPipe) id: string,

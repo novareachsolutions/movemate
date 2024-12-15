@@ -76,7 +76,7 @@ export class AuthController {
   async refreshToken(
     @Res() response: Response,
     @Req() request: Request,
-  ): Promise<IApiResponse<{ accessToken: string }>> {
+  ): Promise<void> {
     const refreshToken = request.cookies["refresh_token"];
     if (!refreshToken) {
       throw new ForbiddenException("Refresh token not found.");
@@ -92,10 +92,10 @@ export class AuthController {
       maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
     });
 
-    return {
+    response.json({
       success: true,
       message: "Tokens refreshed successfully.",
       data: { accessToken },
-    };
+    })
   }
 }

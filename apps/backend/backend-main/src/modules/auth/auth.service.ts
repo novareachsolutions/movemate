@@ -54,7 +54,7 @@ export class AuthService {
     logger.debug(
       `AuthService.signupInitiate: Initiating signup for ${phoneNumber}`,
     );
-    const existingUser = await dbRepo(User).findOneBy({ phoneNumber });
+    const existingUser = await dbRepo(User).findOneOrFail({ where: { phoneNumber } });
 
     if (existingUser) {
       logger.error(
