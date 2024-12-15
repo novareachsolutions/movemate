@@ -49,14 +49,11 @@ export class AuthController {
     @Res() response: Response,
   ): Promise<void> {
     const { phoneNumber, otp } = body;
-    console.log("hey")
     const { accessToken, refreshToken } = await this.authService.login(
       phoneNumber,
       otp,
       role,
     );
-
-    console.log(accessToken)
 
     response.cookie("refresh_token", refreshToken, {
       httpOnly: true,

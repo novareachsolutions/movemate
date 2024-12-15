@@ -81,7 +81,6 @@ export class AuthService {
       `AuthService.login: Logging in user with phone number ${phoneNumber}`,
     );
     await this.validateOtp(phoneNumber, otp);
-    console.log("here")
     const user = await dbRepo(User).findOne({ where: { phoneNumber } });
 
     if (!user) {
