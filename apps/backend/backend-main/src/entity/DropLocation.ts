@@ -22,7 +22,7 @@ export class DropLocation extends BaseEntity {
 
   @OneToOne(
     () => SendPackageOrder,
-    (sendPackageOrder) => sendPackageOrder.dropLocation
+    (sendPackageOrder) => sendPackageOrder.dropLocation,
   )
   sendPackageOrder: SendPackageOrder;
 
