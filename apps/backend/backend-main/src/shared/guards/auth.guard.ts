@@ -3,18 +3,15 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { logger } from "../../logger";
 import { UnauthorizedError } from "../errors/authErrors";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
 import { Agent } from "../../entity/Agent";
 import { UserRoleEnum } from "../../shared/enums";
+import { dbRepo } from "../../modules/database/database.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-    @InjectRepository(Agent)
-    private agentRepository: Repository<Agent>,
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -26,7 +23,7 @@ export class AuthGuard implements CanActivate {
       if (payload) {
         this.setUserInRequest(request, payload);
         if (payload.role === UserRoleEnum.AGENT) {
-          const agent = await this.agentRepository.findOne({
+          const agent = await dbRepo(Agent).findOne({
             where: { userId: payload.id },
           });
           if (agent) {

@@ -11,7 +11,6 @@ import {
   Req,
 } from "@nestjs/common";
 import { UpdateResult } from "typeorm";
-
 import { Agent } from "../../entity/Agent";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { AgentService } from "./agent.service";
@@ -187,7 +186,8 @@ export class AgentController {
   /**
    * Update Agent Profile (Admin)
    * Endpoint: PATCH /agent/profile/:id
-   * Description: Allows an admin to update any agent's profile.
+   * Description: Allows an +
+   *  to update any agent's profile.
    */
   @Patch("profile/:id")
   @UseGuards(AuthGuard)
@@ -263,44 +263,6 @@ export class AgentController {
       success: true,
       message: "All agents retrieved successfully.",
       data: agents,
-    };
-  }
-
-  /**
-   * Approve Agent (Admin)
-   * Endpoint: POST /agent/approve/:id
-   * Description: Allows an admin to approve a specific agent.
-   */
-  @Post("approve/:id")
-  @UseGuards(AuthGuard)
-  @Roles(UserRoleEnum.ADMIN)
-  async approveAgent(
-    @Param("id", ParseIntPipe) agentId: number,
-  ): Promise<IApiResponse<Agent>> {
-    const data = await this.agentService.approveAgent(agentId);
-    return {
-      success: true,
-      message: "Agent approved successfully.",
-      data,
-    };
-  }
-
-  /**
-   * Reject Agent (Admin)
-   * Endpoint: POST /agent/reject/:id
-   * Description: Allows an admin to reject a specific agent.
-   */
-  @Post("reject/:id")
-  @UseGuards(AuthGuard)
-  @Roles(UserRoleEnum.ADMIN)
-  async rejectAgent(
-    @Param("id", ParseIntPipe) agentId: number,
-  ): Promise<IApiResponse<Agent>> {
-    const data = await this.agentService.rejectAgent(agentId);
-    return {
-      success: true,
-      message: "Agent rejected successfully.",
-      data,
     };
   }
 }
