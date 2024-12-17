@@ -1,10 +1,10 @@
 import {
   Entity,
   Column,
-  RelationId,
   ManyToOne,
   JoinColumn,
   OneToOne,
+  RelationId,
 } from 'typeorm';
 import { DropLocation } from './DropLocation';
 import { PickupLocation } from './PickupLocation';
@@ -18,7 +18,6 @@ import {
   UserRoleEnum,
 } from '../shared/enums';
 import { Agent } from './Agent';
-
 @Entity()
 export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
@@ -53,56 +52,25 @@ export class SendPackageOrder extends BaseEntity {
   })
   type: OrderTypeEnum;
 
-  @ManyToOne(() => PickupLocation, {
-    deferrable: 'INITIALLY IMMEDIATE',
-    onDelete: 'SET NULL',
-    nullable: true
-  })
+  @ManyToOne(() => PickupLocation, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   pickupLocation: PickupLocation;
 
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.pickupLocation)
-  @Column({ type: 'integer' })
-  pickupLocationId: number;
-
-  @ManyToOne(() => DropLocation, {
-    deferrable: 'INITIALLY IMMEDIATE',
-    onDelete: 'SET NULL',
-    nullable: true
-  })
+  @ManyToOne(() => DropLocation, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   dropLocation: DropLocation;
 
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.dropLocation)
-  @Column({ type: 'integer' })
-  dropLocationId: number;
-
-  @Column({ type: "integer", nullable: false })
+  @Column({ type: 'integer', nullable: true })
   estimatedDistance: number;
 
-  @Column({ nullable: false, type: "time" })
+  @Column({ nullable: false, type: 'time' })
   estimatedTime: number;
 
-  @ManyToOne(() => User, {
-    deferrable: 'INITIALLY IMMEDIATE',
-    nullable: true
-  })
+  @ManyToOne(() => User, { nullable: true })
   customer: User;
 
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.customer)
-  @Column({ type: 'integer' })
-  customerId: number;
-
-  @ManyToOne(() => Agent, {
-    onDelete: 'SET NULL',
-    nullable: true,
-    deferrable:"INITIALLY IMMEDIATE"
-  })
+  @ManyToOne(() => Agent, { nullable: true, onDelete: 'SET NULL' })
   agent: Agent;
-
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.agent)
-  @Column({ type: 'integer', nullable: true })
-  agentId: number;
 
   @Column({ type: 'float', nullable: true })
   price: number;
@@ -141,7 +109,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   paymentStatus: PaymentStatusEnum;
 
-  @OneToOne(() => Report, (report) => report.sendPackageOrder, {
+  @OneToOne(() => Report, {
     nullable: true,
     onDelete: 'SET NULL',
   })
@@ -151,3 +119,4 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'integer', nullable: true })
   reportId: number;
 }
+
