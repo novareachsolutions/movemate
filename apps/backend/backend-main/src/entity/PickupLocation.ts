@@ -21,12 +21,12 @@ export class PickupLocation extends BaseEntity {
 
   @OneToOne(
     () => SendPackageOrder,
-    (sendPackageOrder) => sendPackageOrder.pickupLocation,
+    (sendPackageOrder) => sendPackageOrder.pickupLocation
   )
   sendPackageOrder: SendPackageOrder;
 
   @RelationId(
-    (pickupLocation: PickupLocation) => pickupLocation.sendPackageOrder,
+    (pickupLocation: PickupLocation) => pickupLocation.sendPackageOrder
   )
   @Column({ type: "integer" })
   sendPackageOrderId: number;
