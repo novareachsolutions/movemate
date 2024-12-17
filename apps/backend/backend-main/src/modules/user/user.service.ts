@@ -79,7 +79,7 @@ export class UserService {
     }
 
     const filteredUpdateUser = filterEmptyValues(updateUserDto);
-    logger.info(
+    logger.debug(
       `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(
         filteredUpdateUser,
       )}`,
@@ -94,7 +94,7 @@ export class UserService {
    * @returns The result of the delete operation.
    */
   async deleteUser(id: string): Promise<DeleteResult> {
-    logger.info(`UserService.deleteUser: Deleting user with ID ${id}`);
+    logger.debug(`UserService.deleteUser: Deleting user with ID ${id}`);
     return await dbRepo(User).softDelete(id);
   }
 }
