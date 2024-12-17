@@ -6,9 +6,9 @@ import {
   Delete,
   Get,
   ParseUUIDPipe,
-  Put,
   UseGuards,
   Req,
+  Patch,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
@@ -127,7 +127,7 @@ export class UserController {
    * Update user profile.
    * PUT /user/profile/:id
    */
-  @Put("profile/:id")
+  @Patch("profile/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
   async updateUser(
