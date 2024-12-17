@@ -1,10 +1,10 @@
 import {
   Entity,
   Column,
-  RelationId,
   ManyToOne,
   JoinColumn,
   OneToOne,
+  RelationId,
 } from 'typeorm';
 import { DropLocation } from './DropLocation';
 import { PickupLocation } from './PickupLocation';
@@ -18,7 +18,6 @@ import {
   UserRoleEnum,
 } from '../shared/enums';
 import { Agent } from './Agent';
-
 @Entity()
 export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
@@ -53,54 +52,25 @@ export class SendPackageOrder extends BaseEntity {
   })
   type: OrderTypeEnum;
 
-  @OneToOne(() => PickupLocation, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => PickupLocation, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   pickupLocation: PickupLocation;
 
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.pickupLocation)
-  @Column({ type: 'integer' })
-  pickupLocationId: number;
-
-  @OneToOne(() => DropLocation, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => DropLocation, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   dropLocation: DropLocation;
 
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.dropLocation)
-  @Column({ type: 'integer' })
-  dropLocationId: number;
-
-  @Column({ nullable: false })
+  @Column({ type: 'integer', nullable: true })
   estimatedDistance: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, type: 'time' })
   estimatedTime: number;
 
-  @ManyToOne(() => User, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => User, { nullable: true })
   customer: User;
 
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.customer)
-  @Column({ type: 'integer' })
-  customerId: number;
-
-  @ManyToOne(() => Agent, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    nullable: true,
-  })
+  @ManyToOne(() => Agent, { nullable: true, onDelete: 'SET NULL' })
   agent: Agent;
-
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.agent)
-  @Column({ type: 'integer', nullable: true })
-  agentId: number;
 
   @Column({ type: 'float', nullable: true })
   price: number;
@@ -111,7 +81,7 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'float', nullable: true })
   actualTime: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   cancellationReason: string;
 
   @Column({
@@ -120,18 +90,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   canceledBy: UserRoleEnum;
 
-  @ManyToOne(() => Agent, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    nullable: true,
-  })
-  assignedAgent: Agent;
-
-  @RelationId((sendPackageOrder: SendPackageOrder) => sendPackageOrder.assignedAgent)
-  @Column({ type: 'integer', nullable: true })
-  assignedAgentId: number;
-
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   completionPhoto: string;
 
   @Column({ type: 'timestamp', nullable: true })
@@ -150,8 +109,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   paymentStatus: PaymentStatusEnum;
 
-  @OneToOne(() => Report, (report) => report.sendPackageOrder, {
-    cascade: true,
+  @OneToOne(() => Report, {
     nullable: true,
     onDelete: 'SET NULL',
   })
@@ -161,3 +119,4 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: 'integer', nullable: true })
   reportId: number;
 }
+
