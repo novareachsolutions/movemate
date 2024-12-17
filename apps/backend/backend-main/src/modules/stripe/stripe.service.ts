@@ -34,7 +34,7 @@ export class StripeService {
    */
   async createCustomer(userId: number): Promise<Stripe.Customer> {
     logger.debug(
-      `StripeService.createCustomer: Creating customer for user ID ${userId}`
+      `StripeService.createCustomer: Creating customer for user ID ${userId}`,
     );
 
     const user = await dbReadRepo(User).findOneOrFail({
@@ -51,15 +51,15 @@ export class StripeService {
         },
       });
       logger.info(
-        `StripeService.createCustomer: Customer created with ID ${customer.id}`
+        `StripeService.createCustomer: Customer created with ID ${customer.id}`,
       );
       return customer;
     } catch (error) {
       logger.error(
-        `StripeService.createCustomer: Failed to create customer. Error: ${error}`
+        `StripeService.createCustomer: Failed to create customer. Error: ${error}`,
       );
       throw new StripeCustomerCreationException(
-        `Failed to create Stripe customer: ${error.message}`
+        `Failed to create Stripe customer: ${error.message}`,
       );
     }
   }
@@ -77,10 +77,10 @@ export class StripeService {
     userId: number,
     amount: number,
     currency: string = "usd",
-    description: string
+    description: string,
   ): Promise<Stripe.PaymentIntent> {
     logger.debug(
-      `StripeService.createPaymentIntent: Creating payment intent for user ID ${userId}`
+      `StripeService.createPaymentIntent: Creating payment intent for user ID ${userId}`,
     );
 
     const user = await dbReadRepo(User).findOneOrFail({
@@ -97,15 +97,15 @@ export class StripeService {
         },
       });
       logger.info(
-        `StripeService.createPaymentIntent: Payment intent created with ID ${paymentIntent.id}`
+        `StripeService.createPaymentIntent: Payment intent created with ID ${paymentIntent.id}`,
       );
       return paymentIntent;
     } catch (error) {
       logger.error(
-        `StripeService.createPaymentIntent: Failed to create payment intent. Error: ${error}`
+        `StripeService.createPaymentIntent: Failed to create payment intent. Error: ${error}`,
       );
       throw new StripePaymentIntentCreationException(
-        `Failed to create payment intent: ${error.message}`
+        `Failed to create payment intent: ${error.message}`,
       );
     }
   }
