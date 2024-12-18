@@ -3,7 +3,7 @@ services:
     image: redis:5.0-alpine
     container_name: redis
     ports:
-      - '6379:6379'
+      - '${REDIS_PORT}:6379'
     command: ['redis-server', '--appendonly', 'yes']
     hostname: redis
     volumes:
