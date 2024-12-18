@@ -93,7 +93,7 @@ export class SendAPackageService {
             const savedReport = await dbRepo(Report).save({
                 reason,
                 details,
-                customerId: order.customerId,
+                customer: order.customer,
                 orderId: order.id,
             });
             logger.debug(`SendAPackageService.reportAgent: Report created with ID ${savedReport.id} for order ID ${orderId}`);
@@ -136,7 +136,7 @@ export class SendAPackageService {
             const savedReview = await dbRepo(OrderReview).save({
                 rating,
                 comment,
-                customerId: order.customerId,
+                customer: order.customer,
                 orderId: order.id,
             });
             logger.debug(`SendAPackageService.leaveReview: Review created with ID ${savedReview.id} for order ID ${orderId}`);

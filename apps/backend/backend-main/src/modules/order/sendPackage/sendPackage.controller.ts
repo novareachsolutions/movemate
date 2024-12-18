@@ -25,7 +25,7 @@ export class SendPackageController {
 
     @Post('create')
     @UseGuards(AuthGuard)
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER)
     async createSendPackageOrder(
         @Body() data: TSendPackageOrder,
         @Req() req: any,
@@ -33,7 +33,7 @@ export class SendPackageController {
         const customerId = req.user.id;
         const createdOrder = await this.sendPackageService.create({
             ...data,
-            customerId, // Dynamically set customerId from the request user
+            customerId, 
         });
         return {
             success: true,
