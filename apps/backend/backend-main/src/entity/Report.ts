@@ -1,32 +1,26 @@
-import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
+// src/entity/Report.ts
+import { Column, Entity, Index, JoinColumn, OneToOne, RelationId } from "typeorm";
+import { SendPackageOrder } from "./SendPackageOrder";
 import { BaseEntity } from "./BaseEntity";
-import { User } from "./User";
 
-@Index('IDX_report_customerId', ['customerId'], {
-  where: '"deletedAt" IS NULL',
-})
 @Index('IDX_report_orderId', ['sendPackageOrderId'], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
 export class Report extends BaseEntity {
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: false })
   reason: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   details: string;
 
-  @ManyToOne(() => User, {
-    deferrable: 'INITIALLY IMMEDIATE',
-    onDelete: 'CASCADE',
-    nullable: false,
+  @OneToOne(() => SendPackageOrder, (sendPackageOrder) => sendPackageOrder.report, {
+    onDelete: "CASCADE",
   })
-  customer: User;
+  @JoinColumn({ name: "sendPackageOrderId" })
+  sendPackageOrder: SendPackageOrder;
 
-  @RelationId((report: Report) => report.customer)
-  @Column({ type: 'integer' })
-  customerId: number;
-
-  @Column({ type: 'integer', nullable: true })
+  @RelationId((report: Report) => report.sendPackageOrder)
+  @Column({ type: "integer", nullable: false })
   sendPackageOrderId: number;
 }

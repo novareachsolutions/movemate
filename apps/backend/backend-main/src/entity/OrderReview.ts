@@ -42,3 +42,4 @@ export class OrderReview extends BaseEntity {
   @Column({ type: "integer" })
   sendPackageOrderId: number;
 }
+  
