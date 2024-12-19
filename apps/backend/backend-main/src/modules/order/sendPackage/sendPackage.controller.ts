@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { UserRoleEnum } from '../../../shared/enums';
 import { SendAPackageService } from './sendPackage.service';
-import { IApiResponse } from '../../../shared/interface';
+import { IApiResponse, ICustomRequest } from '../../../shared/interface';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { Report } from '../../../entity/Report';
 import { OrderReview } from '../../../entity/OrderReview';
@@ -20,20 +20,20 @@ import { AuthGuard } from '../../../shared/guards/auth.guard';
 
 
 @Controller('order/send-package')
+@UseGuards(AuthGuard)
 export class SendPackageController {
     constructor(private readonly sendPackageService: SendAPackageService) { }
 
     @Post('create')
-    @UseGuards(AuthGuard)
     @Roles(UserRoleEnum.CUSTOMER)
     async createSendPackageOrder(
         @Body() data: TSendPackageOrder,
-        @Req() req: any,
+        @Req() request: ICustomRequest,
     ): Promise<IApiResponse<SendPackageOrder>> {
-        const customerId = req.user.id;
+        const customerId = request.user.id;
         const createdOrder = await this.sendPackageService.create({
             ...data,
-            customerId, 
+            customerId,
         });
         return {
             success: true,
@@ -57,7 +57,7 @@ export class SendPackageController {
     }
 
     @Post(':orderId/reportagent')
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER)
     async reportAgent(
         @Param('orderId', ParseIntPipe) orderId: number,
         @Body('reason') reason: string,
@@ -72,7 +72,7 @@ export class SendPackageController {
     }
 
     @Post(':orderId/review')
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER)
     async leaveReview(
         @Param('orderId', ParseIntPipe) orderId: number,
         @Body('rating') rating: number,
@@ -87,7 +87,7 @@ export class SendPackageController {
     }
 
     @Get(':orderId')
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.AGENT, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.AGENT)
     async getOrderDetails(
         @Param('orderId', ParseIntPipe) orderId: number,
     ): Promise<IApiResponse<SendPackageOrder>> {
@@ -98,5 +98,4 @@ export class SendPackageController {
             data,
         };
     }
-
 }

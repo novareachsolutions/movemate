@@ -13,6 +13,7 @@ import { AuthGuard } from "./shared/guards/auth.guard";
 import { OnboardingGuard } from "./shared/guards/onboarding.guard";
 import { RoleGuard } from "./shared/guards/roles.guard";
 import { UserModule } from "./modules/user/user.module";
+import { SendAPackageModule } from "./modules/order/sendPackage/sendPackage.module";
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { UserModule } from "./modules/user/user.module";
     RedisModule,
     AuthModule,
     AgentModule,
-    UserModule
+    UserModule,
+    SendAPackageModule
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],
