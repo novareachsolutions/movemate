@@ -12,6 +12,7 @@ import { RedisModule } from "./modules/redis/redis.module";
 import { AuthGuard } from "./shared/guards/auth.guard";
 import { OnboardingGuard } from "./shared/guards/onboarding.guard";
 import { RoleGuard } from "./shared/guards/roles.guard";
+import { UserModule } from "./modules/user/user.module";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { RoleGuard } from "./shared/guards/roles.guard";
     RedisModule,
     AuthModule,
     AgentModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],

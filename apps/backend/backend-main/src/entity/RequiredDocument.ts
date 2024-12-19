@@ -1,16 +1,23 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
 
-import { UserRoleEnum } from "../shared/enums";
+import { AgentTypeEnum } from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
 
 @Entity()
 export class RequiredDocument extends BaseEntity {
+  @Column({ type: "varchar", nullable: false })
+  name: string;
+
+  @Column({ type: "varchar", nullable: true })
+  description: string;
+
   @Column({
     type: "enum",
-    enum: UserRoleEnum,
+    enum: AgentTypeEnum,
+    nullable: false,
   })
-  role: UserRoleEnum;
+  agentType: AgentTypeEnum;
 
-  @Column({ type: "text", array: true, nullable: false })
-  documents: string[];
+  @Column({ type: "boolean", default: true })
+  isRequired: boolean;
 }

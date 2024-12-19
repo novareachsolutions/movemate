@@ -1,5 +1,4 @@
 import { Column, Entity, Index, ManyToOne, RelationId, Unique } from "typeorm";
-
 import { Agent } from "./Agent";
 import { BaseEntity } from "./BaseEntity";
 
