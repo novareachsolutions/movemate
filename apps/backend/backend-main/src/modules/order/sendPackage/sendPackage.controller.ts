@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { UserRoleEnum } from '../../../shared/enums';
 import { SendAPackageService } from './sendPackage.service';
-import { IApiResponse } from '../../../shared/interface';
+import { IApiResponse, ICustomRequest } from '../../../shared/interface';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { Report } from '../../../entity/Report';
 import { OrderReview } from '../../../entity/OrderReview';
@@ -20,20 +20,20 @@ import { TSendPackageOrder } from './sendPackage.types';
 import { AuthGuard } from '../../../shared/guards/auth.guard';
 
 @Controller('order/send-package')
+@UseGuards(AuthGuard)
 export class SendPackageController {
     constructor(private readonly sendPackageService: SendAPackageService) { }
 
     @Post('create')
-    @UseGuards(AuthGuard)
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER)
     async createSendPackageOrder(
         @Body() data: TSendPackageOrder,
-        @Req() req: any,
+        @Req() request: ICustomRequest,
     ): Promise<IApiResponse<SendPackageOrder>> {
-        const customerId = req.user.id;
+        const customerId = request.user.id;
         const createdOrder = await this.sendPackageService.create({
             ...data,
-            customerId, // Dynamically set customerId from the request user
+            customerId,
         });
         return {
             success: true,
@@ -57,7 +57,7 @@ export class SendPackageController {
     }
 
     @Post(':orderId/reportagent')
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER)
     async reportAgent(
         @Param('orderId', ParseIntPipe) orderId: number,
         @Body('reason') reason: string,
@@ -72,7 +72,7 @@ export class SendPackageController {
     }
 
     @Post(':orderId/review')
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER)
     async leaveReview(
         @Param('orderId', ParseIntPipe) orderId: number,
         @Body('rating') rating: number,
@@ -87,7 +87,7 @@ export class SendPackageController {
     }
 
     @Get(':orderId')
-    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.AGENT, UserRoleEnum.ADMIN)
+    @Roles(UserRoleEnum.CUSTOMER, UserRoleEnum.AGENT)
     async getOrderDetails(
         @Param('orderId', ParseIntPipe) orderId: number,
     ): Promise<IApiResponse<SendPackageOrder>> {
@@ -105,8 +105,10 @@ export class SendPackageController {
     @Roles(UserRoleEnum.AGENT)
     async acceptOrder(
         @Param('orderId', ParseIntPipe) orderId: number,
+        @Req() request: ICustomRequest
     ): Promise<IApiResponse<SendPackageOrder>> {
-        const data = await this.sendPackageService.acceptOrder(orderId);
+        const agentId = request.user.agent.id;
+        const data = await this.sendPackageService.acceptOrder(orderId, agentId);
         return {
             success: true,
             message: 'Order accepted successfully.',
@@ -118,8 +120,10 @@ export class SendPackageController {
     @Roles(UserRoleEnum.AGENT)
     async startOrder(
         @Param('orderId', ParseIntPipe) orderId: number,
+        @Req() request: ICustomRequest,
     ): Promise<IApiResponse<SendPackageOrder>> {
-        const data = await this.sendPackageService.startOrder(orderId);
+        const agentId = request.user.agent.id;
+        const data = await this.sendPackageService.startOrder(orderId, agentId);
         return {
             success: true,
             message: 'Order started successfully.',

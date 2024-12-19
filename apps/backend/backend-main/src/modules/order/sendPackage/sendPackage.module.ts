@@ -2,6 +2,13 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { SendPackageController } from "./sendPackage.controller";
 import { SendAPackageService } from "./sendPackage.service";
+import { AgentService } from "../../agent/agent.service";
+import { AuthService } from "../../auth/auth.service";
+import { OnboardingGuard } from "../../../shared/guards/onboarding.guard";
+import { RedisService } from "../../redis/redis.service";
+import { JwtService } from "@nestjs/jwt";
+import { OtpService } from "../../auth/utils/otp";
+import { TokenService } from "../../auth/utils/generateTokens";
 
 
 @Module({
@@ -11,6 +18,6 @@ import { SendAPackageService } from "./sendPackage.service";
     }),
   ],
   controllers: [SendPackageController],
-  providers: [SendAPackageService],
+  providers: [SendAPackageService, AgentService, AuthService, OnboardingGuard, RedisService, JwtService, OtpService, TokenService],
 })
-export class AgentModule {}
+export class SendAPackageModule { }

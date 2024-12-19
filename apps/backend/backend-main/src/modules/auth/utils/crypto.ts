@@ -16,7 +16,7 @@ export class CryptoService {
     const secret = this.configService.get<string>("ENCRYPTION_SECRET");
     if (!secret) {
       throw new Error(
-        "ENCRYPTION_SECRET is not defined in environment variables"
+        "ENCRYPTION_SECRET is not defined in environment variables",
       );
     }
     this.encryptionKey = scryptSync(secret, "salt", 24);
