@@ -9,21 +9,19 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Request, Response } from "express";
-
 import { UserRoleEnum } from "../../shared/enums";
 import { IApiResponse } from "../../shared/interface";
 import { AuthService } from "./auth.service";
-
 @Controller("auth")
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService
-  ) {}
+    private readonly configService: ConfigService,
+  ) { }
 
   @Post("otp/request")
   async requestOtp(
-    @Body("phoneNumber") phoneNumber: string
+    @Body("phoneNumber") phoneNumber: string,
   ): Promise<IApiResponse<null>> {
     await this.authService.requestOtp(phoneNumber);
     return { success: true, message: "OTP sent successfully.", data: null };
@@ -32,15 +30,15 @@ export class AuthController {
   @Post("otp/verify")
   async verifyOtp(
     @Body() body: { phoneNumber: string; otp: string },
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) response: Response,
   ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
     const onboardingToken = await this.authService.signupInitiate(
       phoneNumber,
-      otp
+      otp,
     );
 
-    res.setHeader("onboarding_token", onboardingToken);
+    response.setHeader("onboarding_token", onboardingToken);
     return { success: true, message: "OTP verified successfully.", data: null };
   }
 
@@ -48,37 +46,35 @@ export class AuthController {
   async login(
     @Body() body: { phoneNumber: string; otp: string },
     @Headers("role") role: UserRoleEnum,
-    @Res({ passthrough: true }) res: Response
-  ): Promise<IApiResponse<null>> {
+    @Res() response: Response,
+  ): Promise<void> {
     const { phoneNumber, otp } = body;
     const { accessToken, refreshToken } = await this.authService.login(
       phoneNumber,
       otp,
-      role
+      role,
     );
 
-    res.cookie("access_token", accessToken, {
-      httpOnly: true,
-      secure: this.configService.get<string>("ENVIRONMENT") === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000, // 1 hour
-    });
-    res.cookie("refresh_token", refreshToken, {
+    response.cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: this.configService.get<string>("ENVIRONMENT") === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
     });
 
-    return { success: true, message: "Login successful.", data: null };
+    response.json({
+      success: true,
+      message: "Login successful.",
+      data: { accessToken },
+    });
   }
 
   @Post("refresh_token")
   async refreshToken(
-    @Res({ passthrough: true }) res: Response,
-    @Req() req: Request
-  ): Promise<IApiResponse<null>> {
-    const refreshToken = req.cookies["refresh_token"];
+    @Res() response: Response,
+    @Req() request: Request,
+  ): Promise<void> {
+    const refreshToken = request.cookies["refresh_token"];
     if (!refreshToken) {
       throw new ForbiddenException("Refresh token not found.");
     }
@@ -86,21 +82,17 @@ export class AuthController {
     const { accessToken, refreshToken: newRefreshToken } =
       await this.authService.refreshToken(refreshToken);
 
-    res.cookie("access_token", accessToken, {
+    response.cookie("refresh_token", newRefreshToken, {
       httpOnly: true,
       secure: this.configService.get<string>("ENVIRONMENT") === "production",
-      maxAge: 60 * 60 * 1000,
-    });
-    res.cookie("refresh_token", newRefreshToken, {
-      httpOnly: true,
-      secure: this.configService.get<string>("ENVIRONMENT") === "production",
-      maxAge: 60 * 60 * 24 * 7 * 1000,
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
     });
 
-    return {
+    response.json({
       success: true,
       message: "Tokens refreshed successfully.",
-      data: null,
-    };
+      data: { accessToken },
+    })
   }
 }

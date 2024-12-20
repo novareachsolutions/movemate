@@ -1,5 +1,4 @@
 import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
-
 import { BaseEntity } from "./BaseEntity";
 import { User } from "./User";
 import { SendPackageOrder } from "./SendPackageOrder";
@@ -21,7 +20,7 @@ export class OrderReview extends BaseEntity {
   @ManyToOne(() => User, {
     cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     nullable: false,
   })
   customer: User;

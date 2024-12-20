@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { User } from "../../entity/User";
 import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
 import { UpdateResult, DeleteResult } from "typeorm";
@@ -26,10 +26,10 @@ export class UserService {
 
     if (existingUser) {
       logger.error(
-        `UserService.createUser: User with email ${email} or phone number ${phoneNumber} already exists.`
+        `UserService.createUser: User with email ${email} or phone number ${phoneNumber} already exists.`,
       );
       throw new UserAlreadyExistsError(
-        `User with the provided email ${email} or phone number ${phoneNumber} already exists.`
+        `User with the provided email ${email} or phone number ${phoneNumber} already exists.`,
       );
     }
 
@@ -43,9 +43,7 @@ export class UserService {
    * @returns The user entity.
    */
   async getUserById(id: number): Promise<User> {
-    return await dbReadRepo(User).findOneOrFail({
-      where: { id },
-    });
+    return await dbReadRepo(User).findOneOrFail({ where: { id } });
   }
 
   /**
@@ -55,9 +53,7 @@ export class UserService {
    */
   async getUserProfile(getUserProfileDto: TGetUserProfile): Promise<User> {
     const filteredInput = filterEmptyValues(getUserProfileDto);
-    return await dbReadRepo(User).findOneOrFail({
-      where: filteredInput,
-    });
+    return await dbReadRepo(User).findOneOrFail({ where: filteredInput });
   }
 
   /**
@@ -74,19 +70,19 @@ export class UserService {
    * @param updateUserDto Data Transfer Object for updating user.
    * @returns The result of the update operation.
    */
-  async updateUser(
-    id: number,
-    updateUserDto: TUpdateUser
-  ): Promise<UpdateResult> {
+  async updateUser(id: number, updateUserDto: TUpdateUser): Promise<UpdateResult> {
     const user = await dbReadRepo(User).findOne({ where: { id } });
 
     if (!user) {
+      logger.error(`UserService.updateUser: User with ID ${id} not found.`);
       throw new UserNotFoundError(`User with ID ${id} not found.`);
     }
 
     const filteredUpdateUser = filterEmptyValues(updateUserDto);
     logger.info(
-      `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(filteredUpdateUser)}`
+      `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(
+        filteredUpdateUser,
+      )}`,
     );
 
     return await dbRepo(User).update(id, filteredUpdateUser);

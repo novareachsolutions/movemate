@@ -20,6 +20,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
         message: exception.message,
         data: null,
         error: {
+          name: exception.name,
           message: exception.message,
           code: status,
         },

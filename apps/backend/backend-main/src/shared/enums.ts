@@ -18,6 +18,12 @@ export enum AgentRegistrationDocumentEnum {
   VEHICLE_REGISTRATION = "VEHICLE_REGISTRATION",
 }
 
+export enum ApprovalStatusEnum {
+  PENDING = "PENDING",
+  REJECTED = "REJECTED",
+  APPROVED = "APPROVED",
+}
+
 // Order
 export enum OrderStatusEnum {
   PENDING = 'PENDING',

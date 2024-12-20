@@ -45,4 +45,15 @@ export default (): Record<string, any> => ({
   onboarding: {
     jwtSecret: process.env.ONBOARDING_JWT_SECRET,
   },
+  corsOrigin:
+    process.env.CORS_ORIGIN ||
+    `http://localhost:${parseInt(process.env.PORT, 10) || 3000}/*`,
+  websocketPorts: {
+    agentNotification:
+      parseInt(process.env.AGENT_NOTIFICATION_PORT, 10) || 3001,
+    customerNotification:
+      parseInt(process.env.CUSTOMER_NOTIFICATION_PORT, 10) || 3002,
+    chatSupport: parseInt(process.env.CHAT_SUPPORT_PORT, 10) || 3003,
+    notification: parseInt(process.env.NOTIFICATION_PORT, 10) || 3004,
+  },
 });
