@@ -136,17 +136,6 @@ export class BuyFromStoreOrder extends BaseEntity {
     @Column({ type: 'timestamp', nullable: true })
     completedAt: Date;
 
-    @ManyToOne(() => Agent, {
-        cascade: true,
-        onDelete: 'CASCADE',
-        nullable: true,
-    })
-    assignedAgent: Agent;
-
-    @RelationId((order: BuyFromStoreOrder) => order.assignedAgent)
-    @Column({ type: 'integer', nullable: true })
-    assignedAgentId: number;
-
     @Column({
         type: 'varchar',
         default: PaymentStatusEnum.NOT_PAID,

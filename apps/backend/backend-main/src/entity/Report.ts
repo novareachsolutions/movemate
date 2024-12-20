@@ -1,48 +1,29 @@
-import {
-  Column,
-  Entity,
-  Index,
-  ManyToOne,
-  RelationId,
-} from 'typeorm';
-import { BaseEntity } from './BaseEntity';
-import { User } from './User';
-import { SendPackageOrder } from './SendPackageOrder';
-import { BuyFromStoreOrder } from './BuyFromStoreOrder';
+// src/entity/Report.ts
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, RelationId } from "typeorm";
+import { SendPackageOrder } from "./SendPackageOrder";
+import { BaseEntity } from "./BaseEntity";
+import { BuyFromStoreOrder } from "./BuyFromStoreOrder";
 
-@Index('IDX_report_customerId', ['customerId'], {
+@Index('IDX_report_orderId', ['sendPackageOrderId'], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
 export class Report extends BaseEntity {
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: false })
   reason: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   details: string;
 
-  @ManyToOne(() => User, {
-    cascade: true,
-    deferrable: 'INITIALLY IMMEDIATE',
-    onDelete: 'CASCADE',
-    nullable: false,
+  @OneToOne(() => SendPackageOrder, (sendPackageOrder) => sendPackageOrder.report, {
+    onDelete: "CASCADE",
   })
-  customer: User;
-
-  @RelationId((report: Report) => report.customer)
-  @Column({ type: 'integer' })
-  customerId: number;
-
-  @ManyToOne(() => SendPackageOrder, (sendPackageOrder) => sendPackageOrder.report, {
-    deferrable: 'INITIALLY IMMEDIATE',
-    onDelete: 'CASCADE',
-    nullable: true,
-  })
-  sendPackageOrder?: SendPackageOrder;
+  @JoinColumn({ name: "sendPackageOrderId" })
+  sendPackageOrder: SendPackageOrder;
 
   @RelationId((report: Report) => report.sendPackageOrder)
-  @Column({ type: 'integer', nullable: true })
-  sendPackageOrderId?: number;
+  @Column({ type: "integer", nullable: false })
+  sendPackageOrderId: number;
 
   @ManyToOne(() => BuyFromStoreOrder, (buyFromStoreOrder) => buyFromStoreOrder.report, {
     deferrable: 'INITIALLY IMMEDIATE',
