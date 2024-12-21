@@ -1,7 +1,10 @@
+// src/modules/agent/agent.types.ts
+
 import { AgentStatusEnum, AgentTypeEnum } from "../../shared/enums";
+import { TCreateUser, TUpdateUser } from "../user/user.types";
 
 export type TAgent = {
-  userId: number;
+  user: TCreateUser;
   agentType: AgentTypeEnum;
   abnNumber: string;
   vehicleMake: string;
@@ -12,7 +15,7 @@ export type TAgent = {
 };
 
 export type TAgentPartial = {
-  userId?: number;
+  user?: TUpdateUser;
   agentType?: AgentTypeEnum;
   abnNumber?: string;
   vehicleMake?: string;
@@ -21,11 +24,6 @@ export type TAgentPartial = {
   profilePhoto?: string;
   status?: AgentStatusEnum;
 };
-
-export type TGetAgentProfile = {
-  id?: number;
-  createdAt?: Date;
-} & TAgentPartial;
 
 export type TAgentDocument = {
   name: string;

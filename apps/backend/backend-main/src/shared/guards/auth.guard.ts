@@ -3,6 +3,9 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { logger } from "../../logger";
 import { UnauthorizedError } from "../errors/authErrors";
+import { Agent } from "../../entity/Agent";
+import { UserRoleEnum } from "../../shared/enums";
+import { dbRepo } from "../../modules/database/database.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -15,16 +18,24 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const accessToken = this.extractTokenFromHeaders(request);
 
-    // Validate Access Token
     if (accessToken) {
       const payload = this.verifyToken(accessToken, "JWT_ACCESS_SECRET");
       if (payload) {
         this.setUserInRequest(request, payload);
+        if (payload.role === UserRoleEnum.AGENT) {
+          const agent = await dbRepo(Agent).findOne({
+            where: { userId: payload.id },
+          });
+          if (agent) {
+            request.user.agent = { id: agent.id };
+          } else {
+            throw new UnauthorizedError("Agent profile not found.");
+          }
+        }
         return true;
       }
     }
 
-    // If Access Token is invalid or missing, throw UnauthorizedError
     throw new UnauthorizedError("Invalid or missing access token");
   }
 

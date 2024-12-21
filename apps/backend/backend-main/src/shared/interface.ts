@@ -5,6 +5,9 @@ export interface ICustomRequest extends Request {
     id?: number;
     phoneNumber?: string;
     role?: UserRoleEnum;
+    agent?: {
+      id?: number
+    }
   }
 }
 
