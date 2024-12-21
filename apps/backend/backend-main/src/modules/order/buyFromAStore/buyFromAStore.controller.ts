@@ -36,7 +36,7 @@ import { BuyFromStoreService } from './buyFromAStore.service';
     async cancelOrder(
       @Param('id') orderId: number,
       @Body('reason') reason: string,
-      @Req() req: Request,
+      @Req() req: ICustomRequest,
     ) {
       const customerId = req.user.id;
       return this.buyFromStoreService.cancelOrder(orderId, reason, customerId);
@@ -50,31 +50,17 @@ import { BuyFromStoreService } from './buyFromAStore.service';
       @Param('id') orderId: number,
       @Body('rating') rating: number,
       @Body('comment') comment: string,
-      @Req() req: Request,
+      @Req() req: ICustomRequest,
     ) {
       const customerId = req.user.id;
       return this.buyFromStoreService.leaveReview(orderId, rating, comment, customerId);
     }
   
     /**
-     * Create a report for a BuyFromStore order
-     */
-    @Post(':id/reports')
-    async createReport(
-      @Param('id') orderId: number,
-      @Body('reason') reason: string,
-      @Body('details') details: string,
-      @Req() req: Request,
-    ) {
-      const customerId = req.user.id;
-      return this.buyFromStoreService.createReport(orderId, reason, details, customerId);
-    }
-  
-    /**
      * Get details of a specific BuyFromStore order
      */
     @Get(':id')
-    async getOrderDetails(@Param('id') orderId: number, @Req() req: Request) {
+    async getOrderDetails(@Param('id') orderId: number, @Req() req: ICustomRequest) {
       const customerId = req.user.id;
       return this.buyFromStoreService.getOrderDetails(orderId, customerId);
     }
@@ -83,7 +69,7 @@ import { BuyFromStoreService } from './buyFromAStore.service';
      * Get all BuyFromStore orders for the authenticated customer
      */
     @Get()
-    async getAllOrders(@Query() query: any, @Req() req: Request) {
+    async getAllOrders(@Query() query: any, @Req() req: ICustomRequest) {
       const customerId = req.user.id;
       return this.buyFromStoreService.getAllOrders(customerId, query);
     }
