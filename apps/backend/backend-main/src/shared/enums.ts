@@ -18,6 +18,12 @@ export enum AgentRegistrationDocumentEnum {
   VEHICLE_REGISTRATION = "VEHICLE_REGISTRATION",
 }
 
+export enum ApprovalStatusEnum {
+  PENDING = "PENDING",
+  REJECTED = "REJECTED",
+  APPROVED = "APPROVED",
+}
+
 // Order
 export enum OrderStatusEnum {
   CANCELED = "CANCELED",
@@ -41,8 +47,8 @@ export enum UserRoleEnum {
 
 //Payment
 export enum PaymentStatusEnum {
-  NOT_PAID = 'NOT_PAID',
-  PAID = 'PAID',
-  ERROR = 'ERROR',
-  REFUNDED = 'REFUNDED',
+  NOT_PAID = "NOT_PAID",
+  PAID = "PAID",
+  ERROR = "ERROR",
+  REFUNDED = "REFUNDED",
 }

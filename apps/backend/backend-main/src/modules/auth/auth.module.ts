@@ -30,6 +30,6 @@ import { OtpService } from "./utils/otp";
     CryptoService,
     TokenService,
   ],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule], 
 })
 export class AuthModule {}

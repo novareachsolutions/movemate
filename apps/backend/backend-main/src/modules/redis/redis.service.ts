@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis, { RedisOptions } from 'ioredis';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import Redis, { RedisOptions } from "ioredis";
 
-import { logger } from '../../logger';
+import { logger } from "../../logger";
 
 @Injectable()
 export class RedisService {
@@ -10,24 +10,24 @@ export class RedisService {
 
   constructor(private readonly configService: ConfigService) {
     const redisOptions: RedisOptions = {
-      host: this.configService.get<string>('REDIS_HOST'),
-      port: this.configService.get<number>('REDIS_PORT'),
+      host: this.configService.get<string>("REDIS_HOST"),
+      port: this.configService.get<number>("REDIS_PORT"),
     };
     this.redisClient = new Redis(redisOptions);
 
-    this.redisClient.on('connect', () => {
-      logger.info('Connected to Redis server');
+    this.redisClient.on("connect", () => {
+      logger.info("Connected to Redis server");
     });
 
-    this.redisClient.on('error', (error: unknown) => {
-      logger.error('Error connecting to Redis:', error);
+    this.redisClient.on("error", (error: unknown) => {
+      logger.error("Error connecting to Redis:", error);
     });
   }
 
   async set(
     key: string,
     value: any,
-    expiryMode: 'EX' = 'EX',
+    expiryMode: "EX" = "EX",
     time?: number,
   ): Promise<void> {
     await this.redisClient.set(key, value, expiryMode, time || 300);

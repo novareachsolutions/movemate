@@ -16,7 +16,7 @@ export class TokenService {
   generateAccessToken(
     userId: number,
     phoneNumber: string,
-    role: string
+    role: string,
   ): string {
     const payload = {
       id: userId,
@@ -25,7 +25,7 @@ export class TokenService {
     };
 
     return this.jwtService.sign(payload, {
-      secret: `${this.configService.get<string>("JWT_ACCESS_SECRET")}`,
+      secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
       expiresIn: this.configService.get<string>("JWT_ACCESS_EXPIRY"),
     });
   }
@@ -36,7 +36,7 @@ export class TokenService {
       {
         secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
         expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRY"),
-      }
+      },
     );
   }
 
@@ -48,7 +48,7 @@ export class TokenService {
       {
         secret: this.configService.get<string>("ONBOARDING_JWT_SECRET"),
         expiresIn: this.configService.get<string>("ONBOARDING_JWT_EXPIRY"),
-      }
+      },
     );
   }
 }
