@@ -21,7 +21,7 @@ export class AgentReview extends BaseEntity {
   @ManyToOne(() => User, {
     cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     nullable: false,
   })
   customer: User;
@@ -33,7 +33,7 @@ export class AgentReview extends BaseEntity {
   @ManyToOne(() => Agent, {
     cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     nullable: false,
   })
   agent: Agent;
