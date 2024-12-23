@@ -43,3 +43,11 @@ export enum UserRoleEnum {
   CUSTOMER = "CUSTOMER",
   SUPPORT = "SUPPORT",
 }
+
+//Payment
+export enum PaymentStatusEnum {
+  NOT_PAID = "NOT_PAID",
+  PAID = "PAID",
+  ERROR = "ERROR",
+  REFUNDED = "REFUNDED",
+}
