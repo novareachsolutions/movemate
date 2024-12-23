@@ -1,47 +1,73 @@
-// src/shared/errors/buyFromStore.errors.ts
+import { UserFacingError } from "./userFacing";
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-
-export class BuyFromStoreCancellationReasonRequiredError extends BadRequestException {
+export class BuyFromStoreCancellationReasonRequiredError extends UserFacingError {
   constructor(message: string) {
     super(message);
+    this.name = "BuyFromStoreCancellationReasonRequiredError";
+    this.statusCode = 400;
   }
 }
 
-export class BuyFromStoreNotFoundError extends NotFoundException {
+export class BuyFromStoreNotFoundError extends UserFacingError {
   constructor(message: string) {
     super(message);
+    this.name = "BuyFromStoreNotFoundError";
+    this.statusCode = 404;
   }
 }
 
-export class BuyFromStoreAlreadyCancelledError extends BadRequestException {
+export class BuyFromStoreAlreadyCancelledError extends UserFacingError {
   constructor(message: string) {
     super(message);
+    this.name = "BuyFromStoreAlreadyCancelledError";
+    this.statusCode = 400;
   }
 }
 
-export class BuyFromStoreInvalidRatingError extends BadRequestException {
+export class BuyFromStoreInvalidRatingError extends UserFacingError {
   constructor(message: string) {
     super(message);
+    this.name = "BuyFromStoreInvalidRatingError";
+    this.statusCode = 400;
   }
 }
 
-export class BuyFromStoreReviewCommentRequiredError extends BadRequestException {
+export class BuyFromStoreReviewCommentRequiredError extends UserFacingError {
   constructor(message: string) {
     super(message);
+    this.name = "BuyFromStoreReviewCommentRequiredError";
+    this.statusCode = 400;
   }
 }
 
-export class BuyFromStoreOrderNotCompletedError extends BadRequestException {
+export class BuyFromStoreOrderNotCompletedError extends UserFacingError {
   constructor(message: string) {
     super(message);
+    this.name = "BuyFromStoreOrderNotCompletedError";
+    this.statusCode = 400;
   }
 }
 
-export class BuyFromStoreReportReasonRequiredError extends BadRequestException {
+export class BuyFromStoreReportReasonRequiredError extends UserFacingError {
   constructor(message: string) {
     super(message);
+    this.name = "BuyFromStoreReportReasonRequiredError";
+    this.statusCode = 400;
   }
 }
 
-// Add more custom errors as needed
+export class BuyFromStoreInvalidActionError extends UserFacingError {
+  constructor(message: string) {
+    super(message);
+    this.name = "BuyFromStoreInvalidActionError";
+    this.statusCode = 400;
+  }
+}
+
+export class BuyFromStoreDeliveryError extends UserFacingError {
+  constructor(message: string) {
+    super(message);
+    this.name = "BuyFromStoreDeliveryError";
+    this.statusCode = 400;
+  }
+}
