@@ -10,7 +10,6 @@ import {
   UserRoleEnum,
   ItemStatusEnum,
 } from '../../../shared/enums';
-import { Report } from '../../../entity/Report';
 import { BuyFromStoreOrder } from '../../../entity/BuyFromStoreOrder';
 import { Item } from '../../../entity/Item';
 import { dbReadRepo, dbRepo } from '../../database/database.service';
@@ -33,7 +32,6 @@ import {
   TFinalizeOrder,
   TMarkAsDelivered,
   TCancelOrder,
-  TReportIssue,
 } from './buyFromStore.types';
 
 @Injectable()
@@ -300,7 +298,6 @@ export class BuyFromStoreService {
     }
 
     order.status = OrderStatusEnum.ITEMS_PAYMENT_RECEIVED;
-    order.deliveryPaymentStatus = PaymentStatusEnum.PAID;
     order.paymentStatus = PaymentStatusEnum.PAID;
     order.completionPhoto = TFinalizeOrder.finalBillUrl;
 
@@ -378,7 +375,6 @@ export class BuyFromStoreService {
 
     return updatedOrder;
   }
-
 
   async getAllAssignedOrders(
     agentId: number,
