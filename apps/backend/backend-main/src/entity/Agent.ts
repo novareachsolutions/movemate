@@ -11,7 +11,6 @@ import { User } from "./User";
 @Entity()
 export class Agent extends BaseEntity implements TAgent {
   @OneToOne(() => User, {
-    cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
     onDelete: "CASCADE",
   })

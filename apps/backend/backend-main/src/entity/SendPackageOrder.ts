@@ -140,9 +140,9 @@ export class SendPackageOrder extends BaseEntity {
   paymentStatus: PaymentStatusEnum;
 
   @OneToOne(() => Report, (report) => report.sendPackageOrder, {
+    cascade: true,
     nullable: true,
     onDelete: "SET NULL",
-    cascade: true,
   })
   @JoinColumn({ name: "reportId" })
   report: Report;

@@ -18,7 +18,6 @@ export class AgentDocument extends BaseEntity {
   url: string;
 
   @ManyToOne(() => Agent, {
-    cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
     onDelete: "CASCADE",
   })
