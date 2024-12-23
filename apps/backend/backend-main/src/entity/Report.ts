@@ -1,4 +1,3 @@
-// src/entity/Report.ts
 import { Column, Entity, Index, JoinColumn, OneToOne, RelationId } from "typeorm";
 import { SendPackageOrder } from "./SendPackageOrder";
 import { BaseEntity } from "./BaseEntity";
