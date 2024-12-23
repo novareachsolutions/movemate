@@ -27,7 +27,6 @@ import { SendAPackageModule } from "./modules/order/sendPackage/sendPackage.modu
     AgentModule,
     UserModule,
     SendAPackageModule
-    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],
