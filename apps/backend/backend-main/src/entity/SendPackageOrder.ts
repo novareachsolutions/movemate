@@ -109,7 +109,7 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: "float", nullable: true })
   actualTime: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   cancellationReason: string;
 
   @Column({
@@ -119,7 +119,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   canceledBy: UserRoleEnum;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   completionPhoto: string;
 
   @Column({ type: "timestamp", nullable: true })
@@ -142,7 +142,6 @@ export class SendPackageOrder extends BaseEntity {
   @OneToOne(() => Report, (report) => report.sendPackageOrder, {
     nullable: true,
     onDelete: "SET NULL",
-    cascade: true,
   })
   @JoinColumn({ name: "reportId" })
   report: Report;

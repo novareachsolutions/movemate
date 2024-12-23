@@ -3,18 +3,18 @@ import { BaseEntity } from "./BaseEntity";
 
 @Entity()
 export class PickupLocation extends BaseEntity {
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: false })
   addressLine1: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   addressLine2: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   landmark: string;
 
-  @Column({ type: 'float' })
+  @Column({ type: "float" })
   latitude: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: "float" })
   longitude: number;
 }

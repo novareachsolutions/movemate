@@ -14,6 +14,7 @@ export interface ICustomRequest extends Request {
 export interface IApiResponse<T> {
   data: T | null;
   error?: {
+    name:string
     message: string;
     code: number;
   };

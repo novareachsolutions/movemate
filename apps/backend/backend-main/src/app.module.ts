@@ -8,6 +8,7 @@ import { AgentModule } from "./modules/agent/agent.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { DatabaseModule } from "./modules/database/database.module";
 import { RedisModule } from "./modules/redis/redis.module";
+import { StripeModule } from "./modules/stripe/stripe.module";
 import { AuthGuard } from "./shared/guards/auth.guard";
 import { OnboardingGuard } from "./shared/guards/onboarding.guard";
 import { RoleGuard } from "./shared/guards/roles.guard";
@@ -26,6 +27,7 @@ import { SendAPackageModule } from "./modules/order/sendPackage/sendPackage.modu
     AgentModule,
     UserModule,
     SendAPackageModule
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],

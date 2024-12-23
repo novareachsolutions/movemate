@@ -6,7 +6,7 @@ import { SendPackageOrder } from "./SendPackageOrder";
 @Index("IDX_review_customerId", ["customerId"], {
   where: '"deletedAt" IS NULL',
 })
-@Index("IDX_review_orderId", ["sendPackageOrderId"], {
+@Index("IDX_review_sendAPackageOrderId", ["sendAPackageOrderId"], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
@@ -30,7 +30,6 @@ export class OrderReview extends BaseEntity {
   customerId: number;
 
   @ManyToOne(() => SendPackageOrder, {
-    cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
     onDelete: "CASCADE",
     nullable: false,
