@@ -27,13 +27,11 @@ import {
   import { DropLocation } from '../../../entity/DropLocation';
   import { OrderReview } from '../../../entity/OrderReview';
   import { Between } from 'typeorm';
-  import { TBuyFromStoreOrder } from '../buyFromStore.types';
+  import { TBuyFromStoreOrder } from './buyFromStore.types';
   
   @Injectable()
   export class BuyFromStoreService {
-    /**
-     * Create a new BuyFromStore order
-     */
+
     async createOrder(
       data: TBuyFromStoreOrder,
       customerId: number,
@@ -60,7 +58,6 @@ import {
           logger.debug(`BuyFromStoreService.createOrder: Reusing existing Store with ID ${store.id}`);
         }
   
-        // Handle Drop Location
         let dropLocation = await queryRunner.manager.findOne(DropLocation, {
           where: { ...data.dropLocation },
         });
@@ -73,7 +70,6 @@ import {
           logger.debug(`BuyFromStoreService.createOrder: Reusing existing DropLocation with ID ${dropLocation.id}`);
         }
   
-        // Create BuyFromStoreOrder
         const buyFromStoreOrder = queryRunner.manager.create(BuyFromStoreOrder, {
           store: store,
           dropLocation: dropLocation,
@@ -90,7 +86,6 @@ import {
         const savedOrder = await queryRunner.manager.save(BuyFromStoreOrder, buyFromStoreOrder);
         logger.debug(`BuyFromStoreService.createOrder: Created BuyFromStoreOrder with ID ${savedOrder.id}`);
   
-        // Handle Items
         if (data.items && data.items.length > 0) {
           for (const itemData of data.items) {
             const item = queryRunner.manager.create(Item, {
@@ -122,9 +117,6 @@ import {
       }
     }
   
-    /**
-     * Cancel an existing BuyFromStore order
-     */
     async cancelOrder(
       orderId: number,
       reason: string,
@@ -157,15 +149,13 @@ import {
       return updatedOrder;
     }
   
-    /**
-     * Leave a review for a completed BuyFromStore order
-     */
+ 
     async leaveReview(
       orderId: number,
       rating: number,
       comment: string,
       userId: number,
-    ): Promise<OrderReview> { // Specify the correct return type
+    ): Promise<OrderReview> { 
       logger.debug(`BuyFromStoreService.leaveReview: Leaving review for order ID ${orderId}`);
   
       if (rating < 1 || rating > 5) {
@@ -188,7 +178,6 @@ import {
         throw new BuyFromStoreOrderNotCompletedError(`Cannot review an incomplete order with ID ${orderId}`);
       }
   
-      // Create OrderReview
       const review = dbRepo(OrderReview).create({
         rating,
         comment,
@@ -202,9 +191,7 @@ import {
       return savedReview;
     }
   
-    /**
-     * Get details of a specific BuyFromStore order
-     */
+
     async getOrderDetails(
       orderId: number,
       userId: number,
@@ -224,9 +211,6 @@ import {
       return order;
     }
   
-    /**
-     * Get all BuyFromStore orders for a customer
-     */
     async getAllOrders(
       userId: number,
       query: any,
