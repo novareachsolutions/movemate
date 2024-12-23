@@ -255,8 +255,8 @@ export class AgentController {
    * Description: Allows an admin to retrieve a list of all agents.
    */
   @Get("list")
-  // @UseGuards(AuthGuard)
-  // @Roles(UserRoleEnum.ADMIN)
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async getAllAgents(): Promise<IApiResponse<Agent[]>> {
     const agents = await this.agentService.getAllAgents();
     return {

@@ -1,5 +1,3 @@
-// sendAPackage.ts
-
 import { UserFacingError } from "./userFacing";
 
 export class SendPackageCancellationReasonRequiredError extends UserFacingError {
@@ -110,6 +108,6 @@ export class SendPackageAgentMismatchError extends UserFacingError {
     constructor(message?: string) {
         super(message || "Agent attempting to start the order is not assigned to it.");
         this.name = "SendPackageAgentMismatchError";
-        this.statusCode = 403; // 403 Forbidden is appropriate here
+        this.statusCode = 403; 
     }
 }
