@@ -7,7 +7,7 @@ import { SendPackageOrder } from "./SendPackageOrder";
 @Index("IDX_review_customerId", ["customerId"], {
   where: '"deletedAt" IS NULL',
 })
-@Index("IDX_review_sendAPackageOrderId", ["sendAPackageOrderId"], {
+@Index("IDX_review_sendPackageOrderId", ["sendPackageOrderId"], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
@@ -39,6 +39,6 @@ export class OrderReview extends BaseEntity {
 
   @RelationId((review: OrderReview) => review.sendPackageOrder)
   @Column({ type: "integer" })
-  sendAPackageOrderId: number;
+  sendPackageOrderId: number;
 }
   
