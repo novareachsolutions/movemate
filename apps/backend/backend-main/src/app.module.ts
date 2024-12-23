@@ -25,7 +25,8 @@ import { UserModule } from "./modules/user/user.module";
     RedisModule,
     AuthModule,
     AgentModule,
-    UserModule
+    UserModule,
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],
