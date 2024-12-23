@@ -22,22 +22,22 @@ import { Agent } from "./Agent";
 
 @Entity()
 export class SendPackageOrder extends BaseEntity {
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   senderName: string;
 
-  @Column({ type: "varchar", length: 20, nullable: false })
+  @Column({ type: 'varchar', length: 20, nullable: false })
   senderPhoneNumber: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   receiverName: string;
 
-  @Column({ type: "varchar", length: 20, nullable: false })
+  @Column({ type: 'varchar', length: 20, nullable: false })
   receiverPhoneNumber: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   packageType: string;
 
-  @Column({ type: "varchar", length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   deliveryInstructions: string;
 
   @Column({
@@ -100,16 +100,16 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: "integer", nullable: true })
   agentId: number;
 
-  @Column({ type: "float", nullable: true })
+  @Column({ type: 'float', nullable: true })
   price: number;
 
-  @Column({ type: "float", nullable: true })
+  @Column({ type: 'float', nullable: true })
   actualDistance: number;
 
-  @Column({ type: "float", nullable: true })
+  @Column({ type: 'float', nullable: true })
   actualTime: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   cancellationReason: string;
 
   @Column({
@@ -119,7 +119,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   canceledBy: UserRoleEnum;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   completionPhoto: string;
 
   @Column({ type: "timestamp", nullable: true })
