@@ -18,7 +18,7 @@ export abstract class BaseSocketGateway implements OnGatewayInit {
   @SubscribeMessage("event")
   handleEvent(
     @MessageBody() _data: any,
-    @ConnectedSocket() _client: Socket,
+    @ConnectedSocket() _client: Socket
   ): void {
     // Implement event handling logic
   }
@@ -28,14 +28,14 @@ export abstract class BaseSocketGateway implements OnGatewayInit {
   }
 
   // Join a specific room
-  joinRoom(room: string, client: Socket): void {
-    client.join(room);
+  async joinRoom(room: string, client: Socket): Promise<void> {
+    await client.join(room);
     logger.info(`Client joined room: ${room}`);
   }
 
   // Leave a specific room
-  leaveRoom(room: string, client: Socket): void {
-    client.leave(room);
+  async leaveRoom(room: string, client: Socket): Promise<void> {
+    await client.leave(room);
     logger.info(`Client left room: ${room}`);
   }
 

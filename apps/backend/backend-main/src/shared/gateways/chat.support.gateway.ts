@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -7,36 +8,169 @@ import {
 import { Socket } from "socket.io";
 
 import configuration from "../../config/configuration";
-import { ChatService } from "../../modules/chat/chat.service";
-import { TChatMessageInput } from "../../modules/chat/chat.types";
+import { NotificationService } from "../../modules/support/notification.service";
+import { SupportService } from "../../modules/support/support.service";
+import {
+  MessageTypeEnum,
+  TicketStatusEnum,
+} from "../../modules/support/types/support.types";
 import { BaseSocketGateway } from "./base.socket";
 
 const config = configuration();
 
+interface ISupportMessageInput {
+  content: string;
+  metadata?: {
+    fileName?: string;
+    fileSize?: number;
+    mimeType?: string;
+    attachmentUrl?: string;
+  };
+  senderId: number;
+  ticketId: number;
+  type: MessageTypeEnum;
+}
+
+interface ITicketStatusInput {
+  status: TicketStatusEnum;
+  ticketId: number;
+}
+
+@Injectable()
 @WebSocketGateway({
   port: config.websocketPorts.chatSupport,
   cors: { origin: config.corsOrigin },
 })
 export class ChatSupportGateway extends BaseSocketGateway {
-  constructor(private readonly chatService: ChatService) {
+  constructor(
+    private readonly supportService: SupportService,
+    private readonly notificationService: NotificationService
+  ) {
     super();
   }
 
-  @SubscribeMessage("sendMessage")
-  async handleSendMessage(
-    @MessageBody() data: TChatMessageInput,
-    @ConnectedSocket() _client: Socket,
+  @SubscribeMessage("sendSupportMessage")
+  async handleSupportMessage(
+    @MessageBody() data: ISupportMessageInput,
+    @ConnectedSocket() client: Socket
   ): Promise<void> {
-    await this.chatService.saveChat(data);
-    this.sendMessageToRoom(data.channelId, "newMessage", data);
+    try {
+      const message = await this.supportService.addMessage({
+        ticketId: data.ticketId,
+        content: data.content,
+        type: data.type,
+        senderId: data.senderId,
+        metadata: data.metadata,
+      });
+
+      // Let notification service handle all notifications
+      this.notificationService.notifyNewMessage(message);
+    } catch (error) {
+      this.sendMessageToClient(client.id, "error", {
+        message: "Failed to send message",
+        error: error.message,
+      });
+    }
   }
 
-  @SubscribeMessage("sendPrivateMessage")
-  async handleSendPrivateMessage(
-    @MessageBody() data: TChatMessageInput,
-    @ConnectedSocket() _client: Socket,
+  @SubscribeMessage("joinTicketRoom")
+  async handleJoinTicketRoom(
+    @MessageBody() data: { ticketId: number },
+    @ConnectedSocket() client: Socket
   ): Promise<void> {
-    await this.chatService.saveChat(data);
-    this.sendMessageToClient(data.channelId, "privateMessage", data);
+    try {
+      const roomId = `ticket:${data.ticketId}`;
+      await client.join(roomId);
+
+      const ticket = await this.supportService.getTicketDetails(data.ticketId);
+
+      // Basic room join confirmation
+      this.sendMessageToRoom(roomId, "userJoinedTicket", {
+        ticketId: data.ticketId,
+        userId: client.id,
+        timestamp: new Date(),
+        ticketDetails: ticket,
+      });
+    } catch (error) {
+      this.sendMessageToClient(client.id, "error", {
+        message: "Failed to join ticket room",
+        error: error.message,
+      });
+    }
+  }
+
+  @SubscribeMessage("leaveTicketRoom")
+  async handleLeaveTicketRoom(
+    @MessageBody() data: { ticketId: number },
+    @ConnectedSocket() client: Socket
+  ): Promise<void> {
+    try {
+      const roomId = `ticket:${data.ticketId}`;
+      await client.leave(roomId);
+
+      // Basic room leave notification
+      this.sendMessageToRoom(roomId, "userLeftTicket", {
+        ticketId: data.ticketId,
+        userId: client.id,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      this.sendMessageToClient(client.id, "error", {
+        message: "Failed to leave ticket room",
+        error: error.message,
+      });
+    }
+  }
+
+  @SubscribeMessage("updateTicketStatus")
+  async handleStatusUpdate(
+    @MessageBody() data: ITicketStatusInput,
+    @ConnectedSocket() client: Socket
+  ): Promise<void> {
+    try {
+      const updatedTicket = await this.supportService.updateTicketStatus(
+        data.ticketId,
+        data.status
+      );
+
+      // Let notification service handle status change notifications
+      this.notificationService.notifyTicketStatusChanged(updatedTicket);
+    } catch (error) {
+      this.sendMessageToClient(client.id, "error", {
+        message: "Failed to update ticket status",
+        error: error.message,
+      });
+    }
+  }
+
+  @SubscribeMessage("typing")
+  handleTyping(
+    @MessageBody() data: { ticketId: number; isTyping: boolean },
+    @ConnectedSocket() client: Socket
+  ): void {
+    // Simple typing indicator - no need for notification service
+    this.sendMessageToRoom(`ticket:${data.ticketId}`, "userTyping", {
+      ticketId: data.ticketId,
+      userId: client.id,
+      isTyping: data.isTyping,
+      timestamp: new Date(),
+    });
+  }
+
+  @SubscribeMessage("joinAgentRoom")
+  async handleJoinAgentRoom(@ConnectedSocket() client: Socket): Promise<void> {
+    try {
+      await client.join("agents");
+      // Simple room join notification
+      this.sendMessageToRoom("agents", "agentJoined", {
+        agentId: client.id,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      this.sendMessageToClient(client.id, "error", {
+        message: "Failed to join agent room",
+        error: error.message,
+      });
+    }
   }
 }
