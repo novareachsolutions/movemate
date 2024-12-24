@@ -12,7 +12,7 @@ export class ActivityService {
     ticket: SupportTicket,
     performer: User,
     oldStatus: TicketStatusEnum,
-    newStatus: TicketStatusEnum
+    newStatus: TicketStatusEnum,
   ): Promise<TicketActivity> {
     return await this.createActivity(ticket, performer, "status_changed", {
       from: oldStatus,
@@ -25,7 +25,7 @@ export class ActivityService {
     ticket: SupportTicket,
     performer: User,
     oldAgentId: number | null,
-    newAgentId: number
+    newAgentId: number,
   ): Promise<TicketActivity> {
     return await this.createActivity(ticket, performer, "agent_assigned", {
       from: oldAgentId,
@@ -38,7 +38,7 @@ export class ActivityService {
     ticket: SupportTicket,
     performer: User,
     oldPriority: string,
-    newPriority: string
+    newPriority: string,
   ): Promise<TicketActivity> {
     return await this.createActivity(ticket, performer, "priority_changed", {
       from: oldPriority,
@@ -51,7 +51,7 @@ export class ActivityService {
     ticket: SupportTicket,
     performer: User,
     noteId: number,
-    isInternal: boolean
+    isInternal: boolean,
   ): Promise<TicketActivity> {
     return await this.createActivity(ticket, performer, "note_added", {
       noteId,
@@ -63,7 +63,7 @@ export class ActivityService {
   async logTicketResolved(
     ticket: SupportTicket,
     performer: User,
-    resolution: string
+    resolution: string,
   ): Promise<TicketActivity> {
     return await this.createActivity(ticket, performer, "ticket_resolved", {
       resolution,
@@ -85,7 +85,7 @@ export class ActivityService {
     ticket: SupportTicket,
     performer: User,
     action: string,
-    details: Record<string, any>
+    details: Record<string, any>,
   ): Promise<TicketActivity> {
     const activity = new TicketActivity();
     activity.ticket = ticket;

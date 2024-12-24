@@ -31,7 +31,7 @@ export class SupportController {
 
   @Post("ticket")
   async createTicket(
-    @Body() input: CreateTicketDto
+    @Body() input: CreateTicketDto,
   ): Promise<IApiResponse<SupportTicket>> {
     const ticket = await this.ticketService.createTicket(input);
     return {
@@ -43,7 +43,7 @@ export class SupportController {
 
   @Get("tickets")
   async getTickets(
-    @Query() query: GetTicketsDto
+    @Query() query: GetTicketsDto,
   ): Promise<IApiResponse<{ tickets: SupportTicket[]; total: number }>> {
     const { tickets, total } = await this.ticketService.getTickets(query);
     return {
@@ -55,7 +55,7 @@ export class SupportController {
 
   @Get("ticket/:ticketId")
   async getTicketDetails(
-    @Param("ticketId") ticketId: number
+    @Param("ticketId") ticketId: number,
   ): Promise<IApiResponse<SupportTicket>> {
     const ticket = await this.ticketService.getTicketDetails(ticketId);
     return {
@@ -68,7 +68,7 @@ export class SupportController {
   @Post("ticket/:ticketId/message")
   async addMessage(
     @Param("ticketId") ticketId: number,
-    @Body() input: AddMessageDto
+    @Body() input: AddMessageDto,
   ): Promise<IApiResponse<ChatMessage>> {
     const message = await this.ticketService.addMessage({
       ...input,
@@ -84,11 +84,11 @@ export class SupportController {
   @Put("ticket/:ticketId/assign")
   async assignTicket(
     @Param("ticketId") ticketId: number,
-    @Body() input: AssignTicketDto
+    @Body() input: AssignTicketDto,
   ): Promise<IApiResponse<SupportTicket>> {
     const ticket = await this.ticketService.assignTicket(
       ticketId,
-      input.agentId
+      input.agentId,
     );
     return {
       success: true,
@@ -100,11 +100,11 @@ export class SupportController {
   @Put("ticket/:ticketId/status")
   async updateTicketStatus(
     @Param("ticketId") ticketId: number,
-    @Body() input: UpdateTicketStatusDto
+    @Body() input: UpdateTicketStatusDto,
   ): Promise<IApiResponse<SupportTicket>> {
     const ticket = await this.ticketService.updateTicketStatus(
       ticketId,
-      input.status
+      input.status,
     );
     return {
       success: true,
@@ -116,7 +116,7 @@ export class SupportController {
   @Post("ticket/:ticketId/note")
   async addNote(
     @Param("ticketId") ticketId: number,
-    @Body() input: AddNoteDto
+    @Body() input: AddNoteDto,
   ): Promise<IApiResponse<TicketNote>> {
     const note = await this.ticketService.addNote({
       ...input,
