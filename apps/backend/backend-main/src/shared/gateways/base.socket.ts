@@ -29,25 +29,25 @@ export abstract class BaseSocketGateway implements OnGatewayInit {
 
   // Join a specific room
   joinRoom(room: string, client: Socket): void {
-    client.join(room);
+    void client.join(room);
     logger.info(`Client joined room: ${room}`);
   }
 
   // Leave a specific room
   leaveRoom(room: string, client: Socket): void {
-    client.leave(room);
+    void client.leave(room);
     logger.info(`Client left room: ${room}`);
   }
 
   // Send a message to a specific room
   sendMessageToRoom(room: string, event: string, message: any): void {
-    this.server.to(room).emit(event, message);
+    void this.server.to(room).emit(event, message);
     logger.info(`Message sent to room ${room}: ${event}`);
   }
 
   // Send a message to a specific client
   sendMessageToClient(clientId: string, event: string, message: any): void {
-    this.server.to(clientId).emit(event, message);
+    void this.server.to(clientId).emit(event, message);
     logger.info(`Message sent to client ${clientId}: ${event}`);
   }
 }

@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
+import { Column, Entity } from "typeorm";
 
 import { AgentTypeEnum } from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
