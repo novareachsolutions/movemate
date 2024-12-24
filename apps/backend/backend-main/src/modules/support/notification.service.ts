@@ -11,7 +11,7 @@ export class NotificationService {
     @Inject(forwardRef(() => ChatSupportGateway))
     private readonly chatSupportGateway: ChatSupportGateway,
     @Inject(forwardRef(() => CustomerNotificationGateway))
-    private readonly customerNotificationGateway: CustomerNotificationGateway
+    private readonly customerNotificationGateway: CustomerNotificationGateway,
   ) {}
 
   notifyNewMessage(message: ChatMessage): void {
@@ -27,7 +27,7 @@ export class NotificationService {
           senderId: message.sender.id,
           createdAt: message.createdAt,
         },
-      }
+      },
     );
 
     if (this.isCustomerMessage(message)) {
@@ -38,7 +38,7 @@ export class NotificationService {
           ticketId: message.ticket.id,
           customerId: message.sender.id,
           message: message.content,
-        }
+        },
       );
     }
   }
@@ -54,7 +54,7 @@ export class NotificationService {
           id: ticket.customer.id,
           name: `${ticket.customer.firstName} ${ticket.customer.lastName}`,
         },
-      }
+      },
     );
 
     this.customerNotificationGateway.sendMessageToClient(
@@ -67,7 +67,7 @@ export class NotificationService {
           id: ticket.assignedAgent.id,
           name: `${ticket.assignedAgent.firstName} ${ticket.assignedAgent.lastName}`,
         },
-      }
+      },
     );
   }
 
@@ -80,7 +80,7 @@ export class NotificationService {
         ticketNumber: ticket.ticketNumber,
         status: ticket.status,
         updatedAt: new Date(),
-      }
+      },
     );
 
     this.customerNotificationGateway.sendMessageToClient(
@@ -90,13 +90,13 @@ export class NotificationService {
         ticketId: ticket.id,
         status: ticket.status,
         message: this.getStatusChangeMessage(ticket.status),
-      }
+      },
     );
   }
 
   notifyTicketPriorityChanged(
     ticket: SupportTicket,
-    oldPriority: string
+    oldPriority: string,
   ): void {
     this.chatSupportGateway.sendMessageToRoom(
       "agents",
@@ -106,7 +106,7 @@ export class NotificationService {
         ticketNumber: ticket.ticketNumber,
         oldPriority,
         newPriority: ticket.priority,
-      }
+      },
     );
   }
 
