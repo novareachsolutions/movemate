@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, RelationId } from "typeorm";
 
 import {
   TicketPriorityEnum,
@@ -16,8 +16,14 @@ export class SupportTicket extends BaseEntity {
   @ManyToOne(() => User)
   customer: User;
 
+  @RelationId((ticket: SupportTicket) => ticket.customer)
+  customerId: number;
+
   @ManyToOne(() => User, { nullable: true })
   assignedAgent: User;
+
+  @RelationId((ticket: SupportTicket) => ticket.assignedAgent)
+  assignedAgentId: number;
 
   @Column({
     type: "varchar",

@@ -43,7 +43,7 @@ export class SupportService {
   }
 
   async addMessage(
-    input: AddMessageDto & { ticketId: number },
+    input: AddMessageDto & { ticketId: number }
   ): Promise<ChatMessage> {
     const ticket = await this.getTicketDetails(input.ticketId);
 
@@ -59,7 +59,7 @@ export class SupportService {
 
   async assignTicket(
     ticketId: number,
-    agentId: number,
+    agentId: number
   ): Promise<SupportTicket> {
     const ticket = await this.getTicketDetails(ticketId);
     const oldAgentId = ticket.assignedAgent?.id;
@@ -70,6 +70,8 @@ export class SupportService {
     await this.logActivity(ticket, {
       action: "agent_assigned",
       details: { from: oldAgentId, to: agentId },
+      // replace with logged in user id
+      performerId: agentId,
     });
 
     this.notificationService.notifyTicketAssigned(updatedTicket);
@@ -111,16 +113,7 @@ export class SupportService {
   async getTicketDetails(ticketId: number): Promise<SupportTicket> {
     const ticket = await dbRepo(SupportTicket).findOne({
       where: { id: ticketId },
-      relations: [
-        "customer",
-        "assignedAgent",
-        "messages",
-        "messages.sender",
-        "notes",
-        "notes.author",
-        "activities",
-        "activities.performer",
-      ],
+      relations: ["customer", "assignedAgent", "messages"],
     });
 
     if (!ticket) {
@@ -132,7 +125,7 @@ export class SupportService {
 
   async updateTicketStatus(
     ticketId: number,
-    status: TicketStatusEnum,
+    status: TicketStatusEnum
   ): Promise<SupportTicket> {
     const ticket = await this.getTicketDetails(ticketId);
     const oldStatus = ticket.status;
@@ -150,9 +143,11 @@ export class SupportService {
         from: oldStatus,
         to: status,
       },
+      // replace with logged in user id
+      performerId: ticket.assignedAgentId,
     });
 
-    await this.notificationService.notifyTicketStatusChanged(updatedTicket);
+    this.notificationService.notifyTicketStatusChanged(updatedTicket);
 
     return updatedTicket;
   }
@@ -171,7 +166,7 @@ export class SupportService {
 
   async getAgentTickets(
     agentId: number,
-    status?: TicketStatusEnum[],
+    status?: TicketStatusEnum[]
   ): Promise<SupportTicket[]> {
     const qb = dbRepo(SupportTicket)
       .createQueryBuilder("ticket")
@@ -211,7 +206,7 @@ export class SupportService {
 
   async getTicketMetrics(
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<{
     totalTickets: number;
     resolvedTickets: number;
@@ -228,11 +223,11 @@ export class SupportService {
       .getMany();
 
     const resolvedTickets = tickets.filter(
-      (t) => t.status === TicketStatusEnum.RESOLVED,
+      (t) => t.status === TicketStatusEnum.RESOLVED
     );
 
     const resolutionTimes = resolvedTickets.map(
-      (t) => t.resolvedAt.getTime() - t.createdAt.getTime(),
+      (t) => t.resolvedAt.getTime() - t.createdAt.getTime()
     );
 
     const averageResolutionTime =
@@ -245,7 +240,7 @@ export class SupportService {
         acc[ticket.priority] = (acc[ticket.priority] || 0) + 1;
         return acc;
       },
-      {} as Record<TicketPriorityEnum, number>,
+      {} as Record<TicketPriorityEnum, number>
     );
 
     const ticketsByStatus = tickets.reduce(
@@ -253,7 +248,7 @@ export class SupportService {
         acc[ticket.status] = (acc[ticket.status] || 0) + 1;
         return acc;
       },
-      {} as Record<TicketStatusEnum, number>,
+      {} as Record<TicketStatusEnum, number>
     );
 
     return {
@@ -267,13 +262,14 @@ export class SupportService {
 
   private async logActivity(
     ticket: SupportTicket,
-    data: { action: string; details?: any },
+    data: { action: string; details?: any; performerId: number }
   ): Promise<void> {
     const activity = new TicketActivity();
     activity.ticket = ticket;
     activity.action = data.action;
     activity.details = data.details;
-
+    activity.performerId = data.performerId;
+    await dbRepo(TicketActivity).save(activity);
     await dbRepo(TicketActivity).save(activity);
   }
 
