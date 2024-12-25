@@ -16,7 +16,6 @@ export class AppService {
   @HealthCheck()
   check(): Promise<HealthCheckResult> {
     return this.healthCheckService.check([
-      // Example: Checking an external service
       async (): Promise<any> =>
         await this.httpHealthIndicator.pingCheck(
           "nestjs-docs",
