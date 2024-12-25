@@ -10,10 +10,10 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { DatabaseModule } from "./modules/database/database.module";
 import { RedisModule } from "./modules/redis/redis.module";
 import { StripeModule } from "./modules/stripe/stripe.module";
+import { UserModule } from "./modules/user/user.module";
 import { AuthGuard } from "./shared/guards/auth.guard";
 import { OnboardingGuard } from "./shared/guards/onboarding.guard";
 import { RoleGuard } from "./shared/guards/roles.guard";
-import { UserModule } from "./modules/user/user.module";
 
 @Module({
   imports: [

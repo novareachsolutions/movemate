@@ -1,29 +1,30 @@
 import {
-  Controller,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
   Get,
+  Param,
   ParseUUIDPipe,
-  UseGuards,
-  Req,
   Patch,
+  Post,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
-import { UpdateResult, DeleteResult } from "typeorm";
+import { DeleteResult, UpdateResult } from "typeorm";
+
 import { User } from "../../entity/User";
-import { IApiResponse, ICustomRequest } from "../../shared/interface";
-import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
-import { UnauthorizedError } from "../../shared/errors/authErrors";
-import { AuthGuard } from "../../shared/guards/auth.guard";
 import { Roles } from "../../shared/decorators/roles.decorator";
 import { UserRoleEnum } from "../../shared/enums";
+import { UnauthorizedError } from "../../shared/errors/authErrors";
+import { AuthGuard } from "../../shared/guards/auth.guard";
+import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
+import { IApiResponse, ICustomRequest } from "../../shared/interface";
+import { UserService } from "./user.service";
+import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Controller("user")
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   /**
    * Create a new user.
@@ -36,7 +37,10 @@ export class UserController {
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<number>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
-    if (createUserDto.phoneNumber && createUserDto.phoneNumber !== phoneNumberFromGuard) {
+    if (
+      createUserDto.phoneNumber &&
+      createUserDto.phoneNumber !== phoneNumberFromGuard
+    ) {
       throw new UnauthorizedError(
         "The provided phone number does not match the authenticated user's phone number.",
       );
@@ -52,9 +56,9 @@ export class UserController {
   }
 
   /**
-  * Get the authenticated user's profile.
-  * GET /user/me
-  */
+   * Get the authenticated user's profile.
+   * GET /user/me
+   */
   @Get()
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.CUSTOMER)
