@@ -38,13 +38,13 @@ interface ITicketStatusInput {
 
 @Injectable()
 @WebSocketGateway({
-  port: config.websocketPorts.chatSupport,
+  namespace: "chat-support",
   cors: { origin: config.corsOrigin },
 })
 export class ChatSupportGateway extends BaseSocketGateway {
   constructor(
     private readonly supportService: SupportService,
-    private readonly notificationService: NotificationService,
+    private readonly notificationService: NotificationService
   ) {
     super();
   }
@@ -52,7 +52,7 @@ export class ChatSupportGateway extends BaseSocketGateway {
   @SubscribeMessage("sendSupportMessage")
   async handleSupportMessage(
     @MessageBody() data: ISupportMessageInput,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): Promise<void> {
     try {
       const message = await this.supportService.addMessage({
@@ -76,7 +76,7 @@ export class ChatSupportGateway extends BaseSocketGateway {
   @SubscribeMessage("joinTicketRoom")
   async handleJoinTicketRoom(
     @MessageBody() data: { ticketId: number },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): Promise<void> {
     try {
       const roomId = `ticket:${data.ticketId}`;
@@ -102,7 +102,7 @@ export class ChatSupportGateway extends BaseSocketGateway {
   @SubscribeMessage("leaveTicketRoom")
   async handleLeaveTicketRoom(
     @MessageBody() data: { ticketId: number },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): Promise<void> {
     try {
       const roomId = `ticket:${data.ticketId}`;
@@ -125,12 +125,12 @@ export class ChatSupportGateway extends BaseSocketGateway {
   @SubscribeMessage("updateTicketStatus")
   async handleStatusUpdate(
     @MessageBody() data: ITicketStatusInput,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): Promise<void> {
     try {
       const updatedTicket = await this.supportService.updateTicketStatus(
         data.ticketId,
-        data.status,
+        data.status
       );
 
       // Let notification service handle status change notifications
@@ -146,7 +146,7 @@ export class ChatSupportGateway extends BaseSocketGateway {
   @SubscribeMessage("typing")
   handleTyping(
     @MessageBody() data: { ticketId: number; isTyping: boolean },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): void {
     // Simple typing indicator - no need for notification service
     this.sendMessageToRoom(`ticket:${data.ticketId}`, "userTyping", {
