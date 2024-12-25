@@ -8,13 +8,20 @@ import {
   Res,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { ApiBody, ApiHeader, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { Request, Response } from "express";
 
 import { UserRoleEnum } from "../../shared/enums";
 import { IApiResponse } from "../../shared/interface";
 import { AuthService } from "./auth.service";
 import { LoginDto, RequestOtpDto, VerifyOtpDto } from "./dto/auth.dto";
+@ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
   constructor(
