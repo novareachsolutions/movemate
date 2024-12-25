@@ -24,7 +24,7 @@ async function bootstrap(): Promise<void> {
       spec: {
         content: document,
       },
-    })
+    }),
   );
 
   app.useGlobalFilters(new CustomExceptionFilter());

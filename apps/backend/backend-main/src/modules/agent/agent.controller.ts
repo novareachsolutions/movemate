@@ -10,6 +10,13 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from "@nestjs/swagger";
 import { UpdateResult } from "typeorm";
 
 import { Agent } from "../../entity/Agent";
@@ -21,6 +28,12 @@ import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { AgentService } from "./agent.service";
 import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
+import {
+  AgentDocumentDto,
+  CreateAgentDto,
+  UpdateAgentProfileDto,
+  UpdateAgentStatusDto,
+} from "./dto/agent.dto";
 
 @Controller("agent")
 export class AgentController {
@@ -33,6 +46,15 @@ export class AgentController {
    */
   @Post("signup")
   @UseGuards(OnboardingGuard)
+  @ApiOperation({ summary: "Create a new agent account" })
+  @ApiBody({ type: CreateAgentDto })
+  @ApiResponse({
+    status: 201,
+    description: "Agent successfully created",
+    type: Agent,
+  })
+  @ApiResponse({ status: 409, description: "Agent already exists" })
+  @ApiResponse({ status: 401, description: "Phone number mismatch" })
   async create(
     @Req() request: ICustomRequest,
     @Body() agent: TAgent,
@@ -63,6 +85,15 @@ export class AgentController {
   @Get("profile")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Get own agent profile" })
+  @ApiResponse({
+    status: 200,
+    description: "Agent profile retrieved successfully",
+    type: Agent,
+  })
+  @ApiResponse({ status: 404, description: "Agent not found" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
   async getOwnProfile(
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<Agent>> {
@@ -83,6 +114,20 @@ export class AgentController {
   @Patch("profile")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({
+    summary: "Update own profile",
+    description:
+      "Allows the authenticated agent to update their profile information.",
+  })
+  @ApiBody({ type: UpdateAgentProfileDto })
+  @ApiResponse({
+    status: 200,
+    description: "Agent profile updated successfully",
+    type: UpdateResult,
+  })
+  @ApiResponse({ status: 404, description: "Agent not found" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
   async updateOwnProfile(
     @Body() updateAgentPartial: TAgentPartial,
     @Req() request: ICustomRequest,
@@ -107,6 +152,16 @@ export class AgentController {
   @Post("document")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Submit agent document" })
+  @ApiBody({ type: AgentDocumentDto })
+  @ApiResponse({
+    status: 201,
+    description: "Document submitted successfully",
+    type: AgentDocumentDto,
+  })
+  @ApiResponse({ status: 400, description: "Invalid document" })
+  @ApiResponse({ status: 409, description: "Document already exists" })
   async submitOwnDocument(
     @Body() submitDocumentDto: TAgentDocument,
     @Req() request: ICustomRequest,
@@ -132,6 +187,19 @@ export class AgentController {
   @Delete("document/:documentId")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Remove agent document" })
+  @ApiParam({
+    name: "documentId",
+    description: "Document ID to remove",
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Document removed successfully",
+  })
+  @ApiResponse({ status: 404, description: "Document not found" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
   async removeOwnDocument(
     @Param("documentId", ParseIntPipe) documentId: number,
     @Req() request: ICustomRequest,
@@ -153,6 +221,18 @@ export class AgentController {
   @Patch("status")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Update agent status" })
+  @ApiBody({ type: UpdateAgentStatusDto })
+  @ApiResponse({
+    status: 200,
+    description: "Status updated successfully",
+    type: UpdateResult,
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid status or agent not approved",
+  })
   async setOwnAgentStatus(
     @Body() body: { status: AgentStatusEnum },
     @Req() request: ICustomRequest,
@@ -175,6 +255,26 @@ export class AgentController {
   @Get("profile/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({
+    summary: "Get agent profile (Admin)",
+    description: "Allows an admin to retrieve any agent's profile information.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Agent ID",
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Agent profile retrieved successfully",
+    type: Agent,
+  })
+  @ApiResponse({ status: 404, description: "Agent not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Admin access required",
+  })
   async getAgentProfile(
     @Param("id", ParseIntPipe) agentId: number,
   ): Promise<IApiResponse<Agent>> {
@@ -195,6 +295,27 @@ export class AgentController {
   @Patch("profile/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({
+    summary: "Update agent profile (Admin)",
+    description: "Allows an admin to update any agent's profile information.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Agent ID",
+    type: Number,
+  })
+  @ApiBody({ type: UpdateAgentProfileDto })
+  @ApiResponse({
+    status: 200,
+    description: "Agent profile updated successfully",
+    type: UpdateResult,
+  })
+  @ApiResponse({ status: 404, description: "Agent not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Admin access required",
+  })
   async updateAgentProfile(
     @Param("id", ParseIntPipe) agentId: number,
     @Body() updateAgentPartial: TAgentPartial,
@@ -220,6 +341,28 @@ export class AgentController {
   @Post("document/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({
+    summary: "Submit agent document (Admin)",
+    description: "Allows an admin to submit a document for any agent.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Agent ID",
+    type: Number,
+  })
+  @ApiBody({ type: AgentDocumentDto })
+  @ApiResponse({
+    status: 201,
+    description: "Document submitted successfully",
+    type: AgentDocumentDto,
+  })
+  @ApiResponse({ status: 400, description: "Invalid document" })
+  @ApiResponse({ status: 409, description: "Document already exists" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Admin access required",
+  })
   async submitAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
     @Body() submitDocumentDto: TAgentDocument,
@@ -244,6 +387,31 @@ export class AgentController {
   @Delete("document/:id/:documentId")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({
+    summary: "Remove agent document (Admin)",
+    description:
+      "Allows an admin to remove a specific document from any agent.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Agent ID",
+    type: Number,
+  })
+  @ApiParam({
+    name: "documentId",
+    description: "Document ID to remove",
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Document removed successfully",
+  })
+  @ApiResponse({ status: 404, description: "Document not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Admin access required",
+  })
   async removeAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
     @Param("documentId", ParseIntPipe) documentId: number,
@@ -264,6 +432,17 @@ export class AgentController {
   @Get("list")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Get all agents (Admin only)" })
+  @ApiResponse({
+    status: 200,
+    description: "List of all agents retrieved successfully",
+    type: [Agent],
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Admin access required",
+  })
   async getAllAgents(): Promise<IApiResponse<Agent[]>> {
     const agents = await this.agentService.getAllAgents();
     return {
