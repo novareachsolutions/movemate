@@ -108,7 +108,7 @@ export class AgentController {
   })
   async create(
     @Req() request: ICustomRequest,
-    @Body() agent: TAgent
+    @Body() agent: TAgent,
   ): Promise<IApiResponse<Agent>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
     if (
@@ -116,7 +116,7 @@ export class AgentController {
       agent.user.phoneNumber !== phoneNumberFromGuard
     ) {
       throw new UnauthorizedError(
-        "The provided phone number does not match the authenticated user's phone number."
+        "The provided phone number does not match the authenticated user's phone number.",
       );
     }
     agent.user.phoneNumber = phoneNumberFromGuard;
@@ -178,7 +178,7 @@ export class AgentController {
     },
   })
   async getOwnProfile(
-    @Req() request: ICustomRequest
+    @Req() request: ICustomRequest,
   ): Promise<IApiResponse<Agent>> {
     const agentId = request.user.agent.id;
     const agent = await this.agentService.getAgentById(agentId);
@@ -243,12 +243,12 @@ export class AgentController {
   })
   async updateOwnProfile(
     @Body() updateAgentPartial: TAgentPartial,
-    @Req() request: ICustomRequest
+    @Req() request: ICustomRequest,
   ): Promise<IApiResponse<UpdateResult>> {
     const agentId = request.user.agent.id;
     const data = await this.agentService.updateAgentProfile(
       agentId,
-      updateAgentPartial
+      updateAgentPartial,
     );
     return {
       success: true,
@@ -303,7 +303,7 @@ export class AgentController {
   })
   async submitOwnDocument(
     @Body() submitDocumentDto: TAgentDocument,
-    @Req() request: ICustomRequest
+    @Req() request: ICustomRequest,
   ): Promise<IApiResponse<TAgentDocument>> {
     const agentId = request.user.agent.id;
     const document: TAgentDocument = {
@@ -361,7 +361,7 @@ export class AgentController {
   })
   async removeOwnDocument(
     @Param("documentId", ParseIntPipe) documentId: number,
-    @Req() request: ICustomRequest
+    @Req() request: ICustomRequest,
   ): Promise<IApiResponse<null>> {
     const agentId = request.user.agent.id;
     await this.agentService.removeDocument(agentId, documentId);
@@ -411,7 +411,7 @@ export class AgentController {
   })
   async setOwnAgentStatus(
     @Body() body: { status: AgentStatusEnum },
-    @Req() request: ICustomRequest
+    @Req() request: ICustomRequest,
   ): Promise<IApiResponse<UpdateResult>> {
     const { status } = body;
     const agentId = request.user.agent.id;
@@ -492,7 +492,7 @@ export class AgentController {
     },
   })
   async getAgentProfile(
-    @Param("id", ParseIntPipe) agentId: number
+    @Param("id", ParseIntPipe) agentId: number,
   ): Promise<IApiResponse<Agent>> {
     const agent = await this.agentService.getAgentById(agentId);
     return {
@@ -559,13 +559,13 @@ export class AgentController {
   })
   async updateAgentProfile(
     @Param("id", ParseIntPipe) agentId: number,
-    @Body() updateAgentPartial: TAgentPartial
+    @Body() updateAgentPartial: TAgentPartial,
   ): Promise<IApiResponse<UpdateResult>> {
     const isAdmin = true;
     const data = await this.agentService.updateAgentProfile(
       agentId,
       updateAgentPartial,
-      isAdmin
+      isAdmin,
     );
     return {
       success: true,
@@ -628,7 +628,7 @@ export class AgentController {
   })
   async submitAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
-    @Body() submitDocumentDto: TAgentDocument
+    @Body() submitDocumentDto: TAgentDocument,
   ): Promise<IApiResponse<TAgentDocument>> {
     const document: TAgentDocument = {
       ...submitDocumentDto,
@@ -684,7 +684,7 @@ export class AgentController {
   })
   async removeAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
-    @Param("documentId", ParseIntPipe) documentId: number
+    @Param("documentId", ParseIntPipe) documentId: number,
   ): Promise<IApiResponse<null>> {
     await this.agentService.removeDocument(agentId, documentId);
     return {

@@ -5,3 +5,4 @@ if ! git diff --quiet; then
 fi
 
 yarn run validate
+git add .
