@@ -16,6 +16,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiResponse,
+  ApiTags,
 } from "@nestjs/swagger";
 import { UpdateResult } from "typeorm";
 
@@ -39,7 +40,7 @@ import {
   UpdateAgentProfileDto,
   UpdateAgentStatusDto,
 } from "./dto/agent.dto";
-
+@ApiTags("Agent")
 @Controller("agent")
 export class AgentController {
   constructor(private readonly agentService: AgentService) {}
