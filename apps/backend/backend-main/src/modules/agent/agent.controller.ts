@@ -21,7 +21,12 @@ import { UpdateResult } from "typeorm";
 
 import { Agent } from "../../entity/Agent";
 import { Roles } from "../../shared/decorators/roles.decorator";
-import { AgentStatusEnum, UserRoleEnum } from "../../shared/enums";
+import {
+  AgentStatusEnum,
+  AgentTypeEnum,
+  ApprovalStatusEnum,
+  UserRoleEnum,
+} from "../../shared/enums";
 import { UnauthorizedError } from "../../shared/errors/authErrors";
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
@@ -47,17 +52,63 @@ export class AgentController {
   @Post("signup")
   @UseGuards(OnboardingGuard)
   @ApiOperation({ summary: "Create a new agent account" })
-  @ApiBody({ type: CreateAgentDto })
+  @ApiBody({
+    type: CreateAgentDto,
+  })
   @ApiResponse({
     status: 201,
     description: "Agent successfully created",
-    type: Agent,
+    schema: {
+      example: {
+        success: true,
+        message: "Agent created successfully",
+        data: {
+          id: 1,
+          abnNumber: "12345678901",
+          agentType: AgentTypeEnum.CAR_TOWING,
+          vehicleMake: "Toyota",
+          vehicleModel: "Hilux",
+          vehicleYear: 2020,
+          profilePhoto: "https://example.com/photo.jpg",
+          status: AgentStatusEnum.OFFLINE,
+          approvalStatus: ApprovalStatusEnum.PENDING,
+          user: {
+            id: 1,
+            email: "agent@example.com",
+            phoneNumber: "+61412345678",
+          },
+          createdAt: "2024-03-26T10:00:00.000Z",
+          updatedAt: "2024-03-26T10:00:00.000Z",
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 409, description: "Agent already exists" })
-  @ApiResponse({ status: 401, description: "Phone number mismatch" })
+  @ApiResponse({
+    status: 409,
+    description: "Agent already exists",
+    schema: {
+      example: {
+        success: false,
+        message: "Agent with ABN number 12345678901 already exists",
+        statusCode: 409,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Phone number mismatch",
+    schema: {
+      example: {
+        success: false,
+        message:
+          "The provided phone number does not match the authenticated user's phone number",
+        statusCode: 401,
+      },
+    },
+  })
   async create(
     @Req() request: ICustomRequest,
-    @Body() agent: TAgent,
+    @Body() agent: TAgent
   ): Promise<IApiResponse<Agent>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
     if (
@@ -65,7 +116,7 @@ export class AgentController {
       agent.user.phoneNumber !== phoneNumberFromGuard
     ) {
       throw new UnauthorizedError(
-        "The provided phone number does not match the authenticated user's phone number.",
+        "The provided phone number does not match the authenticated user's phone number."
       );
     }
     agent.user.phoneNumber = phoneNumberFromGuard;
@@ -90,12 +141,44 @@ export class AgentController {
   @ApiResponse({
     status: 200,
     description: "Agent profile retrieved successfully",
-    type: Agent,
+    schema: {
+      example: {
+        success: true,
+        message: "Agent profile retrieved successfully",
+        data: {
+          id: 1,
+          abnNumber: "12345678901",
+          agentType: AgentTypeEnum.CAR_TOWING,
+          vehicleMake: "Toyota",
+          vehicleModel: "Hilux",
+          vehicleYear: 2020,
+          profilePhoto: "https://example.com/photo.jpg",
+          status: AgentStatusEnum.ONLINE,
+          approvalStatus: ApprovalStatusEnum.APPROVED,
+          user: {
+            id: 1,
+            email: "agent@example.com",
+            phoneNumber: "+61412345678",
+          },
+          createdAt: "2024-03-26T10:00:00.000Z",
+          updatedAt: "2024-03-26T10:00:00.000Z",
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 404, description: "Agent not found" })
-  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({
+    status: 404,
+    description: "Agent not found",
+    schema: {
+      example: {
+        success: false,
+        message: "Agent not found for ID 1",
+        statusCode: 404,
+      },
+    },
+  })
   async getOwnProfile(
-    @Req() request: ICustomRequest,
+    @Req() request: ICustomRequest
   ): Promise<IApiResponse<Agent>> {
     const agentId = request.user.agent.id;
     const agent = await this.agentService.getAgentById(agentId);
@@ -124,18 +207,48 @@ export class AgentController {
   @ApiResponse({
     status: 200,
     description: "Agent profile updated successfully",
-    type: UpdateResult,
+    schema: {
+      example: {
+        success: true,
+        message: "Agent profile updated successfully",
+        data: {
+          generatedMaps: [],
+          raw: [],
+          affected: 1,
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 404, description: "Agent not found" })
-  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({
+    status: 404,
+    description: "Agent not found",
+    schema: {
+      example: {
+        success: false,
+        message: "Agent with ID 1 not found",
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized",
+    schema: {
+      example: {
+        success: false,
+        message: "Token refresh failed",
+        statusCode: 401,
+      },
+    },
+  })
   async updateOwnProfile(
     @Body() updateAgentPartial: TAgentPartial,
-    @Req() request: ICustomRequest,
+    @Req() request: ICustomRequest
   ): Promise<IApiResponse<UpdateResult>> {
     const agentId = request.user.agent.id;
     const data = await this.agentService.updateAgentProfile(
       agentId,
-      updateAgentPartial,
+      updateAgentPartial
     );
     return {
       success: true,
@@ -160,11 +273,37 @@ export class AgentController {
     description: "Document submitted successfully",
     type: AgentDocumentDto,
   })
-  @ApiResponse({ status: 400, description: "Invalid document" })
-  @ApiResponse({ status: 409, description: "Document already exists" })
+  @ApiResponse({
+    status: 201,
+    description: "Document submitted successfully",
+    schema: {
+      example: {
+        success: true,
+        message: "Document submitted successfully",
+        data: {
+          name: "DRIVER_LICENSE",
+          description: "Driver license front and back",
+          url: "https://example.com/documents/license.pdf",
+          agentId: 1,
+          createdAt: "2024-03-26T10:00:00.000Z",
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 409,
+    description: "Document already exists",
+    schema: {
+      example: {
+        success: false,
+        message: "Document DRIVER_LICENSE already exists",
+        statusCode: 409,
+      },
+    },
+  })
   async submitOwnDocument(
     @Body() submitDocumentDto: TAgentDocument,
-    @Req() request: ICustomRequest,
+    @Req() request: ICustomRequest
   ): Promise<IApiResponse<TAgentDocument>> {
     const agentId = request.user.agent.id;
     const document: TAgentDocument = {
@@ -198,11 +337,31 @@ export class AgentController {
     status: 200,
     description: "Document removed successfully",
   })
-  @ApiResponse({ status: 404, description: "Document not found" })
-  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({
+    status: 200,
+    description: "Document removed successfully",
+    schema: {
+      example: {
+        success: true,
+        message: "Document removed successfully",
+        data: null,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Document not found",
+    schema: {
+      example: {
+        success: false,
+        message: "Document with ID 1 not found",
+        statusCode: 404,
+      },
+    },
+  })
   async removeOwnDocument(
     @Param("documentId", ParseIntPipe) documentId: number,
-    @Req() request: ICustomRequest,
+    @Req() request: ICustomRequest
   ): Promise<IApiResponse<null>> {
     const agentId = request.user.agent.id;
     await this.agentService.removeDocument(agentId, documentId);
@@ -227,15 +386,32 @@ export class AgentController {
   @ApiResponse({
     status: 200,
     description: "Status updated successfully",
-    type: UpdateResult,
+    schema: {
+      example: {
+        success: true,
+        message: "Agent status updated to ONLINE",
+        data: {
+          generatedMaps: [],
+          raw: [],
+          affected: 1,
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
     description: "Invalid status or agent not approved",
+    schema: {
+      example: {
+        success: false,
+        message: "Cannot set status. Agent is not approved",
+        statusCode: 400,
+      },
+    },
   })
   async setOwnAgentStatus(
     @Body() body: { status: AgentStatusEnum },
-    @Req() request: ICustomRequest,
+    @Req() request: ICustomRequest
   ): Promise<IApiResponse<UpdateResult>> {
     const { status } = body;
     const agentId = request.user.agent.id;
@@ -268,15 +444,55 @@ export class AgentController {
   @ApiResponse({
     status: 200,
     description: "Agent profile retrieved successfully",
-    type: Agent,
+    schema: {
+      example: {
+        success: true,
+        message: "Agent profile retrieved successfully",
+        data: {
+          id: 1,
+          abnNumber: "12345678901",
+          agentType: AgentTypeEnum.CAR_TOWING,
+          vehicleMake: "Toyota",
+          vehicleModel: "Hilux",
+          vehicleYear: 2020,
+          profilePhoto: "https://example.com/photo.jpg",
+          status: AgentStatusEnum.ONLINE,
+          approvalStatus: ApprovalStatusEnum.APPROVED,
+          user: {
+            id: 1,
+            email: "agent@example.com",
+            phoneNumber: "+61412345678",
+          },
+          createdAt: "2024-03-26T10:00:00.000Z",
+          updatedAt: "2024-03-26T10:00:00.000Z",
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 404, description: "Agent not found" })
+  @ApiResponse({
+    status: 404,
+    description: "Agent not found",
+    schema: {
+      example: {
+        success: false,
+        message: "Agent not found for ID 1",
+        statusCode: 404,
+      },
+    },
+  })
   @ApiResponse({
     status: 403,
     description: "Forbidden - Admin access required",
+    schema: {
+      example: {
+        success: false,
+        message: "Access denied - Admin role required",
+        statusCode: 403,
+      },
+    },
   })
   async getAgentProfile(
-    @Param("id", ParseIntPipe) agentId: number,
+    @Param("id", ParseIntPipe) agentId: number
   ): Promise<IApiResponse<Agent>> {
     const agent = await this.agentService.getAgentById(agentId);
     return {
@@ -308,8 +524,33 @@ export class AgentController {
   @ApiBody({ type: UpdateAgentProfileDto })
   @ApiResponse({
     status: 200,
-    description: "Agent profile updated successfully",
-    type: UpdateResult,
+    description: "List of all agents retrieved successfully",
+    schema: {
+      example: {
+        success: true,
+        message: "All agents retrieved successfully",
+        data: [
+          {
+            id: 1,
+            abnNumber: "12345678901",
+            agentType: AgentTypeEnum.CAR_TOWING,
+            vehicleMake: "Toyota",
+            vehicleModel: "Hilux",
+            vehicleYear: 2020,
+            profilePhoto: "https://example.com/photo.jpg",
+            status: AgentStatusEnum.ONLINE,
+            approvalStatus: ApprovalStatusEnum.APPROVED,
+            user: {
+              id: 1,
+              email: "agent@example.com",
+              phoneNumber: "+61412345678",
+            },
+            createdAt: "2024-03-26T10:00:00.000Z",
+            updatedAt: "2024-03-26T10:00:00.000Z",
+          },
+        ],
+      },
+    },
   })
   @ApiResponse({ status: 404, description: "Agent not found" })
   @ApiResponse({
@@ -318,13 +559,13 @@ export class AgentController {
   })
   async updateAgentProfile(
     @Param("id", ParseIntPipe) agentId: number,
-    @Body() updateAgentPartial: TAgentPartial,
+    @Body() updateAgentPartial: TAgentPartial
   ): Promise<IApiResponse<UpdateResult>> {
     const isAdmin = true;
     const data = await this.agentService.updateAgentProfile(
       agentId,
       updateAgentPartial,
-      isAdmin,
+      isAdmin
     );
     return {
       success: true,
@@ -355,9 +596,31 @@ export class AgentController {
   @ApiResponse({
     status: 201,
     description: "Document submitted successfully",
-    type: AgentDocumentDto,
+    schema: {
+      example: {
+        success: true,
+        message: "Document submitted successfully",
+        data: {
+          name: "DRIVER_LICENSE",
+          description: "Driver license front and back",
+          url: "https://example.com/documents/license.pdf",
+          agentId: 1,
+          createdAt: "2024-03-26T10:00:00.000Z",
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 400, description: "Invalid document" })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid document",
+    schema: {
+      example: {
+        success: false,
+        message: "Invalid document type provided",
+        statusCode: 400,
+      },
+    },
+  })
   @ApiResponse({ status: 409, description: "Document already exists" })
   @ApiResponse({
     status: 403,
@@ -365,7 +628,7 @@ export class AgentController {
   })
   async submitAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
-    @Body() submitDocumentDto: TAgentDocument,
+    @Body() submitDocumentDto: TAgentDocument
   ): Promise<IApiResponse<TAgentDocument>> {
     const document: TAgentDocument = {
       ...submitDocumentDto,
@@ -406,6 +669,13 @@ export class AgentController {
   @ApiResponse({
     status: 200,
     description: "Document removed successfully",
+    schema: {
+      example: {
+        success: true,
+        message: "Document removed successfully",
+        data: null,
+      },
+    },
   })
   @ApiResponse({ status: 404, description: "Document not found" })
   @ApiResponse({
@@ -414,7 +684,7 @@ export class AgentController {
   })
   async removeAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
-    @Param("documentId", ParseIntPipe) documentId: number,
+    @Param("documentId", ParseIntPipe) documentId: number
   ): Promise<IApiResponse<null>> {
     await this.agentService.removeDocument(agentId, documentId);
     return {
@@ -437,11 +707,43 @@ export class AgentController {
   @ApiResponse({
     status: 200,
     description: "List of all agents retrieved successfully",
-    type: [Agent],
+    schema: {
+      example: {
+        success: true,
+        message: "All agents retrieved successfully",
+        data: [
+          {
+            id: 1,
+            abnNumber: "12345678901",
+            agentType: AgentTypeEnum.CAR_TOWING,
+            vehicleMake: "Toyota",
+            vehicleModel: "Hilux",
+            vehicleYear: 2020,
+            profilePhoto: "https://example.com/photo.jpg",
+            status: AgentStatusEnum.ONLINE,
+            approvalStatus: ApprovalStatusEnum.APPROVED,
+            user: {
+              id: 1,
+              email: "agent@example.com",
+              phoneNumber: "+61412345678",
+            },
+            createdAt: "2024-03-26T10:00:00.000Z",
+            updatedAt: "2024-03-26T10:00:00.000Z",
+          },
+        ],
+      },
+    },
   })
   @ApiResponse({
     status: 403,
     description: "Forbidden - Admin access required",
+    schema: {
+      example: {
+        success: false,
+        message: "Access denied - Admin role required",
+        statusCode: 403,
+      },
+    },
   })
   async getAllAgents(): Promise<IApiResponse<Agent[]>> {
     const agents = await this.agentService.getAllAgents();
