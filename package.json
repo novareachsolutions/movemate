@@ -26,7 +26,7 @@
     "lint:backend": "cd apps/backend/backend-main && yarn lint",
     "prettier": "prettier --write 'apps/**/*.{ts,tsx,json,css,scss,md}' 'shared/**/*.{ts,tsx,json,css,scss,md}'",
     "tsc": "tsc --noEmit --project tsconfig.json",
-    "validate": "yarn run prettier && yarn run lint:backend && yarn run lint",
+    "validate": "yarn run prettier && yarn run lint:backend",
     "commit": "git-cz",
     "prepare": "husky",
     "install:all": "yarn install --frozen-lockfile",

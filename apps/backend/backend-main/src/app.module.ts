@@ -1,6 +1,8 @@
+import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
+import { TerminusModule } from "@nestjs/terminus";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
@@ -27,6 +29,8 @@ import { RoleGuard } from "./shared/guards/roles.guard";
     AgentModule,
     UserModule,
     StripeModule,
+    TerminusModule,
+    HttpModule,
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],
