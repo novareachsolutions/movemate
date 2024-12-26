@@ -36,6 +36,7 @@
     "dotenv": "^16.4.5",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-perfectionist": "^4.0.3",
+    "firebase-admin": "^13.0.2",
     "ioredis": "^5.4.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
