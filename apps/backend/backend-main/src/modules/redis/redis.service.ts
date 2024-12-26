@@ -20,7 +20,7 @@ export class RedisService implements OnModuleDestroy {
     });
 
     this.redisClient.on("error", (error: unknown) => {
-      logger.error("Error connecting to Redis:", error as any);
+      logger.error("Error connecting to Redis:", error);
     });
   }
 
@@ -38,7 +38,7 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async expire(key: string, seconds: number | string): Promise<number> {
-    return await this.redisClient.expire(key, Number(seconds));
+    return await this.redisClient.expire(key, seconds);
   }
 
   async get(key: string): Promise<string | null> {
