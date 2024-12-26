@@ -9,7 +9,6 @@ const config = configuration();
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
-  // Apply the global exception filter
   app.useGlobalFilters(new CustomExceptionFilter());
 
   // Configure CORS
