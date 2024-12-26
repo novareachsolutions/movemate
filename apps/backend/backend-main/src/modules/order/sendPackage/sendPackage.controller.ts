@@ -5,6 +5,7 @@ import {
     Param,
     Get,
     ParseIntPipe,
+    Query,
     UseGuards,
     Req,
 } from '@nestjs/common';
@@ -17,7 +18,6 @@ import { OrderReview } from '../../../entity/OrderReview';
 import { SendPackageOrder } from '../../../entity/SendPackageOrder';
 import { TSendPackageOrder } from './sendPackage.types';
 import { AuthGuard } from '../../../shared/guards/auth.guard';
-
 
 @Controller('order/send-package')
 @UseGuards(AuthGuard)
@@ -98,4 +98,93 @@ export class SendPackageController {
             data,
         };
     }
+
+    // ====== Agent APIs ======
+
+    @Post('agent/:orderId/accept')
+    @Roles(UserRoleEnum.AGENT)
+    async acceptOrder(
+        @Param('orderId', ParseIntPipe) orderId: number,
+        @Req() request: ICustomRequest
+    ): Promise<IApiResponse<SendPackageOrder>> {
+        const agentId = request.user.agent.id;
+        const data = await this.sendPackageService.acceptOrder(orderId, agentId);
+        return {
+            success: true,
+            message: 'Order accepted successfully.',
+            data,
+        };
+    }
+
+    @Post('agent/:orderId/start')
+    @Roles(UserRoleEnum.AGENT)
+    async startOrder(
+        @Param('orderId', ParseIntPipe) orderId: number,
+        @Req() request: ICustomRequest,
+    ): Promise<IApiResponse<SendPackageOrder>> {
+        const agentId = request.user.agent.id;
+        const data = await this.sendPackageService.startOrder(orderId, agentId);
+        return {
+            success: true,
+            message: 'Order started successfully.',
+            data,
+        };
+    }
+
+    @Post('agent/:orderId/complete')
+    @Roles(UserRoleEnum.AGENT)
+    async completeOrder(
+        @Param('orderId', ParseIntPipe) orderId: number,
+    ): Promise<IApiResponse<SendPackageOrder>> {
+        const data = await this.sendPackageService.completeOrder(orderId);
+        return {
+            success: true,
+            message: 'Order completed successfully.',
+            data,
+        };
+    }
+
+    @Post('agent/:orderId/cancel')
+    @Roles(UserRoleEnum.AGENT)
+    async agentCancelOrder(
+        @Param('orderId', ParseIntPipe) orderId: number,
+        @Body('reason') reason: string,
+    ): Promise<IApiResponse<SendPackageOrder>> {
+        const data = await this.sendPackageService.agentCancelOrder(orderId, reason);
+        return {
+            success: true,
+            message: 'Order canceled successfully by agent.',
+            data,
+        };
+    }
+
+    @Post('agent/:orderId/report')
+    @Roles(UserRoleEnum.AGENT)
+    async reportIssue(
+        @Param('orderId', ParseIntPipe) orderId: number,
+        @Body('issue') issue: string,
+    ): Promise<IApiResponse<Report>> {
+        const data = await this.sendPackageService.reportIssue(orderId, issue);
+        return {
+            success: true,
+            message: 'Issue reported successfully.',
+            data,
+        };
+    }
+
+    // ====== Admin APIs ======
+
+    @Get('admin/orders')
+    @Roles(UserRoleEnum.ADMIN)
+    async getAllOrders(
+        @Query() query: any,
+    ): Promise<IApiResponse<SendPackageOrder[]>> {
+        const data = await this.sendPackageService.getAllOrders(query);
+        return {
+            success: true,
+            message: 'All orders retrieved successfully.',
+            data,
+        };
+    }
+
 }
