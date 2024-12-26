@@ -97,10 +97,10 @@ export class AgentService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       logger.error(
-        `AgentService.createAgent: Error occurred - ${(error as Error).message}`,
+        `AgentService.createAgent: Error occurred - ${error}`,
       );
       throw new InternalServerErrorException(
-        `Failed to create agent: ${(error as Error).message}`,
+        `Failed to create agent: ${error}`,
       );
     } finally {
       await queryRunner.release();
@@ -275,11 +275,6 @@ export class AgentService {
         "Cannot set status. Agent is not approved.",
       );
     }
-
-    logger.debug(
-      `AgentService.setAgentStatus: Updating status in Redis for agent ID ${agentId}.`,
-    );
-    await this.redisService.set(`agent:${agentId}:status`, status, 'EX', 3600);
 
     logger.debug(
       `AgentService.setAgentStatus: Updating status in database for agent ID ${agentId}.`,
