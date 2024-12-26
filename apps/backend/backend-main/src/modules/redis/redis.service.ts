@@ -1,5 +1,3 @@
-// src/modules/redis/redis.service.ts
-
 import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Redis, { RedisOptions } from "ioredis";

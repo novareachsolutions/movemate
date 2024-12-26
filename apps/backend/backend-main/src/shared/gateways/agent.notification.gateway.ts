@@ -1,5 +1,3 @@
-// src/notification/agent-notification.gateway.ts
-
 import {
   ConnectedSocket,
   MessageBody,
