@@ -1,3 +1,5 @@
+// src/notification/agent-notification.gateway.ts
+
 import {
   ConnectedSocket,
   MessageBody,
@@ -38,5 +40,9 @@ export class AgentNotificationGateway extends BaseSocketGateway {
     @ConnectedSocket() _client: Socket,
   ): void {
     void this.sendMessageToRoom("agents", "agentStatus", data);
+  }
+
+  sendMessageToAgent(agentId: number, event: string, message: any): void {
+    this.sendMessageToRoom(`agent:${agentId}`, event, message);
   }
 }

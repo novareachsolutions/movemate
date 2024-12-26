@@ -1,3 +1,5 @@
+// src/agent/agent.controller.ts
+
 import {
   Body,
   Controller,
@@ -24,12 +26,11 @@ import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 
 @Controller("agent")
 export class AgentController {
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: AgentService) { }
 
   /**
    * Agent Signup
    * Endpoint: POST /agent/signup
-   * Description: Allows an agent to sign up by providing necessary details.
    */
   @Post("signup")
   @UseGuards(OnboardingGuard)
@@ -58,7 +59,6 @@ export class AgentController {
   /**
    * Get Own Profile
    * Endpoint: GET /agent/profile
-   * Description: Retrieves the authenticated agent's profile.
    */
   @Get("profile")
   @UseGuards(AuthGuard)
@@ -78,7 +78,6 @@ export class AgentController {
   /**
    * Update Own Profile
    * Endpoint: PATCH /agent/profile
-   * Description: Allows the authenticated agent to update their profile.
    */
   @Patch("profile")
   @UseGuards(AuthGuard)
@@ -102,7 +101,6 @@ export class AgentController {
   /**
    * Submit Own Document
    * Endpoint: POST /agent/document
-   * Description: Allows the authenticated agent to submit a document.
    */
   @Post("document")
   @UseGuards(AuthGuard)
@@ -127,7 +125,6 @@ export class AgentController {
   /**
    * Remove Own Document
    * Endpoint: DELETE /agent/document/:documentId
-   * Description: Allows the authenticated agent to remove a specific document.
    */
   @Delete("document/:documentId")
   @UseGuards(AuthGuard)
@@ -148,7 +145,6 @@ export class AgentController {
   /**
    * Set Own Agent Status
    * Endpoint: PATCH /agent/status
-   * Description: Allows the authenticated agent to update their status.
    */
   @Patch("status")
   @UseGuards(AuthGuard)
@@ -170,7 +166,6 @@ export class AgentController {
   /**
    * Get Agent Profile (Admin)
    * Endpoint: GET /agent/profile/:id
-   * Description: Allows an admin to retrieve any agent's profile.
    */
   @Get("profile/:id")
   @UseGuards(AuthGuard)
@@ -189,8 +184,6 @@ export class AgentController {
   /**
    * Update Agent Profile (Admin)
    * Endpoint: PATCH /agent/profile/:id
-   * Description: Allows an +
-   *  to update any agent's profile.
    */
   @Patch("profile/:id")
   @UseGuards(AuthGuard)
@@ -215,7 +208,6 @@ export class AgentController {
   /**
    * Submit Agent Document (Admin)
    * Endpoint: POST /agent/document/:id
-   * Description: Allows an admin to submit a document for any agent.
    */
   @Post("document/:id")
   @UseGuards(AuthGuard)
@@ -239,7 +231,6 @@ export class AgentController {
   /**
    * Remove Agent Document (Admin)
    * Endpoint: DELETE /agent/document/:id/:documentId
-   * Description: Allows an admin to remove a specific document from any agent.
    */
   @Delete("document/:id/:documentId")
   @UseGuards(AuthGuard)
@@ -259,7 +250,6 @@ export class AgentController {
   /**
    * Get All Agents (Admin)
    * Endpoint: GET /agent/list
-   * Description: Allows an admin to retrieve a list of all agents.
    */
   @Get("list")
   @UseGuards(AuthGuard)
@@ -270,6 +260,27 @@ export class AgentController {
       success: true,
       message: "All agents retrieved successfully.",
       data: agents,
+    };
+  }
+
+  /**
+   * Update Agent Location
+   * Endpoint: PATCH /agent/location
+   */
+  @Patch("location")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.AGENT)
+  async updateLocation(
+    @Body() body: { latitude: number; longitude: number },
+    @Req() request: ICustomRequest,
+  ): Promise<IApiResponse<null>> {
+    const agentId = request.user.agent.id;
+    const { latitude, longitude } = body;
+    await this.agentService.updateAgentLocation(agentId, latitude, longitude);
+    return {
+      success: true,
+      message: "Location updated successfully.",
+      data: null,
     };
   }
 }
