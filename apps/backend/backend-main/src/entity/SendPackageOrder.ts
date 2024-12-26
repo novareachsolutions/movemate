@@ -9,7 +9,7 @@ import {
 import { DropLocation } from "./DropLocation";
 import { PickupLocation } from "./PickupLocation";
 import { Report } from "./Report";
-import { OrderReview } from "./OrderReview";
+import { OrderReview } from "./OrderReview"; 
 import { BaseEntity } from "./BaseEntity";
 import { User } from "./User";
 import {
@@ -22,22 +22,22 @@ import { Agent } from "./Agent";
 
 @Entity()
 export class SendPackageOrder extends BaseEntity {
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: false })
   senderName: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: false })
+  @Column({ type: "varchar", length: 20, nullable: false })
   senderPhoneNumber: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: false })
   receiverName: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: false })
+  @Column({ type: "varchar", length: 20, nullable: false })
   receiverPhoneNumber: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: false })
   packageType: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   deliveryInstructions: string;
 
   @Column({
@@ -100,13 +100,13 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: "integer", nullable: true })
   agentId: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: "float", nullable: true })
   price: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: "float", nullable: true })
   actualDistance: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: "float", nullable: true })
   actualTime: number;
 
   @Column({ type: 'varchar', nullable: true })
@@ -140,7 +140,6 @@ export class SendPackageOrder extends BaseEntity {
   paymentStatus: PaymentStatusEnum;
 
   @OneToOne(() => Report, (report) => report.sendPackageOrder, {
-    cascade: true,
     nullable: true,
     onDelete: "SET NULL",
   })
