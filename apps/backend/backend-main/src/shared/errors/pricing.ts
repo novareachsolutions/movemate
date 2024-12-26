@@ -1,25 +1,20 @@
-import { PricingFacingError } from "./pricingFacing";
-
-export class InvalidFareCalculationError extends PricingFacingError {
+export class InvalidFareCalculationError extends Error {
     constructor(message?: string) {
         super(message || "Invalid fare calculation parameters.");
         this.name = "InvalidFareCalculationError";
-        this.statusCode = 400;
     }
 }
 
-export class DynamicPricingError extends PricingFacingError {
+export class DynamicPricingError extends Error {
     constructor(message?: string) {
         super(message || "Error applying dynamic pricing.");
         this.name = "DynamicPricingError";
-        this.statusCode = 500;
     }
 }
 
-export class RouteDetailsError extends PricingFacingError {
+export class RouteDetailsError extends Error {
     constructor(message?: string) {
         super(message || "Error fetching route details.");
         this.name = "RouteDetailsError";
-        this.statusCode = 502;
     }
 }
