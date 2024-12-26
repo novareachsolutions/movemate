@@ -1,5 +1,3 @@
-// src/modules/agent/agent.service.ts
-
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { DeleteResult, QueryRunner, UpdateResult } from "typeorm";
 import { Agent } from "../../entity/Agent";

@@ -1,5 +1,3 @@
-// src/agent/agent.controller.ts
-
 import {
   Body,
   Controller,
@@ -28,10 +26,6 @@ import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 export class AgentController {
   constructor(private readonly agentService: AgentService) { }
 
-  /**
-   * Agent Signup
-   * Endpoint: POST /agent/signup
-   */
   @Post("signup")
   @UseGuards(OnboardingGuard)
   async create(
@@ -56,10 +50,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Get Own Profile
-   * Endpoint: GET /agent/profile
-   */
   @Get("profile")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
@@ -75,10 +65,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Update Own Profile
-   * Endpoint: PATCH /agent/profile
-   */
   @Patch("profile")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
@@ -98,10 +84,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Submit Own Document
-   * Endpoint: POST /agent/document
-   */
   @Post("document")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
@@ -122,10 +104,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Remove Own Document
-   * Endpoint: DELETE /agent/document/:documentId
-   */
   @Delete("document/:documentId")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
@@ -142,10 +120,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Set Own Agent Status
-   * Endpoint: PATCH /agent/status
-   */
   @Patch("status")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
@@ -163,10 +137,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Get Agent Profile (Admin)
-   * Endpoint: GET /agent/profile/:id
-   */
   @Get("profile/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
@@ -181,10 +151,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Update Agent Profile (Admin)
-   * Endpoint: PATCH /agent/profile/:id
-   */
   @Patch("profile/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
@@ -205,10 +171,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Submit Agent Document (Admin)
-   * Endpoint: POST /agent/document/:id
-   */
   @Post("document/:id")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
@@ -228,10 +190,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Remove Agent Document (Admin)
-   * Endpoint: DELETE /agent/document/:id/:documentId
-   */
   @Delete("document/:id/:documentId")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
@@ -247,10 +205,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Get All Agents (Admin)
-   * Endpoint: GET /agent/list
-   */
   @Get("list")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.ADMIN)
@@ -263,10 +217,6 @@ export class AgentController {
     };
   }
 
-  /**
-   * Update Agent Location
-   * Endpoint: PATCH /agent/location
-   */
   @Patch("location")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
