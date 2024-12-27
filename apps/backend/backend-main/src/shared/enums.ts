@@ -18,6 +18,13 @@ export enum AgentRegistrationDocumentEnum {
   VEHICLE_REGISTRATION = "VEHICLE_REGISTRATION",
 }
 
+export enum ApprovalStatus {
+  PENDING = "PENDING",
+  REUPLOAD = "REUPLOAD",
+  APPROVED = "APPROVED",
+  EXPIRED = "EXPIRED",
+}
+
 // Order
 export enum OrderStatusEnum {
   CANCELED = "CANCELED",

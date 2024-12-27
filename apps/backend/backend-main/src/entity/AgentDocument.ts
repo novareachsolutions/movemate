@@ -1,7 +1,14 @@
-import { Column, Entity, Index, ManyToOne, RelationId, Unique } from "typeorm";
-
-import { Agent } from "./Agent";
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  RelationId,
+  Unique,
+} from "typeorm";
 import { BaseEntity } from "./BaseEntity";
+import { ApprovalStatus } from "../shared/enums";
+import { Agent } from "./Agent";
 
 @Index("IDX_agent_document_agentId", ["agentId"], {
   where: '"deletedAt" IS NULL',
@@ -28,4 +35,14 @@ export class AgentDocument extends BaseEntity {
   @RelationId((doc: AgentDocument) => doc.agent)
   @Column({ type: "integer" })
   agentId: number;
+
+  @Column({
+    type: "enum",
+    enum: ApprovalStatus,
+    default: ApprovalStatus.PENDING,
+  })
+  approval: ApprovalStatus;
+
+  @Column({ type: "timestamp", nullable: true })
+  expiryDate?: Date;
 }

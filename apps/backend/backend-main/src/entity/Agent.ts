@@ -1,5 +1,4 @@
 import { Column, Entity, Index, OneToOne, RelationId, Unique } from "typeorm";
-
 import { TAgent } from "../modules/agent/agent.types";
 import { AgentStatusEnum, AgentTypeEnum } from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
