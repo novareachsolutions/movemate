@@ -39,4 +39,8 @@ export class AgentNotificationGateway extends BaseSocketGateway {
   ): void {
     void this.sendMessageToRoom("agents", "agentStatus", data);
   }
+
+  sendMessageToAgent(agentId: number, event: string, message: any): void {
+    this.sendMessageToRoom(`agent:${agentId}`, event, message);
+  }
 }
