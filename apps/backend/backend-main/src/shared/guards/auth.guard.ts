@@ -2,7 +2,10 @@ import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 
+import { Agent } from "../../entity/Agent";
 import { logger } from "../../logger";
+import { dbRepo } from "../../modules/database/database.service";
+import { UserRoleEnum } from "../../shared/enums";
 import { UnauthorizedError } from "../errors/authErrors";
 
 @Injectable()
@@ -12,42 +15,29 @@ export class AuthGuard implements CanActivate {
     private configService: ConfigService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
-    const token = this.extractTokenFromCookies(request);
+    const accessToken = this.extractTokenFromHeaders(request);
 
-    if (!token) {
-      logger.warn("AuthGuard.canActivate: Token not found");
-      throw new UnauthorizedError("Token not found");
+    if (accessToken) {
+      const payload = this.verifyToken(accessToken, "JWT_ACCESS_SECRET");
+      if (payload) {
+        this.setUserInRequest(request, payload);
+        if (payload.role === UserRoleEnum.AGENT) {
+          const agent = await dbRepo(Agent).findOne({
+            where: { userId: payload.id },
+          });
+          if (agent) {
+            request.user.agent = { id: agent.id };
+          } else {
+            throw new UnauthorizedError("Agent profile not found.");
+          }
+        }
+        return true;
+      }
     }
 
-    const payload = this.verifyToken(token, "jwt.accessSecret");
-    if (payload) {
-      this.setUserInRequest(request, payload);
-      return true;
-    }
-
-    const refreshToken = this.extractRefreshTokenFromCookies(request);
-    if (!refreshToken) {
-      throw new UnauthorizedError("Refresh token not found");
-    }
-
-    const refreshPayload = this.verifyToken(refreshToken, "jwt.refreshSecret");
-    if (!refreshPayload) {
-      throw new UnauthorizedError("Invalid refresh token");
-    }
-
-    const newAccessToken = this.generateAccessToken(refreshPayload);
-    response.cookie("access_token", newAccessToken, {
-      httpOnly: true,
-      secure: this.configService.get<string>("ENVIRONMENT") === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000, // 1 hour
-    });
-    this.setUserInRequest(request, refreshPayload);
-
-    return true;
+    throw new UnauthorizedError("Invalid or missing access token");
   }
 
   private verifyToken(token: string, secretKey: string): any {
@@ -65,20 +55,6 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private generateAccessToken(payload: any): string {
-    return this.jwtService.sign(
-      {
-        id: payload.id,
-        role: payload.role,
-        phoneNumber: payload.phoneNumber,
-      },
-      {
-        secret: this.configService.get<string>("jwt.accessSecret"),
-        expiresIn: "15m",
-      },
-    );
-  }
-
   private setUserInRequest(request: any, payload: any): void {
     request.user = {
       id: payload.id,
@@ -90,30 +66,17 @@ export class AuthGuard implements CanActivate {
     );
   }
 
-  private extractTokenFromCookies(request: any): string | null {
-    const token = request.cookies?.access_token;
-    if (token) {
+  private extractTokenFromHeaders(request: any): string | null {
+    const authHeader = request.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
       logger.debug(
-        "AuthGuard.extractTokenFromCookies: Token extracted from cookies",
+        "AuthGuard.extractTokenFromHeaders: Token extracted from headers",
       );
       return token;
     }
     logger.warn(
-      "AuthGuard.extractTokenFromCookies: Token not found in cookies",
-    );
-    return null;
-  }
-
-  private extractRefreshTokenFromCookies(request: any): string | null {
-    const refreshToken = request.cookies?.refresh_token;
-    if (refreshToken) {
-      logger.debug(
-        "AuthGuard.extractRefreshTokenFromCookies: Refresh token extracted from cookies",
-      );
-      return refreshToken;
-    }
-    logger.warn(
-      "AuthGuard.extractRefreshTokenFromCookies: Refresh token not found in cookies",
+      "AuthGuard.extractTokenFromHeaders: Token not found in headers",
     );
     return null;
   }

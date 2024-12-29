@@ -1,18 +1,26 @@
 import {
-  Controller,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
   Get,
+  Param,
   ParseUUIDPipe,
-  Put,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
-import { UpdateResult, DeleteResult } from "typeorm";
+import { DeleteResult, UpdateResult } from "typeorm";
+
 import { User } from "../../entity/User";
-import { IApiResponse } from "../../shared/interface";
+import { Roles } from "../../shared/decorators/roles.decorator";
+import { UserRoleEnum } from "../../shared/enums";
+import { UnauthorizedError } from "../../shared/errors/authErrors";
+import { AuthGuard } from "../../shared/guards/auth.guard";
+import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
+import { IApiResponse, ICustomRequest } from "../../shared/interface";
+import { UserService } from "./user.service";
+import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Controller("user")
 export class UserController {
@@ -23,9 +31,22 @@ export class UserController {
    * POST /user/signup
    */
   @Post("signup")
+  @UseGuards(OnboardingGuard)
   async createUser(
     @Body() createUserDto: TCreateUser,
+    @Req() request: ICustomRequest,
   ): Promise<IApiResponse<number>> {
+    const phoneNumberFromGuard = request.user.phoneNumber;
+    if (
+      createUserDto.phoneNumber &&
+      createUserDto.phoneNumber !== phoneNumberFromGuard
+    ) {
+      throw new UnauthorizedError(
+        "The provided phone number does not match the authenticated user's phone number.",
+      );
+    }
+    createUserDto.phoneNumber = phoneNumberFromGuard;
+    createUserDto.role = UserRoleEnum.CUSTOMER;
     const userId = await this.userService.createUser(createUserDto);
     return {
       success: true,
@@ -35,10 +56,32 @@ export class UserController {
   }
 
   /**
-   * Get user profile by ID.
+   * Get the authenticated user's profile.
+   * GET /user/me
+   */
+  @Get()
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.CUSTOMER)
+  async getCurrentUser(
+    @Req() request: ICustomRequest,
+  ): Promise<IApiResponse<User>> {
+    const userId = request.user.id;
+
+    const user = await this.userService.getUserById(userId);
+    return {
+      success: true,
+      message: "User profile retrieved successfully.",
+      data: user,
+    };
+  }
+
+  /**
+   * Get user profile by ID. This controller is for admin
    * GET /user/profile/:id
    */
   @Get("profile/:id")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async getUserById(
     @Param("id", ParseUUIDPipe) id: number,
   ): Promise<IApiResponse<User>> {
@@ -55,6 +98,8 @@ export class UserController {
    * POST /user/profile
    */
   @Post("profile")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async getUserProfile(
     @Body() getUserProfileDto: TGetUserProfile,
   ): Promise<IApiResponse<User>> {
@@ -71,6 +116,8 @@ export class UserController {
    * GET /user/list
    */
   @Get("list")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async getAllUsers(): Promise<IApiResponse<User[]>> {
     const users = await this.userService.getAllUsers();
     return {
@@ -84,7 +131,9 @@ export class UserController {
    * Update user profile.
    * PUT /user/profile/:id
    */
-  @Put("profile/:id")
+  @Patch("profile/:id")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async updateUser(
     @Param("id", ParseUUIDPipe) id: number,
     @Body() updateUserDto: TUpdateUser,
@@ -102,6 +151,8 @@ export class UserController {
    * DELETE /user/profile/:id
    */
   @Delete("profile/:id")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async deleteUser(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<IApiResponse<DeleteResult>> {

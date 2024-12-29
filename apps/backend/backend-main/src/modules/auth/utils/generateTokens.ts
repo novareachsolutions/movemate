@@ -25,7 +25,7 @@ export class TokenService {
     };
 
     return this.jwtService.sign(payload, {
-      secret: `${this.configService.get<string>("JWT_ACCESS_SECRET")}`,
+      secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
       expiresIn: this.configService.get<string>("JWT_ACCESS_EXPIRY"),
     });
   }
