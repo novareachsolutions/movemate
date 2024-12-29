@@ -9,6 +9,7 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Request, Response } from "express";
+
 import { UserRoleEnum } from "../../shared/enums";
 import { IApiResponse } from "../../shared/interface";
 import { AuthService } from "./auth.service";
@@ -17,7 +18,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   @Post("otp/request")
   async requestOtp(
@@ -93,6 +94,6 @@ export class AuthController {
       success: true,
       message: "Tokens refreshed successfully.",
       data: { accessToken },
-    })
+    });
   }
 }

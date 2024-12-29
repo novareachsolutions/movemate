@@ -19,9 +19,9 @@ export enum AgentRegistrationDocumentEnum {
 }
 
 export enum ApprovalStatusEnum {
+  APPROVED = "APPROVED",
   PENDING = "PENDING",
   REJECTED = "REJECTED",
-  APPROVED = "APPROVED",
 }
 
 // Order
@@ -46,10 +46,10 @@ export enum UserRoleEnum {
   SUPPORT = "SUPPORT",
 }
 
-//Payment
+// Payment
 export enum PaymentStatusEnum {
+  ERROR = "ERROR",
   NOT_PAID = "NOT_PAID",
   PAID = "PAID",
-  ERROR = "ERROR",
   REFUNDED = "REFUNDED",
 }

@@ -19,12 +19,12 @@ const rootConfig = [
     files: ["src/**/*.ts"],
     languageOptions: {
       parserOptions: {
-        project: "./tsconfig.json"
-      }
+        project: "./tsconfig.json",
+      },
     },
     plugins: {
       "simple-import-sort": simpleImportSort,
-      perfectionist
+      perfectionist,
     },
     rules: {
       "no-console": error,
@@ -33,12 +33,12 @@ const rootConfig = [
         warn,
         {
           name: "date-fns",
-          message: "Please use luxon instead."
+          message: "Please use luxon instead.",
         },
         {
           name: "moment",
-          message: "Please use luxon instead."
-        }
+          message: "Please use luxon instead.",
+        },
       ],
       "no-restricted-properties": [
         error,
@@ -54,12 +54,12 @@ const rootConfig = [
           ["http", "info"],
           ["verbose", "info"],
           ["input", "info"],
-          ["silly", "info"]
+          ["silly", "info"],
         ].map(([property, alternative]) => ({
           object: "logger",
           property,
-          message: `Use logger.${alternative} instead`
-        }))
+          message: `Use logger.${alternative} instead`,
+        })),
       ],
       "no-return-await": off, // causes stack trace to omit some calls
       "require-await": error,
@@ -76,18 +76,18 @@ const rootConfig = [
         {
           selector: "enum",
           format: ["PascalCase"],
-          suffix: ["Enum"]
+          suffix: ["Enum"],
         },
         {
           selector: "interface",
           format: ["PascalCase"],
-          prefix: ["I"]
+          prefix: ["I"],
         },
         {
           selector: "typeAlias",
           format: ["PascalCase"],
-          prefix: ["T"]
-        }
+          prefix: ["T"],
+        },
       ],
       "@typescript-eslint/no-empty-interface": error,
       "@typescript-eslint/no-empty-object-type": error,
@@ -95,7 +95,7 @@ const rootConfig = [
       "@typescript-eslint/no-floating-promises": error,
       "@typescript-eslint/no-unused-expressions": [
         error,
-        { allowShortCircuit: true, allowTernary: true }
+        { allowShortCircuit: true, allowTernary: true },
       ],
       "@typescript-eslint/no-unused-vars": [
         warn,
@@ -106,12 +106,12 @@ const rootConfig = [
           caughtErrorsIgnorePattern: "^_",
           destructuredArrayIgnorePattern: "^_",
           varsIgnorePattern: "^_",
-          ignoreRestSiblings: true
-        }
+          ignoreRestSiblings: true,
+        },
       ],
-      "comma-dangle": off
-    }
-  }
+      "comma-dangle": off,
+    },
+  },
 ];
 
 export default rootConfig;

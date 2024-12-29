@@ -6,15 +6,15 @@ export interface ICustomRequest extends Request {
     phoneNumber?: string;
     role?: UserRoleEnum;
     agent?: {
-      id?: number
-    }
-  }
+      id?: number;
+    };
+  };
 }
 
 export interface IApiResponse<T> {
   data: T | null;
   error?: {
-    name:string
+    name: string;
     message: string;
     code: number;
   };

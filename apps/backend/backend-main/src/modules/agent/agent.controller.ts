@@ -7,27 +7,24 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards,
   Req,
+  UseGuards,
 } from "@nestjs/common";
 import { UpdateResult } from "typeorm";
+
 import { Agent } from "../../entity/Agent";
+import { Roles } from "../../shared/decorators/roles.decorator";
+import { AgentStatusEnum, UserRoleEnum } from "../../shared/enums";
+import { UnauthorizedError } from "../../shared/errors/authErrors";
+import { AuthGuard } from "../../shared/guards/auth.guard";
+import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { AgentService } from "./agent.service";
-import {
-  TAgent,
-  TAgentPartial,
-  TAgentDocument,
-} from "./agent.types";
-import { AuthGuard } from "../../shared/guards/auth.guard";
-import { Roles } from "../../shared/decorators/roles.decorator";
-import { UserRoleEnum, AgentStatusEnum } from "../../shared/enums";
-import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
-import { UnauthorizedError } from "../../shared/errors/authErrors";
+import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 
 @Controller("agent")
 export class AgentController {
-  constructor(private readonly agentService: AgentService) { }
+  constructor(private readonly agentService: AgentService) {}
 
   /**
    * Agent Signup
@@ -41,7 +38,10 @@ export class AgentController {
     @Body() agent: TAgent,
   ): Promise<IApiResponse<Agent>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
-    if (agent.user.phoneNumber && agent.user.phoneNumber !== phoneNumberFromGuard) {
+    if (
+      agent.user.phoneNumber &&
+      agent.user.phoneNumber !== phoneNumberFromGuard
+    ) {
       throw new UnauthorizedError(
         "The provided phone number does not match the authenticated user's phone number.",
       );
@@ -88,7 +88,10 @@ export class AgentController {
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<UpdateResult>> {
     const agentId = request.user.agent.id;
-    const data = await this.agentService.updateAgentProfile(agentId, updateAgentPartial);
+    const data = await this.agentService.updateAgentProfile(
+      agentId,
+      updateAgentPartial,
+    );
     return {
       success: true,
       message: "Agent profile updated successfully.",
@@ -197,7 +200,11 @@ export class AgentController {
     @Body() updateAgentPartial: TAgentPartial,
   ): Promise<IApiResponse<UpdateResult>> {
     const isAdmin = true;
-    const data = await this.agentService.updateAgentProfile(agentId, updateAgentPartial, isAdmin);
+    const data = await this.agentService.updateAgentProfile(
+      agentId,
+      updateAgentPartial,
+      isAdmin,
+    );
     return {
       success: true,
       message: "Agent profile updated successfully.",

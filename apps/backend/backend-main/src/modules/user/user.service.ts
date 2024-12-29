@@ -1,14 +1,15 @@
 import { Injectable } from "@nestjs/common";
+import { DeleteResult, UpdateResult } from "typeorm";
+
 import { User } from "../../entity/User";
-import { TCreateUser, TUpdateUser, TGetUserProfile } from "./user.types";
-import { UpdateResult, DeleteResult } from "typeorm";
-import { dbReadRepo, dbRepo } from "../database/database.service";
 import { logger } from "../../logger";
-import { filterEmptyValues } from "../../utils/filter";
 import {
   UserAlreadyExistsError,
   UserNotFoundError,
 } from "../../shared/errors/user";
+import { filterEmptyValues } from "../../utils/filter";
+import { dbReadRepo, dbRepo } from "../database/database.service";
+import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Injectable()
 export class UserService {
@@ -70,7 +71,10 @@ export class UserService {
    * @param updateUserDto Data Transfer Object for updating user.
    * @returns The result of the update operation.
    */
-  async updateUser(id: number, updateUserDto: TUpdateUser): Promise<UpdateResult> {
+  async updateUser(
+    id: number,
+    updateUserDto: TUpdateUser,
+  ): Promise<UpdateResult> {
     const user = await dbReadRepo(User).findOne({ where: { id } });
 
     if (!user) {
