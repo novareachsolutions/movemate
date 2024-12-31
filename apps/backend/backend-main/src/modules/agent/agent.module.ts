@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 
+import { AgentNotificationGateway } from "../../shared/gateways/agent.notification.gateway";
 import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
 import { AuthService } from "../auth/auth.service";
 import { TokenService } from "../auth/utils/generateTokens";
@@ -25,6 +26,7 @@ import { AgentService } from "./agent.service";
     JwtService,
     OtpService,
     TokenService,
+    AgentNotificationGateway,
   ],
   exports: [AgentService],
 })

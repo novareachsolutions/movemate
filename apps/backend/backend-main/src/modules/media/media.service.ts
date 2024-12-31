@@ -1,22 +1,27 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as AWS from 'aws-sdk';
-import { ManagedUpload } from 'aws-sdk/clients/s3';
-import { logger } from '../../logger';
-import { MediaDeleteError, MediaInvalidKeyError, MediaMissingFileError, MediaUploadError } from '../../shared/errors/media';
+import { Inject, Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import * as AWS from "aws-sdk";
+import { ManagedUpload } from "aws-sdk/clients/s3";
 
+import { logger } from "../../logger";
+import {
+  MediaDeleteError,
+  MediaInvalidKeyError,
+  MediaMissingFileError,
+  MediaUploadError,
+} from "../../shared/errors/media";
 
 @Injectable()
 export class MediaService {
   private readonly bucketName: string;
 
   constructor(
-    @Inject('S3') private readonly s3: AWS.S3,
+    @Inject("S3") private readonly s3: AWS.S3,
     private readonly configService: ConfigService,
   ) {
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
+    this.bucketName = this.configService.get<string>("AWS_S3_BUCKET_NAME");
     if (!this.bucketName) {
-      throw new MediaInvalidKeyError('S3 Bucket name is not configured');
+      throw new MediaInvalidKeyError("S3 Bucket name is not configured");
     }
   }
 
@@ -29,22 +34,24 @@ export class MediaService {
       Key: `${Date.now()}-${file.originalname}`,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read',
+      ACL: "public-read",
     };
 
     try {
-      const uploadResult: ManagedUpload.SendData = await this.s3.upload(params).promise();
+      const uploadResult: ManagedUpload.SendData = await this.s3
+        .upload(params)
+        .promise();
       logger.debug(`File uploaded successfully. URL: ${uploadResult.Location}`);
       return uploadResult.Location;
     } catch (error) {
-      logger.error('Error uploading file to S3', error);
-      throw new MediaUploadError('Failed to upload file');
+      logger.error("Error uploading file to S3", error);
+      throw new MediaUploadError("Failed to upload file");
     }
   }
 
   async deleteFile(key: string): Promise<string> {
     if (!key) {
-      throw new MediaInvalidKeyError('File key is required for deletion');
+      throw new MediaInvalidKeyError("File key is required for deletion");
     }
 
     const params: AWS.S3.DeleteObjectRequest = {
