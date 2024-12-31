@@ -1,136 +1,143 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 
+import { DropLocation } from "../../entity/DropLocation";
 import { Payment } from "../../entity/Payment";
+import { PickupLocation } from "../../entity/PickupLocation";
 import { SendPackageOrder } from "../../entity/SendPackageOrder";
 import { logger } from "../../logger";
-import { PaymentStatusEnum } from "../../shared/enums";
 import {
-  TCreatePaymentIntent,
-  TPayment,
+  OrderTypeEnum,
+  PaymentStatusEnum,
+  PaymentTypeEnum,
+} from "../../shared/enums";
+import {
+  TCreateOrderRequest,
+  TOrderResponse,
 } from "../../shared/types/payment.types";
 import { dbReadRepo, dbRepo } from "../database/database.service";
-import { StripeService } from "../stripe/stripe.service";
-import { WalletService } from "./wallet.service";
+import { StripeService } from "./stripe.service";
 
 @Injectable()
 export class PaymentService {
-  constructor(
-    private stripeService: StripeService,
-    private walletService: WalletService,
-  ) {}
+  constructor(private readonly stripeService: StripeService) {}
 
-  async createPaymentIntent(data: TCreatePaymentIntent): Promise<Payment> {
-    if (data.orderId) {
-      const order = await dbReadRepo(SendPackageOrder).findOne({
-        where: { id: data.orderId },
+  async createOrder(orderData: TCreateOrderRequest): Promise<TOrderResponse> {
+    try {
+      // Validate locations
+      const pickupLocation = await dbReadRepo(PickupLocation).findOne({
+        where: { id: orderData.pickupLocationId },
       });
-      if (!order) {
+      if (!pickupLocation) {
         logger.error(
-          `PaymentService.createPaymentIntent: Order ${data.orderId} not found`,
+          `PaymentService.createOrder: Pickup location ${orderData.pickupLocationId} not found`,
         );
-        throw new NotFoundException("Order not found");
+        throw new NotFoundException("Pickup location not found");
       }
-    }
 
-    // Create Stripe Payment Intent
-    const paymentIntent = await this.stripeService.createPaymentIntent({
-      amount: data.amount,
-      currency: "aud",
-      description: data.description || `Payment for ${data.type}`,
-    });
+      const dropLocation = await dbReadRepo(DropLocation).findOne({
+        where: { id: orderData.dropLocationId },
+      });
+      if (!dropLocation) {
+        logger.error(
+          `PaymentService.createOrder: Drop location ${orderData.dropLocationId} not found`,
+        );
+        throw new NotFoundException("Drop location not found");
+      }
 
-    // Create payment record
-    const payment: TPayment = {
-      stripePaymentIntentId: paymentIntent.id,
-      type: data.type,
-      amount: data.amount,
-      orderId: data.orderId,
-      agentId: data.agentId,
-      status: PaymentStatusEnum.PENDING,
-    };
-
-    const response = await dbRepo(Payment).save(payment);
-    logger.info(
-      `PaymentService.createPaymentIntent: Created payment ${response.id}`,
-    );
-    return response;
-  }
-
-  async handlePaymentSuccess(stripeEvent: any): Promise<void> {
-    const paymentIntentId = stripeEvent.data.object.id;
-    const payment = await dbReadRepo(Payment).findOne({
-      where: { stripePaymentIntentId: paymentIntentId },
-      relations: ["order", "agent"],
-    });
-
-    if (!payment) {
-      logger.error(
-        `PaymentService.handlePaymentSuccess: Payment with intent ${paymentIntentId} not found`,
+      // Calculate order amount based on distance or fixed rate
+      const amount = await this.calculateOrderAmount(
+        pickupLocation,
+        dropLocation,
       );
-      throw new NotFoundException("Payment not found");
-    }
 
-    // Update payment status
-    await dbRepo(Payment).update(payment.id, {
-      status: PaymentStatusEnum.PAID,
-    });
-
-    // Update order payment status if exists
-    if (payment.orderId) {
-      await dbRepo(SendPackageOrder).update(payment.orderId, {
-        paymentStatus: PaymentStatusEnum.PAID,
-      });
-    }
-
-    // Handle rider earnings if applicable
-    if (payment.agent && payment.order) {
-      const commission = payment.amount * payment.agent.commissionRate;
-      const netAmount = payment.amount - commission;
-
-      await dbRepo(Payment).update(payment.id, {
-        commissionAmount: commission,
+      // Create order
+      const order: any = await dbRepo(SendPackageOrder).save({
+        ...orderData,
+        paymentStatus: PaymentStatusEnum.PENDING,
+        type: OrderTypeEnum.DELIVERY,
+        estimatedDistance: amount.distance,
+        estimatedTime: amount.time,
+        price: amount.price,
       });
 
-      await this.walletService.creditWallet(payment.agent.id, netAmount, {
-        reference: `Earnings from order #${payment.order.id}`,
-        paymentId: payment.id,
+      // Create payment intent
+      const paymentIntent = await this.stripeService.createPaymentIntent({
+        amount: amount.price,
+        currency: "aud",
+        description: `Payment for order #${order.id}`,
+      });
+
+      // Create payment record
+      await dbRepo(Payment).save({
+        stripePaymentIntentId: paymentIntent.id,
+        type: PaymentTypeEnum.ORDER,
+        amount: amount.price,
+        status: PaymentStatusEnum.PENDING,
+        order: { id: order.id },
       });
 
       logger.info(
-        `PaymentService.handlePaymentSuccess: Credited ${netAmount} to agent ${payment.agent.id}`,
+        `PaymentService.createOrder: Created order ${order.id} with payment intent ${paymentIntent.id}`,
       );
+
+      return {
+        orderId: order.id,
+        clientSecret: paymentIntent.client_secret,
+        amount: amount.price,
+      };
+    } catch (error) {
+      logger.error("PaymentService.createOrder: Failed to create order", error);
+      throw error;
     }
   }
 
-  async handlePaymentFailure(stripeEvent: any): Promise<void> {
-    const paymentIntentId = stripeEvent.data.object.id;
-    const payment = await dbReadRepo(Payment).findOne({
-      where: { stripePaymentIntentId: paymentIntentId },
-      relations: ["order"],
-    });
-
-    if (!payment) {
-      logger.error(
-        `PaymentService.handlePaymentFailure: Payment with intent ${paymentIntentId} not found`,
-      );
-      throw new NotFoundException("Payment not found");
-    }
-
-    // Update payment status
-    await dbRepo(Payment).update(payment.id, {
-      status: PaymentStatusEnum.ERROR,
-      failureReason: stripeEvent.data.object.last_payment_error?.message,
-    });
-
-    // Update order payment status if exists
-    if (payment.orderId) {
-      await dbRepo(SendPackageOrder).update(payment.orderId, {
-        paymentStatus: PaymentStatusEnum.ERROR,
-      });
-    }
-
-    logger.error(
-      `PaymentService.handlePaymentFailure: Payment ${payment.id} failed`,
+  private calculateOrderAmount(
+    pickup: PickupLocation,
+    drop: DropLocation,
+  ): Promise<{ price: number; distance: number; time: number }> {
+    // Implement your pricing logic here
+    // This is a simple example - replace with your actual calculation
+    const distance = this.calculateDistance(
+      pickup.latitude,
+      pickup.longitude,
+      drop.latitude,
+      drop.longitude,
     );
+
+    const baseRate = 10; // Base rate in AUD
+    const perKmRate = 2; // Rate per km in AUD
+    const price = baseRate + distance * perKmRate;
+    const estimatedTime = distance * 3; // Simple estimation: 3 minutes per km
+
+    return Promise.resolve({
+      price: Math.round(price * 100) / 100, // Round to 2 decimal places
+      distance: Math.round(distance * 100) / 100,
+      time: Math.round(estimatedTime),
+    });
+  }
+
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
+    // Implement distance calculation (e.g., Haversine formula)
+    // This is a simplified version
+    const R = 6371; // Earth's radius in km
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.deg2rad(lat1)) *
+        Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  }
+
+  private deg2rad(deg: number): number {
+    return deg * (Math.PI / 180);
   }
 }

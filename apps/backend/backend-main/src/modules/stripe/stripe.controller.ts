@@ -1,17 +1,28 @@
 import {
+  Body,
   Controller,
-  Headers,
+  Get,
   Logger,
+  Param,
+  ParseIntPipe,
   Post,
-  RawBodyRequest,
-  Req,
+  UseGuards,
 } from "@nestjs/common";
-import { Request } from "express";
 
+import { AuthGuard } from "../../shared/guards/auth.guard";
+import { IApiResponse } from "../../shared/interface";
+import {
+  TConnectAccountRequest,
+  TCreateOrderRequest,
+  TCreateSubscriptionRequest,
+  TCreateVirtualCardRequest,
+  TOrderResponse,
+} from "../../shared/types/payment.types";
 import { PaymentService } from "./payment.service";
 import { StripeService } from "./stripe.service";
 
 @Controller("stripe")
+@UseGuards(AuthGuard)
 export class StripeController {
   private readonly logger = new Logger(StripeController.name);
   constructor(
@@ -19,30 +30,63 @@ export class StripeController {
     private readonly paymentService: PaymentService,
   ) {}
 
-  @Post("webhook")
-  async handleWebhook(
-    @Headers("stripe-signature") signature: string,
-    @Req() request: RawBodyRequest<Request>,
-  ): Promise<{ received: boolean }> {
-    try {
-      const event = await this.stripeService.handleWebhook(
-        signature,
-        request.rawBody,
-      );
+  @Post("connect-account")
+  async createConnectAccount(
+    @Body() data: TConnectAccountRequest,
+  ): Promise<IApiResponse<{ accountId: string; accountLink: string }>> {
+    const result = await this.stripeService.createConnectedAccount(data);
+    return {
+      success: true,
+      message: "Stripe connect account created successfully.",
+      data: result,
+    };
+  }
 
-      switch (event.type) {
-        case "payment_intent.succeeded":
-          await this.paymentService.handlePaymentSuccess(event);
-          break;
-        case "payment_intent.payment_failed":
-          await this.paymentService.handlePaymentFailure(event);
-          break;
-      }
+  @Get("account-links/:agentId")
+  async createAccountLink(
+    @Param("agentId", ParseIntPipe) agentId: number,
+  ): Promise<IApiResponse<{ url: string; expiresAt: string }>> {
+    const data = await this.stripeService.createAccountLink(agentId);
+    return {
+      success: true,
+      message: "Account link created successfully.",
+      data,
+    };
+  }
 
-      return { received: true };
-    } catch (err) {
-      this.logger.error("Error processing webhook:", err);
-      throw err;
-    }
+  @Post("virtual-cards")
+  async createVirtualCard(
+    @Body() data: TCreateVirtualCardRequest,
+  ): Promise<IApiResponse<{ cardDetails: any; amount: number }>> {
+    const result = await this.stripeService.createVirtualCard(data);
+    return {
+      success: true,
+      message: "Virtual card created successfully.",
+      data: result,
+    };
+  }
+
+  @Post("subscriptions")
+  async createSubscription(
+    @Body() data: TCreateSubscriptionRequest,
+  ): Promise<IApiResponse<{ clientSecret: string; subscriptionId: string }>> {
+    const result = await this.stripeService.createSubscription(data);
+    return {
+      success: true,
+      message: "Subscription created successfully.",
+      data: result,
+    };
+  }
+
+  @Post("orders/send-package")
+  async createOrder(
+    @Body() orderData: TCreateOrderRequest,
+  ): Promise<IApiResponse<TOrderResponse>> {
+    const data = await this.paymentService.createOrder(orderData);
+    return {
+      success: true,
+      message: "Order created successfully.",
+      data,
+    };
   }
 }
