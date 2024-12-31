@@ -5,9 +5,9 @@ export enum AgentTypeEnum {
 }
 
 export enum AgentStatusEnum {
+  BUSY = "BUSY",
   OFFLINE = "OFFLINE",
   ONLINE = "ONLINE",
-  BUSY="BUSY"
 }
 
 export enum AgentRegistrationDocumentEnum {
