@@ -2,8 +2,8 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
 // import { CustomerPaymentService } from "./customerPayment.service";
-import { IssuingService } from "./issuing.service";
-import { RiderPaymentService } from "./riderPayment.service";
+// import { IssuingService } from "./issuing.service";
+// import { RiderPaymentService } from "./riderPayment.service";
 import { StripeController } from "./stripe.controller";
 import { StripeService } from "./stripe.service";
 
@@ -13,14 +13,14 @@ import { StripeService } from "./stripe.service";
   providers: [
     StripeService,
     // CustomerPaymentService,
-    RiderPaymentService,
-    IssuingService,
+    // RiderPaymentService,
+    // IssuingService,
   ],
   exports: [
     StripeService,
     // CustomerPaymentService,
-    RiderPaymentService,
-    IssuingService,
+    // RiderPaymentService,
+    // IssuingService,
   ],
 })
 export class StripeModule {}

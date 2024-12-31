@@ -49,6 +49,7 @@ export enum PaymentStatusEnum {
   ERROR = "ERROR",
   NOT_PAID = "NOT_PAID",
   PAID = "PAID",
+  PENDING = "PENDING",
   REFUNDED = "REFUNDED",
 }
 

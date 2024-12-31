@@ -19,27 +19,56 @@ export class StripeService {
     });
   }
 
-  getClient(): Stripe {
-    return this.stripe;
-  }
-
-  async constructEvent(payload: any, signature: string): Promise<Stripe.Event> {
-    const endpointSecret = this.configService.get<string>(
-      "STRIPE_WEBHOOK_SECRET",
-    );
+  async createPaymentIntent(params: {
+    amount: number;
+    currency: string;
+    description?: string;
+  }): Promise<Stripe.PaymentIntent> {
     try {
-      return await this.stripe.webhooks.constructEvent(
-        JSON.stringify(payload),
-        signature,
-        endpointSecret,
+      const paymentIntent = await this.stripe.paymentIntents.create({
+        amount: Math.round(params.amount * 100), // Convert to cents
+        currency: params.currency,
+        description: params.description,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      logger.info(
+        `StripeService.createPaymentIntent: Created payment intent ${paymentIntent.id}`,
       );
+      return paymentIntent;
     } catch (error) {
       logger.error(
-        `StripeService.constructEvent: Error verifying webhook - ${error.message}`,
+        `StripeService.createPaymentIntent: Failed to create payment intent`,
+        error,
       );
-      throw new InternalServerErrorException(
-        "Invalid Stripe webhook signature",
+      throw error;
+    }
+  }
+
+  async handleWebhook(
+    signature: string,
+    rawBody: Buffer,
+  ): Promise<Stripe.Event> {
+    try {
+      const webhookSecret = this.configService.get("STRIPE_WEBHOOK_SECRET");
+      const event = await this.stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        webhookSecret,
       );
+
+      logger.info(
+        `StripeService.handleWebhook: Processed webhook event ${event.type}`,
+      );
+      return event;
+    } catch (error) {
+      logger.error(
+        `StripeService.handleWebhook: Webhook verification failed`,
+        error,
+      );
+      throw error;
     }
   }
 }
