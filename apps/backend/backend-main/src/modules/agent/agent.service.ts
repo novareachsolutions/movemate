@@ -1,7 +1,6 @@
-// src/modules/agent/agent.service.ts
-
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { DeleteResult, QueryRunner, UpdateResult } from "typeorm";
+
 import { Agent } from "../../entity/Agent";
 import { AgentDocument } from "../../entity/AgentDocument";
 import { RequiredDocument } from "../../entity/RequiredDocument";
@@ -14,11 +13,11 @@ import {
   UserInvalidDocumentError,
   UserNotFoundError,
 } from "../../shared/errors/user";
+import { AgentNotificationGateway } from "../../shared/gateways/agent.notification.gateway";
 import { filterEmptyValues } from "../../utils/filter";
 import { dbReadRepo, dbRepo } from "../database/database.service";
-import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 import { RedisService } from "../redis/redis.service";
-import { AgentNotificationGateway } from "../../shared/gateways/agent.notification.gateway";
+import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 import { radii } from "./agents.constants";
 
 @Injectable()
@@ -26,7 +25,7 @@ export class AgentService {
   constructor(
     private readonly redisService: RedisService,
     private readonly notificationGateway: AgentNotificationGateway,
-  ) { }
+  ) {}
 
   async createAgent(agent: TAgent): Promise<Agent> {
     const { abnNumber, user } = agent;
@@ -96,9 +95,7 @@ export class AgentService {
       return savedAgent;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      logger.error(
-        `AgentService.createAgent: Error occurred - ${error}`,
-      );
+      logger.error(`AgentService.createAgent: Error occurred - ${error}`);
       throw new InternalServerErrorException(
         `Failed to create agent: ${error}`,
       );
@@ -282,7 +279,11 @@ export class AgentService {
     return await dbRepo(Agent).update(agentId, { status });
   }
 
-  async updateAgentLocation(agentId: number, latitude: number, longitude: number): Promise<void> {
+  async updateAgentLocation(
+    agentId: number,
+    latitude: number,
+    longitude: number,
+  ): Promise<void> {
     logger.debug(
       `AgentService.updateAgentLocation: Updating location for agent ID ${agentId} to (${latitude}, ${longitude}).`,
     );
@@ -300,37 +301,54 @@ export class AgentService {
     logger.debug(
       `AgentService.updateAgentLocation: Adding/updating location in Redis for member ${member}.`,
     );
-    await this.redisService.getClient().geoadd('agents:locations', longitude, latitude, member);
+    await this.redisService
+      .getClient()
+      .geoadd("agents:locations", longitude, latitude, member);
     logger.debug(
       `AgentService.updateAgentLocation: Setting agent status to ONLINE in Redis for agent ID ${agentId}.`,
     );
-    await this.redisService.set(`agent:${agentId}:status`, AgentStatusEnum.ONLINE, 'EX', 3600);
+    await this.redisService.set(
+      `agent:${agentId}:status`,
+      AgentStatusEnum.ONLINE,
+      "EX",
+      3600,
+    );
   }
 
-  async getNearbyAgents(latitude: number, longitude: number, radiusKm: number): Promise<{ agentId: number; distance: number }[]> {
+  async getNearbyAgents(
+    latitude: number,
+    longitude: number,
+    radiusKm: number,
+  ): Promise<{ agentId: number; distance: number }[]> {
     logger.debug(
       `AgentService.getNearbyAgents: Fetching agents within ${radiusKm} km of (${latitude}, ${longitude}).`,
     );
     const radiusMeters = radiusKm * 1000;
-    const results = await this.redisService.getClient().georadius(
-      'agents:locations',
-      longitude,
-      latitude,
-      radiusMeters,
-      'm',
-      'WITHDIST',
-      'ASC',
-    ) as [string, string][];
+    const results = (await this.redisService
+      .getClient()
+      .georadius(
+        "agents:locations",
+        longitude,
+        latitude,
+        radiusMeters,
+        "m",
+        "WITHDIST",
+        "ASC",
+      )) as [string, string][];
     logger.debug(
       `AgentService.getNearbyAgents: Found ${results.length} agents within ${radiusKm} km.`,
     );
-    return results.map(result => ({
-      agentId: parseInt(result[0].split(':')[1], 10),
+    return results.map((result) => ({
+      agentId: parseInt(result[0].split(":")[1], 10),
       distance: parseFloat(result[1]),
     }));
   }
 
-  async assignRider(pickupLatitude: number, pickupLongitude: number, orderId: string): Promise<number | null> {
+  async assignRider(
+    pickupLatitude: number,
+    pickupLongitude: number,
+    orderId: string,
+  ): Promise<number | null> {
     logger.debug(
       `AgentService.assignRider: Assigning rider for order ID ${orderId} at location (${pickupLatitude}, ${pickupLongitude}).`,
     );
@@ -340,20 +358,26 @@ export class AgentService {
       logger.debug(
         `AgentService.assignRider: Searching within ${km} km with a limit of ${limit} agents.`,
       );
-      const nearbyAgents = await this.getNearbyAgents(pickupLatitude, pickupLongitude, km);
+      const nearbyAgents = await this.getNearbyAgents(
+        pickupLatitude,
+        pickupLongitude,
+        km,
+      );
       logger.debug(
         `AgentService.assignRider: Found ${nearbyAgents.length} nearby agents within ${km} km.`,
       );
 
       const availableAgents = await Promise.all(
-        nearbyAgents.map(async agent => {
+        nearbyAgents.map(async (agent) => {
           if (notifiedAgents.has(agent.agentId)) {
             logger.debug(
               `AgentService.assignRider: Agent ID ${agent.agentId} already notified.`,
             );
             return null;
           }
-          const status = await this.redisService.get(`agent:${agent.agentId}:status`);
+          const status = await this.redisService.get(
+            `agent:${agent.agentId}:status`,
+          );
           if (status === AgentStatusEnum.ONLINE) {
             logger.debug(
               `AgentService.assignRider: Agent ID ${agent.agentId} is ONLINE.`,
@@ -365,8 +389,8 @@ export class AgentService {
             );
             return null;
           }
-        })
-      ).then(results => results.filter(agent => agent !== null));
+        }),
+      ).then((results) => results.filter((agent) => agent !== null));
 
       logger.debug(
         `AgentService.assignRider: ${availableAgents.length} agents available within ${km} km.`,
@@ -378,20 +402,29 @@ export class AgentService {
       );
 
       if (selectedAgents.length === 0) {
-        logger.debug(`AgentService.assignRider: No agents to notify within ${km} km.`);
+        logger.debug(
+          `AgentService.assignRider: No agents to notify within ${km} km.`,
+        );
         continue;
       }
 
-      selectedAgents.forEach(agent => notifiedAgents.add(agent.agentId));
+      selectedAgents.forEach((agent) => notifiedAgents.add(agent.agentId));
 
-      selectedAgents.forEach(agent => {
+      selectedAgents.forEach((agent) => {
         logger.debug(
           `AgentService.assignRider: Notifying agent ID ${agent.agentId} about order ID ${orderId}.`,
         );
-        this.notificationGateway.sendMessageToAgent(agent.agentId, 'newRequest', {
-          orderId,
-          pickupLocation: { latitude: pickupLatitude, longitude: pickupLongitude },
-        });
+        this.notificationGateway.sendMessageToAgent(
+          agent.agentId,
+          "newRequest",
+          {
+            orderId,
+            pickupLocation: {
+              latitude: pickupLatitude,
+              longitude: pickupLongitude,
+            },
+          },
+        );
       });
 
       const assignedAgentId = await this.waitForAcceptance(orderId, 40000);
@@ -413,7 +446,10 @@ export class AgentService {
     return null;
   }
 
-  private async waitForAcceptance(orderId: string, timeoutMs: number): Promise<number | null> {
+  private waitForAcceptance(
+    orderId: string,
+    timeoutMs: number,
+  ): Promise<number | null> {
     logger.debug(
       `AgentService.waitForAcceptance: Waiting for acceptance of order ID ${orderId} for ${timeoutMs} ms.`,
     );
@@ -425,12 +461,16 @@ export class AgentService {
         );
         resolve(null);
       }, timeoutMs);
-
-      const listener = (channel: string, message: string) => {
+      const listener = async (
+        _channel: string,
+        message: string,
+      ): Promise<any> => {
         const data = JSON.parse(message);
         if (data.orderId === orderId) {
           clearTimeout(timeout);
-          this.redisService.getClient().unsubscribe(`acceptance:${orderId}`);
+          await this.redisService
+            .getClient()
+            .unsubscribe(`acceptance:${orderId}`);
           logger.debug(
             `AgentService.waitForAcceptance: Order ID ${orderId} accepted by agent ID ${data.agentId}.`,
           );
@@ -438,19 +478,24 @@ export class AgentService {
         }
       };
 
-      this.redisService.getClient().subscribe(`acceptance:${orderId}`, (err, count) => {
-        if (err) {
-          logger.error(`AgentService.waitForAcceptance: Failed to subscribe to acceptance channel: ${err.message}`);
-          clearTimeout(timeout);
-          resolve(null);
-        } else {
-          logger.debug(
-            `AgentService.waitForAcceptance: Subscribed to acceptance channel for order ID ${orderId}.`,
-          );
-        }
-      });
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this.redisService
+        .getClient()
+        .subscribe(`acceptance:${orderId}`, (err) => {
+          if (err) {
+            logger.error(
+              `AgentService.waitForAcceptance: Failed to subscribe to acceptance channel: ${err.message}`,
+            );
+            clearTimeout(timeout);
+            resolve(null);
+          } else {
+            logger.debug(
+              `AgentService.waitForAcceptance: Subscribed to acceptance channel for order ID ${orderId}.`,
+            );
+          }
+        });
 
-      this.redisService.getClient().on('message', listener);
+      this.redisService.getClient().on("message", listener);
     });
   }
 
@@ -464,7 +509,9 @@ export class AgentService {
     logger.debug(
       `AgentService.acceptOrder: Publishing acceptance data to Redis for order ID ${orderId}.`,
     );
-    await this.redisService.getClient().publish(`acceptance:${orderId}`, JSON.stringify(acceptanceData));
+    await this.redisService
+      .getClient()
+      .publish(`acceptance:${orderId}`, JSON.stringify(acceptanceData));
 
     // this is to notify the other agents that the order is taken, not necessary for now
     // logger.debug(

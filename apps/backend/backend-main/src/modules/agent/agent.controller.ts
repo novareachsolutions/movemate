@@ -24,7 +24,7 @@ import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 
 @Controller("agent")
 export class AgentController {
-  constructor(private readonly agentService: AgentService) { }
+  constructor(private readonly agentService: AgentService) {}
 
   @Post("signup")
   @UseGuards(OnboardingGuard)
