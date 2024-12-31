@@ -9,6 +9,7 @@ import { RedisService } from "../../redis/redis.service";
 import { JwtService } from "@nestjs/jwt";
 import { OtpService } from "../../auth/utils/otp";
 import { TokenService } from "../../auth/utils/generateTokens";
+import { AgentNotificationGateway } from "../../../shared/gateways/agent.notification.gateway";
 
 
 @Module({
@@ -18,6 +19,6 @@ import { TokenService } from "../../auth/utils/generateTokens";
     }),
   ],
   controllers: [SendPackageController],
-  providers: [SendAPackageService, AgentService, AuthService, OnboardingGuard, RedisService, JwtService, OtpService, TokenService],
+  providers: [SendAPackageService, AgentService, AuthService, OnboardingGuard, RedisService, JwtService, OtpService, TokenService, AgentNotificationGateway],
 })
 export class SendAPackageModule { }
