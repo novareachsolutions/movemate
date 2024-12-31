@@ -24,7 +24,7 @@
   "scripts": {
     "lint": "eslint \"apps/frontend/**/*.{ts,tsx}\" --fix",
     "lint:backend": "cd apps/backend/backend-main && yarn lint",
-    "prettier": "prettier --write 'apps/**/*.{ts,tsx,json,css,scss,md}' 'shared/**/*.{ts,tsx,json,css,scss,md}'",
+    "prettier": "prettier --write 'apps/**/*.{ts,tsx,json,css,scss,md}' 'shared/**/*.{ts,tsx,json,css,scss,md}' --ignore-path .prettierignore",
     "tsc": "tsc --noEmit --project tsconfig.json",
     "validate": "yarn run prettier && yarn run lint:backend && yarn run lint",
     "commit": "git-cz",

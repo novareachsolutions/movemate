@@ -1,7 +1,10 @@
+// src/modules/support/notification.service.ts
+
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 
 import { ChatMessage } from "../../entity/ChatMessage";
 import { SupportTicket } from "../../entity/SupportTicket";
+import { UserRoleEnum } from "../../shared/enums";
 import { ChatSupportGateway } from "../../shared/gateways/chat.support.gateway";
 import { CustomerNotificationGateway } from "../../shared/gateways/customer.notification.gateway";
 
@@ -15,6 +18,9 @@ export class NotificationService {
   ) {}
 
   notifyNewMessage(message: ChatMessage): void {
+    const sender = message.sender;
+
+    // Send to the specific ticket room
     this.chatSupportGateway.sendMessageToRoom(
       `ticket:${message.ticket.id}`,
       "newMessage",
@@ -30,9 +36,10 @@ export class NotificationService {
       },
     );
 
-    if (this.isCustomerMessage(message)) {
-      this.chatSupportGateway.sendMessageToRoom(
-        "agents",
+    // If the sender is a customer, notify the assigned rider
+    if (sender.role === UserRoleEnum.CUSTOMER) {
+      this.chatSupportGateway.sendMessageToClient(
+        message.ticket.assignedRider.id.toString(),
         "newCustomerMessage",
         {
           ticketId: message.ticket.id,
@@ -41,12 +48,26 @@ export class NotificationService {
         },
       );
     }
+
+    // If the sender is a rider, optionally notify support agents if needed
+    if (sender.role === UserRoleEnum.AGENT) {
+      // For example, notify support agents about rider's message
+      this.chatSupportGateway.sendMessageToRoom(
+        "support_agents",
+        "newRiderMessage",
+        {
+          ticketId: message.ticket.id,
+          riderId: message.sender.id,
+          message: message.content,
+        },
+      );
+    }
   }
 
-  notifyTicketAssigned(ticket: SupportTicket): void {
+  notifyRiderAssigned(ticket: SupportTicket): void {
     this.chatSupportGateway.sendMessageToClient(
-      ticket.assignedAgent.id.toString(),
-      "ticketAssigned",
+      ticket.assignedRider.id.toString(),
+      "riderAssigned",
       {
         ticketId: ticket.id,
         ticketNumber: ticket.ticketNumber,
@@ -59,13 +80,41 @@ export class NotificationService {
 
     this.customerNotificationGateway.sendMessageToClient(
       ticket.customer.id.toString(),
-      "agentAssigned",
+      "riderAssigned",
       {
         ticketId: ticket.id,
         ticketNumber: ticket.ticketNumber,
-        agent: {
-          id: ticket.assignedAgent.id,
-          name: `${ticket.assignedAgent.firstName} ${ticket.assignedAgent.lastName}`,
+        rider: {
+          id: ticket.assignedRider.id,
+          name: `${ticket.assignedRider.firstName} ${ticket.assignedRider.lastName}`,
+        },
+      },
+    );
+  }
+
+  notifySupportAgentAssigned(ticket: SupportTicket): void {
+    this.chatSupportGateway.sendMessageToClient(
+      ticket.assignedSupportAgent.id.toString(),
+      "supportAgentAssigned",
+      {
+        ticketId: ticket.id,
+        ticketNumber: ticket.ticketNumber,
+        customer: {
+          id: ticket.customer.id,
+          name: `${ticket.customer.firstName} ${ticket.customer.lastName}`,
+        },
+      },
+    );
+
+    this.customerNotificationGateway.sendMessageToClient(
+      ticket.customer.id.toString(),
+      "supportAgentAssigned",
+      {
+        ticketId: ticket.id,
+        ticketNumber: ticket.ticketNumber,
+        supportAgent: {
+          id: ticket.assignedSupportAgent.id,
+          name: `${ticket.assignedSupportAgent.firstName} ${ticket.assignedSupportAgent.lastName}`,
         },
       },
     );
@@ -83,6 +132,7 @@ export class NotificationService {
       },
     );
 
+    // Notify customer
     this.customerNotificationGateway.sendMessageToClient(
       ticket.customer.id.toString(),
       "ticketStatusUpdate",
@@ -99,7 +149,7 @@ export class NotificationService {
     oldPriority: string,
   ): void {
     this.chatSupportGateway.sendMessageToRoom(
-      "agents",
+      "support_agents",
       "ticketPriorityChanged",
       {
         ticketId: ticket.id,

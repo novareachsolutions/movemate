@@ -1,3 +1,5 @@
+// src/modules/support/support.controller.ts
+
 import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 
 import { ChatMessage } from "../../entity/ChatMessage";
@@ -75,10 +77,7 @@ export class SupportController {
     @Param("ticketId") ticketId: number,
     @Body() input: AssignTicketDto,
   ): Promise<IApiResponse<SupportTicket>> {
-    const ticket = await this.ticketService.assignTicket(
-      ticketId,
-      input.agentId,
-    );
+    const ticket = await this.ticketService.assignTicket(ticketId, input);
     return {
       success: true,
       message: "Ticket assigned successfully",
