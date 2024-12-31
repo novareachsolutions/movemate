@@ -1,17 +1,13 @@
 import {
-  Entity,
   Column,
-  ManyToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   RelationId,
 } from "typeorm";
-import { DropLocation } from "./DropLocation";
-import { PickupLocation } from "./PickupLocation";
-import { Report } from "./Report";
-import { OrderReview } from "./OrderReview";
-import { BaseEntity } from "./BaseEntity";
-import { User } from "./User";
+
 import {
   OrderStatusEnum,
   OrderTypeEnum,
@@ -19,6 +15,13 @@ import {
   UserRoleEnum,
 } from "../shared/enums";
 import { Agent } from "./Agent";
+import { BaseEntity } from "./BaseEntity";
+import { DropLocation } from "./DropLocation";
+import { OrderReview } from "./OrderReview";
+import { Payment } from "./Payment";
+import { PickupLocation } from "./PickupLocation";
+import { Report } from "./Report";
+import { User } from "./User";
 
 @Entity()
 export class SendPackageOrder extends BaseEntity {
@@ -134,14 +137,6 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: "timestamp", nullable: true })
   completedAt: Date;
 
-  @Column({
-    type: "enum",
-    enum: PaymentStatusEnum,
-    default: PaymentStatusEnum.NOT_PAID,
-    nullable: false,
-  })
-  paymentStatus: PaymentStatusEnum;
-
   @OneToOne(() => Report, (report) => report.sendPackageOrder, {
     nullable: true,
     onDelete: "SET NULL",
@@ -164,4 +159,16 @@ export class SendPackageOrder extends BaseEntity {
   @RelationId((order: SendPackageOrder) => order.review)
   @Column({ type: "integer", nullable: true })
   orderReviewId: number;
+
+  // ---- Payment Specific Fields ----
+  @Column({
+    type: "enum",
+    enum: PaymentStatusEnum,
+    default: PaymentStatusEnum.NOT_PAID,
+    nullable: false,
+  })
+  paymentStatus: PaymentStatusEnum;
+
+  @OneToMany(() => Payment, (payment) => payment.order)
+  payments: Payment[];
 }

@@ -7,8 +7,9 @@ import {
   OneToOne,
   RelationId,
 } from "typeorm";
-import { SendPackageOrder } from "./SendPackageOrder";
+
 import { BaseEntity } from "./BaseEntity";
+import { SendPackageOrder } from "./SendPackageOrder";
 
 @Index("IDX_report_orderId", ["sendPackageOrderId"], {
   where: '"deletedAt" IS NULL',

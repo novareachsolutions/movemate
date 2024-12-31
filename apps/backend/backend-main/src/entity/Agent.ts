@@ -1,4 +1,12 @@
-import { Column, Entity, Index, OneToOne, RelationId, Unique } from "typeorm";
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  OneToOne,
+  RelationId,
+  Unique,
+} from "typeorm";
 
 import { TAgent } from "../modules/agent/agent.types";
 import {
@@ -6,8 +14,11 @@ import {
   AgentTypeEnum,
   SubscripionStatusEnum,
 } from "../shared/enums";
+import { AgentSubscription } from "./AgentSubscription";
 import { BaseEntity } from "./BaseEntity";
+import { Payment } from "./Payment";
 import { User } from "./User";
+import { Wallet } from "./Wallet";
 
 @Index("IDX_agent_userId", ["userId"], { where: '"deletedAt" IS NULL' })
 @Index("IDX_agent_status", ["status"], { where: '"deletedAt" IS NULL' })
@@ -53,6 +64,8 @@ export class Agent extends BaseEntity implements TAgent {
   })
   status: AgentStatusEnum;
 
+  // ---- Payment Specific Fields ----
+
   @Column({ type: "varchar", nullable: true })
   stripeAccountId: string;
 
@@ -71,4 +84,13 @@ export class Agent extends BaseEntity implements TAgent {
 
   @Column({ type: "decimal", default: 0.1, precision: 5, scale: 2 })
   commissionRate: number;
+
+  @OneToMany(() => Payment, (payment) => payment.agent)
+  payments: Payment[];
+
+  @OneToMany(() => AgentSubscription, (subscription) => subscription.agent)
+  subscriptions: AgentSubscription[];
+
+  @OneToOne(() => Wallet, (wallet) => wallet.agent)
+  wallet: Wallet;
 }

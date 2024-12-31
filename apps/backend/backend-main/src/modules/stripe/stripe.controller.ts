@@ -8,7 +8,7 @@ import {
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { CustomerPaymentService } from "./customerPayment.service";
+// import { CustomerPaymentService } from "./customerPayment.service";
 import { RiderPaymentService } from "./riderPayment.service";
 import { StripeService } from "./stripe.service";
 
@@ -16,55 +16,55 @@ import { StripeService } from "./stripe.service";
 export class StripeController {
   constructor(
     private readonly stripeService: StripeService,
-    private readonly customerPaymentService: CustomerPaymentService,
+    // private readonly customerPaymentService: CustomerPaymentService,
     private readonly riderPaymentService: RiderPaymentService,
   ) {}
 
   // CUSTOMER FLOWS
-  @Post("send-package")
-  async processSendPackage(
-    @Body("userId") userId: number,
-    @Body("orderId") orderId: number,
-    @Body("amount") amount: number,
-  ): Promise<{ success: boolean; paymentIntent: any }> {
-    const paymentIntent =
-      await this.customerPaymentService.processSendPackagePayment(
-        userId,
-        orderId,
-        amount,
-      );
-    return { success: true, paymentIntent };
-  }
+  // @Post("send-package")
+  // async processSendPackage(
+  //   @Body("userId") userId: number,
+  //   @Body("orderId") orderId: number,
+  //   @Body("amount") amount: number
+  // ): Promise<{ success: boolean; paymentIntent: any }> {
+  //   const paymentIntent =
+  //     await this.customerPaymentService.processSendPackagePayment(
+  //       userId,
+  //       orderId,
+  //       amount
+  //     );
+  //   return { success: true, paymentIntent };
+  // }
 
-  @Post("store-invoice-payment")
-  async processStoreInvoicePayment(
-    @Body("userId") userId: number,
-    @Body("orderId") orderId: number,
-    @Body("amount") amount: number,
-  ): Promise<{ success: boolean; paymentIntent: Stripe.PaymentIntent }> {
-    const paymentIntent =
-      await this.customerPaymentService.processStoreInvoicePayment(
-        userId,
-        orderId,
-        amount,
-      );
-    return { success: true, paymentIntent };
-  }
+  // @Post("store-invoice-payment")
+  // async processStoreInvoicePayment(
+  //   @Body("userId") userId: number,
+  //   @Body("orderId") orderId: number,
+  //   @Body("amount") amount: number
+  // ): Promise<{ success: boolean; paymentIntent: Stripe.PaymentIntent }> {
+  //   const paymentIntent =
+  //     await this.customerPaymentService.processStoreInvoicePayment(
+  //       userId,
+  //       orderId,
+  //       amount
+  //     );
+  //   return { success: true, paymentIntent };
+  // }
 
-  @Post("car-towing")
-  async processCarTowingPayment(
-    @Body("userId") userId: number,
-    @Body("orderId") orderId: number,
-    @Body("amount") amount: number,
-  ): Promise<{ success: boolean; paymentIntent: Stripe.PaymentIntent }> {
-    const paymentIntent =
-      await this.customerPaymentService.processCarTowingPayment(
-        userId,
-        orderId,
-        amount,
-      );
-    return { success: true, paymentIntent };
-  }
+  // @Post("car-towing")
+  // async processCarTowingPayment(
+  //   @Body("userId") userId: number,
+  //   @Body("orderId") orderId: number,
+  //   @Body("amount") amount: number
+  // ): Promise<{ success: boolean; paymentIntent: Stripe.PaymentIntent }> {
+  //   const paymentIntent =
+  //     await this.customerPaymentService.processCarTowingPayment(
+  //       userId,
+  //       orderId,
+  //       amount
+  //     );
+  //   return { success: true, paymentIntent };
+  // }
 
   // RIDER FLOWS
   @Post("rider-subscription")
@@ -116,16 +116,16 @@ export class StripeController {
     }
 
     switch (event.type) {
-      case "payment_intent.succeeded":
-        await this.customerPaymentService.handlePaymentIntentSucceeded(
-          event.data.object as Stripe.PaymentIntent,
-        );
-        break;
-      case "payment_intent.payment_failed":
-        await this.customerPaymentService.handlePaymentIntentFailed(
-          event.data.object as Stripe.PaymentIntent,
-        );
-        break;
+      // case "payment_intent.succeeded":
+      //   await this.customerPaymentService.handlePaymentIntentSucceeded(
+      //     event.data.object as Stripe.PaymentIntent
+      //   );
+      //   break;
+      // case "payment_intent.payment_failed":
+      //   await this.customerPaymentService.handlePaymentIntentFailed(
+      //     event.data.object as Stripe.PaymentIntent
+      //   );
+      //   break;
       // Additional event types as needed
       default:
         logger.debug(
