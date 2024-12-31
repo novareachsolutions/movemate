@@ -6,8 +6,11 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
+  Redirect,
   UseGuards,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { IApiResponse } from "../../shared/interface";
@@ -28,6 +31,7 @@ export class StripeController {
   constructor(
     private readonly stripeService: StripeService,
     private readonly paymentService: PaymentService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post("connect-account")
@@ -88,5 +92,29 @@ export class StripeController {
       message: "Order created successfully.",
       data,
     };
+  }
+
+  @Get("refresh-account-link")
+  @Redirect()
+  async handleRefreshAccountLink(
+    @Query("agent_id") agentId: string,
+  ): Promise<{ url: string }> {
+    this.logger.log(`Refreshing account link for agent ${agentId}`);
+    const { url } = await this.stripeService.createAccountLink(
+      parseInt(agentId, 10),
+    );
+    return { url };
+  }
+
+  @Get("return-account-link")
+  @Redirect()
+  handleReturnAccountLink(
+    @Query("agent_id") agentId: string,
+  ): Promise<{ url: string }> {
+    // Redirect to your frontend success page
+    const frontendUrl = this.configService.get<string>("FRONTEND_URL");
+    return Promise.resolve({
+      url: `${frontendUrl}/agent/onboarding-success?agent_id=${agentId}`,
+    });
   }
 }
