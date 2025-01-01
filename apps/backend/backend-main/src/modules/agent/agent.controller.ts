@@ -266,8 +266,8 @@ export class AgentController {
   }
 
   @Post("required-document")
-  // @UseGuards(AuthGuard)
-  // @Roles(UserRoleEnum.ADMIN)
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async createRequiredDocument(
     @Body()
     createRequiredDocumentDto: {
