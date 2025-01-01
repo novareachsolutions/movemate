@@ -23,6 +23,7 @@ import { Roles } from "../../shared/decorators/roles.decorator";
 import {
   AgentStatusEnum,
   AgentTypeEnum,
+  ApprovalStatusEnum,
   UserRoleEnum,
 } from "../../shared/enums";
 import { UnauthorizedError } from "../../shared/errors/authErrors";
@@ -38,7 +39,7 @@ export class AgentController {
   constructor(
     private readonly agentService: AgentService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   @Post("signup")
   @UseGuards(OnboardingGuard)
@@ -285,6 +286,26 @@ export class AgentController {
       success: true,
       message: "Required document created successfully.",
       data: requiredDocument,
+    };
+  }
+
+  @Patch(":agentId/document/:documentId/approval-status")
+  @UseGuards(AuthGuard)
+  @Roles(UserRoleEnum.ADMIN)
+  async updateDocumentApprovalStatus(
+    @Param("agentId", ParseIntPipe) agentId: number,
+    @Param("documentId", ParseIntPipe) documentId: number,
+    @Body() body: { approvalStatus: ApprovalStatusEnum },
+  ): Promise<IApiResponse<null>> {
+    const { approvalStatus } = body;
+
+    // Call service method to update the document's approval status
+    await this.agentService.updateDocumentApprovalStatus(agentId, documentId, approvalStatus);
+
+    return {
+      success: true,
+      message: `Document approval status updated to ${approvalStatus}.`,
+      data: null,
     };
   }
 }

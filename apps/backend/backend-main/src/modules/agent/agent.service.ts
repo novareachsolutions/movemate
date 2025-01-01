@@ -34,7 +34,7 @@ export class AgentService {
     private readonly notificationGateway: AgentNotificationGateway,
     private readonly tokenService: TokenService,
     private readonly mediaService: MediaService,
-  ) {}
+  ) { }
 
   async createAgent(
     agent: TAgent,
@@ -606,5 +606,32 @@ export class AgentService {
       `AgentService.createRequiredDocument: Required document with ID ${savedDocument.id} created successfully.`,
     );
     return savedDocument;
+  }
+
+  async updateDocumentApprovalStatus(
+    agentId: number,
+    documentId: number,
+    approvalStatus: ApprovalStatusEnum,
+  ): Promise<void> {
+    if (!["APPROVED", "REJECTED"].includes(approvalStatus)) {
+      throw new UserInvalidDocumentError("Invalid approval status provided.");
+    }
+
+    // Fetch the document
+    const document = await dbReadRepo(AgentDocument).findOne({
+      where: { id: documentId, agentId },
+    });
+
+    if (!document) {
+      throw new UserNotFoundError(
+        `Document with ID ${documentId} not found for agent ID ${agentId}.`,
+      );
+    }
+
+    // Update the document's approval status
+    document.approvalStatus = approvalStatus;
+
+    // Save the updated document to the database
+    await dbRepo(AgentDocument).save(document);
   }
 }
