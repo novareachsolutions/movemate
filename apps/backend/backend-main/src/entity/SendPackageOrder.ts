@@ -1,17 +1,12 @@
 import {
-  Entity,
   Column,
-  ManyToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   RelationId,
 } from "typeorm";
-import { DropLocation } from "./DropLocation";
-import { PickupLocation } from "./PickupLocation";
-import { Report } from "./Report";
-import { OrderReview } from "./OrderReview"; 
-import { BaseEntity } from "./BaseEntity";
-import { User } from "./User";
+
 import {
   OrderStatusEnum,
   OrderTypeEnum,
@@ -19,6 +14,12 @@ import {
   UserRoleEnum,
 } from "../shared/enums";
 import { Agent } from "./Agent";
+import { BaseEntity } from "./BaseEntity";
+import { DropLocation } from "./DropLocation";
+import { OrderReview } from "./OrderReview";
+import { PickupLocation } from "./PickupLocation";
+import { Report } from "./Report";
+import { User } from "./User";
 
 @Entity()
 export class SendPackageOrder extends BaseEntity {
@@ -82,7 +83,7 @@ export class SendPackageOrder extends BaseEntity {
   estimatedDistance: number;
 
   @Column({ type: "time", nullable: false })
-  estimatedTime: number; 
+  estimatedTime: number;
 
   @ManyToOne(() => User, (user) => user.id, { nullable: true })
   @JoinColumn({ name: "customerId" })
@@ -92,7 +93,10 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: "integer", nullable: true })
   customerId: number;
 
-  @ManyToOne(() => Agent, (agent) => agent.id, { nullable: true, onDelete: "SET NULL" })
+  @ManyToOne(() => Agent, (agent) => agent.id, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "agentId" })
   agent: Agent;
 
@@ -109,7 +113,7 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: "float", nullable: true })
   actualTime: number;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   cancellationReason: string;
 
   @Column({
@@ -119,7 +123,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   canceledBy: UserRoleEnum;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   completionPhoto: string;
 
   @Column({ type: "timestamp", nullable: true })
@@ -152,7 +156,7 @@ export class SendPackageOrder extends BaseEntity {
 
   @OneToOne(() => OrderReview, (orderReview) => orderReview.sendPackageOrder, {
     nullable: true,
-    onDelete: "SET NULL"
+    onDelete: "SET NULL",
   })
   @JoinColumn({ name: "orderReviewId" })
   review: OrderReview;

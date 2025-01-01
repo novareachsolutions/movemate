@@ -20,4 +20,7 @@ export class RequiredDocument extends BaseEntity {
 
   @Column({ type: "boolean", default: true })
   isRequired: boolean;
+
+  @Column({ type: "boolean", default: false })
+  isExpiry: boolean;
 }

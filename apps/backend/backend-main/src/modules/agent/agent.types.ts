@@ -29,5 +29,6 @@ export type TAgentDocument = {
   name: string;
   description?: string;
   url: string;
-  agentId: number;
+  agentId?: number;
+  expiry?: Date;
 };

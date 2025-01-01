@@ -8,30 +8,45 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { Response } from "express";
 import { UpdateResult } from "typeorm";
 
 import { Agent } from "../../entity/Agent";
+import { RequiredDocument } from "../../entity/RequiredDocument";
 import { Roles } from "../../shared/decorators/roles.decorator";
-import { AgentStatusEnum, UserRoleEnum } from "../../shared/enums";
+import {
+  AgentStatusEnum,
+  AgentTypeEnum,
+  UserRoleEnum,
+} from "../../shared/enums";
 import { UnauthorizedError } from "../../shared/errors/authErrors";
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
+import { FileToUrlInterceptor } from "../../shared/interceptors/file-to-url.interceptor";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { AgentService } from "./agent.service";
 import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 
 @Controller("agent")
 export class AgentController {
-  constructor(private readonly agentService: AgentService) {}
+  constructor(
+    private readonly agentService: AgentService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post("signup")
   @UseGuards(OnboardingGuard)
   async create(
     @Req() request: ICustomRequest,
     @Body() agent: TAgent,
-  ): Promise<IApiResponse<Agent>> {
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<IApiResponse<{ agent: Agent; accessToken: string }>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
     if (
       agent.user.phoneNumber &&
@@ -42,11 +57,24 @@ export class AgentController {
       );
     }
     agent.user.phoneNumber = phoneNumberFromGuard;
-    const data = await this.agentService.createAgent(agent);
+
+    const {
+      agent: createdAgent,
+      accessToken,
+      refreshToken,
+    } = await this.agentService.createAgent(agent);
+
+    response.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
+    });
+
     return {
       success: true,
       message: "Agent created successfully.",
-      data,
+      data: { agent: createdAgent, accessToken },
     };
   }
 
@@ -87,6 +115,7 @@ export class AgentController {
   @Post("document")
   @UseGuards(AuthGuard)
   @Roles(UserRoleEnum.AGENT)
+  @UseInterceptors(FileInterceptor("file"), FileToUrlInterceptor)
   async submitOwnDocument(
     @Body() submitDocumentDto: TAgentDocument,
     @Req() request: ICustomRequest,
@@ -95,7 +124,9 @@ export class AgentController {
     const document: TAgentDocument = {
       ...submitDocumentDto,
       agentId,
+      url: submitDocumentDto.url,
     };
+
     const data = await this.agentService.submitDocument(agentId, document);
     return {
       success: true,
@@ -231,6 +262,29 @@ export class AgentController {
       success: true,
       message: "Location updated successfully.",
       data: null,
+    };
+  }
+
+  @Post("required-document")
+  // @UseGuards(AuthGuard)
+  // @Roles(UserRoleEnum.ADMIN)
+  async createRequiredDocument(
+    @Body()
+    createRequiredDocumentDto: {
+      name: string;
+      description?: string;
+      agentType: AgentTypeEnum;
+      isRequired: boolean;
+      isExpiry: boolean;
+    },
+  ): Promise<IApiResponse<RequiredDocument>> {
+    const requiredDocument = await this.agentService.createRequiredDocument(
+      createRequiredDocumentDto,
+    );
+    return {
+      success: true,
+      message: "Required document created successfully.",
+      data: requiredDocument,
     };
   }
 }
