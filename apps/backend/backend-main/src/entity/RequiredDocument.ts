@@ -1,6 +1,6 @@
 import { Column, Entity } from "typeorm";
 
-import { AgentTypeEnum } from "../shared/enums";
+import { AgentTypeEnum, ApprovalStatusEnum } from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
 
 @Entity()
@@ -12,8 +12,7 @@ export class RequiredDocument extends BaseEntity {
   description: string;
 
   @Column({
-    type: "enum",
-    enum: AgentTypeEnum,
+    type: "varchar",
     nullable: false,
   })
   agentType: AgentTypeEnum;
