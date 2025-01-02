@@ -1,5 +1,3 @@
-// src/pricing/pricing.module.ts
-
 import { Module } from '@nestjs/common';
 import { PricingService } from './pricing.service';
 import { PricingController } from './pricing.controller';
