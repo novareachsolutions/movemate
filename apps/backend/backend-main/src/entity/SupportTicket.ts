@@ -1,3 +1,5 @@
+// src/entity/SupportTicket.ts
+
 import { Column, Entity, ManyToOne, OneToMany, RelationId } from "typeorm";
 
 import {
@@ -17,13 +19,22 @@ export class SupportTicket extends BaseEntity {
   customer: User;
 
   @RelationId((ticket: SupportTicket) => ticket.customer)
+  @Column({ type: "integer", nullable: false })
   customerId: number;
 
   @ManyToOne(() => User, { nullable: true })
-  assignedAgent: User;
+  assignedRider: User; // New field for Rider
 
-  @RelationId((ticket: SupportTicket) => ticket.assignedAgent)
-  assignedAgentId: number;
+  @RelationId((ticket: SupportTicket) => ticket.assignedRider)
+  @Column({ type: "integer", nullable: true })
+  assignedRiderId: number;
+
+  @ManyToOne(() => User, { nullable: true })
+  assignedSupportAgent: User; // New field for Support Agent
+
+  @RelationId((ticket: SupportTicket) => ticket.assignedSupportAgent)
+  @Column({ type: "integer", nullable: true })
+  assignedSupportAgentId: number;
 
   @Column({
     type: "varchar",

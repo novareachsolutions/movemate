@@ -1,3 +1,5 @@
+// src/modules/support/support.controller.ts
+
 import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 
 import { ChatMessage } from "../../entity/ChatMessage";
@@ -16,7 +18,7 @@ import { SupportService } from "./support.service";
 
 @Controller("support")
 export class SupportController {
-  constructor(private readonly ticketService: SupportService) {}
+  constructor(private readonly ticketService: SupportService) { }
 
   @Post("ticket")
   async createTicket(
@@ -75,10 +77,7 @@ export class SupportController {
     @Param("ticketId") ticketId: number,
     @Body() input: AssignTicketDto,
   ): Promise<IApiResponse<SupportTicket>> {
-    const ticket = await this.ticketService.assignTicket(
-      ticketId,
-      input.agentId,
-    );
+    const ticket = await this.ticketService.assignTicket(ticketId, input);
     return {
       success: true,
       message: "Ticket assigned successfully",
@@ -115,6 +114,17 @@ export class SupportController {
       success: true,
       message: "Note added successfully",
       data: note,
+    };
+  }
+  @Get("ticket/:ticketId/messages")
+  async getTicketMessages(
+    @Param("ticketId") ticketId: number,
+  ): Promise<IApiResponse<ChatMessage[]>> {
+    const messages = await this.ticketService.getMessages(ticketId);
+    return {
+      success: true,
+      message: "Messages retrieved successfully",
+      data: messages,
     };
   }
 }

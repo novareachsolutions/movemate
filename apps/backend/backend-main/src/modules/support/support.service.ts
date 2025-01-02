@@ -1,17 +1,24 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+// src/modules/support/support.service.ts
+
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 
 import { ChatMessage } from "../../entity/ChatMessage";
 import { SupportTicket } from "../../entity/SupportTicket";
 import { TicketActivity } from "../../entity/TicketActivity";
 import { TicketNote } from "../../entity/TicketNote";
 import { User } from "../../entity/User";
+import { UserRoleEnum } from "../../shared/enums";
 import { dbRepo } from "../database/database.service";
 import { NotificationService } from "./notification.service";
 import {
   AddMessageDto,
   AddNoteDto,
+  AssignTicketDto,
   CreateTicketDto,
-  GetTicketsDto,
 } from "./support.dto";
 import { TicketPriorityEnum, TicketStatusEnum } from "./types/support.types";
 
@@ -57,36 +64,84 @@ export class SupportService {
     return await dbRepo(ChatMessage).save(message);
   }
 
-  async assignTicket(
-    ticketId: number,
-    agentId: number,
-  ): Promise<SupportTicket> {
+  // Updated method to assign a rider
+  async assignRider(ticketId: number, riderId: number): Promise<SupportTicket> {
     const ticket = await this.getTicketDetails(ticketId);
-    const oldAgentId = ticket.assignedAgent?.id;
+    // Corrected the findOne method to findOneBy with a where clause
+    const rider = await dbRepo(User).findOneBy({ id: riderId });
 
-    ticket.assignedAgent = { id: agentId } as User;
+    if (!rider || rider.role !== UserRoleEnum.AGENT) {
+      throw new BadRequestException("Invalid rider assigned. Must be a rider.");
+    }
+
+    const oldRiderId = ticket.assignedRiderId;
+
+    ticket.assignedRider = rider;
     const updatedTicket = await dbRepo(SupportTicket).save(ticket);
 
     await this.logActivity(ticket, {
-      action: "agent_assigned",
-      details: { from: oldAgentId, to: agentId },
-      // replace with logged in user id
-      performerId: agentId,
+      action: "rider_assigned",
+      details: { from: oldRiderId, to: riderId },
+      performerId: riderId,
     });
 
-    this.notificationService.notifyTicketAssigned(updatedTicket);
+    this.notificationService.notifyRiderAssigned(updatedTicket);
 
     return updatedTicket;
   }
 
-  async getTickets(query: GetTicketsDto): Promise<{
+  // Updated method to assign support agents
+  async assignSupportAgent(
+    ticketId: number,
+    agentId: number,
+  ): Promise<SupportTicket> {
+    const ticket = await this.getTicketDetails(ticketId);
+    // Corrected the findOne method to findOneBy with a where clause
+    const agent = await dbRepo(User).findOneBy({ id: agentId });
+
+    if (!agent || agent.role !== UserRoleEnum.SUPPORT) {
+      throw new BadRequestException("Invalid support agent assigned.");
+    }
+
+    const oldAgentId = ticket.assignedSupportAgentId;
+
+    ticket.assignedSupportAgent = agent;
+    const updatedTicket = await dbRepo(SupportTicket).save(ticket);
+
+    await this.logActivity(ticket, {
+      action: "SUPPORT_assigned",
+      details: { from: oldAgentId, to: agentId },
+      performerId: agentId,
+    });
+
+    this.notificationService.notifySupportAgentAssigned(updatedTicket);
+
+    return updatedTicket;
+  }
+
+  // Modified assignTicket method to handle both rider and support agent assignments
+  assignTicket(
+    ticketId: number,
+    assignDto: AssignTicketDto,
+  ): Promise<SupportTicket> {
+    if (assignDto.role === UserRoleEnum.AGENT) {
+      return this.assignRider(ticketId, assignDto.userId);
+    } else if (assignDto.role === UserRoleEnum.SUPPORT) {
+      return this.assignSupportAgent(ticketId, assignDto.userId);
+    } else {
+      throw new BadRequestException("Invalid role for assignment.");
+    }
+  }
+
+  async getTickets(query: any): Promise<{
     tickets: SupportTicket[];
     total: number;
   }> {
     const qb = dbRepo(SupportTicket)
       .createQueryBuilder("ticket")
       .leftJoinAndSelect("ticket.customer", "customer")
-      .leftJoinAndSelect("ticket.assignedAgent", "agent");
+      .leftJoinAndSelect("ticket.assignedRider", "rider")
+      .leftJoinAndSelect("ticket.assignedSupportAgent", "supportAgent");
 
     if (query.status) {
       qb.andWhere("ticket.status = :status", { status: query.status });
@@ -96,9 +151,15 @@ export class SupportService {
       qb.andWhere("ticket.priority = :priority", { priority: query.priority });
     }
 
-    if (query.agentId) {
-      qb.andWhere("ticket.assignedAgent.id = :agentId", {
-        agentId: query.agentId,
+    if (query.riderId) {
+      qb.andWhere("ticket.assignedRiderId = :riderId", {
+        riderId: query.riderId,
+      });
+    }
+
+    if (query.supportAgentId) {
+      qb.andWhere("ticket.assignedSupportAgentId = :supportAgentId", {
+        supportAgentId: query.supportAgentId,
       });
     }
 
@@ -113,7 +174,12 @@ export class SupportService {
   async getTicketDetails(ticketId: number): Promise<SupportTicket> {
     const ticket = await dbRepo(SupportTicket).findOne({
       where: { id: ticketId },
-      relations: ["customer", "assignedAgent", "messages"],
+      relations: [
+        "customer",
+        "assignedRider",
+        "assignedSupportAgent",
+        "messages",
+      ],
     });
 
     if (!ticket) {
@@ -143,13 +209,25 @@ export class SupportService {
         from: oldStatus,
         to: status,
       },
-      // replace with logged in user id
-      performerId: ticket.assignedAgentId,
+      performerId: ticket.assignedSupportAgentId || ticket.assignedRiderId,
     });
 
     this.notificationService.notifyTicketStatusChanged(updatedTicket);
 
     return updatedTicket;
+  }
+
+  async getMessages(ticketId: number): Promise<ChatMessage[]> {
+    const ticket = await this.getTicketDetails(ticketId); // Ensures the ticket exists
+
+    // Fetch messages related to the ticket, ordered by creation time (ascending)
+    const messages = await dbRepo(ChatMessage)
+      .createQueryBuilder("message")
+      .where("message.ticketId = :ticketId", { ticketId })
+      .orderBy("message.createdAt", "ASC")
+      .getMany();
+
+    return messages;
   }
 
   async addNote(input: AddNoteDto): Promise<TicketNote> {
@@ -166,12 +244,20 @@ export class SupportService {
 
   async getAgentTickets(
     agentId: number,
+    role: UserRoleEnum,
     status?: TicketStatusEnum[],
   ): Promise<SupportTicket[]> {
     const qb = dbRepo(SupportTicket)
       .createQueryBuilder("ticket")
       .leftJoinAndSelect("ticket.customer", "customer")
-      .where("ticket.assignedAgentId = :agentId", { agentId });
+      .leftJoinAndSelect("ticket.assignedRider", "rider")
+      .leftJoinAndSelect("ticket.assignedSupportAgent", "supportAgent");
+
+    if (role === UserRoleEnum.AGENT) {
+      qb.where("ticket.assignedRiderId = :agentId", { agentId });
+    } else if (role === UserRoleEnum.SUPPORT) {
+      qb.where("ticket.assignedSupportAgentId = :agentId", { agentId });
+    }
 
     if (status && status.length > 0) {
       qb.andWhere("ticket.status IN (:...status)", { status });
@@ -186,7 +272,8 @@ export class SupportService {
   async getCustomerTickets(customerId: number): Promise<SupportTicket[]> {
     return await dbRepo(SupportTicket)
       .createQueryBuilder("ticket")
-      .leftJoinAndSelect("ticket.assignedAgent", "agent")
+      .leftJoinAndSelect("ticket.assignedRider", "rider")
+      .leftJoinAndSelect("ticket.assignedSupportAgent", "supportAgent")
       .where("ticket.customerId = :customerId", { customerId })
       .orderBy("ticket.createdAt", "DESC")
       .getMany();
@@ -196,7 +283,8 @@ export class SupportService {
     return await dbRepo(SupportTicket)
       .createQueryBuilder("ticket")
       .leftJoinAndSelect("ticket.customer", "customer")
-      .leftJoinAndSelect("ticket.assignedAgent", "agent")
+      .leftJoinAndSelect("ticket.assignedRider", "rider")
+      .leftJoinAndSelect("ticket.assignedSupportAgent", "supportAgent")
       .where("ticket.ticketNumber ILIKE :query", { query: `%${query}%` })
       .orWhere("ticket.subject ILIKE :query", { query: `%${query}%` })
       .orWhere("customer.email ILIKE :query", { query: `%${query}%` })
@@ -269,7 +357,6 @@ export class SupportService {
     activity.action = data.action;
     activity.details = data.details;
     activity.performerId = data.performerId;
-    await dbRepo(TicketActivity).save(activity);
     await dbRepo(TicketActivity).save(activity);
   }
 

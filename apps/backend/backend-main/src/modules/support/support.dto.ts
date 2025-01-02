@@ -6,6 +6,7 @@ import {
   IsString,
 } from "class-validator";
 
+import { UserRoleEnum } from "../../shared/enums";
 import {
   MessageTypeEnum,
   TicketPriorityEnum,
@@ -70,7 +71,10 @@ export class AddMessageDto {
 
 export class AssignTicketDto {
   @IsNumber()
-  agentId: number;
+  userId: number;
+
+  @IsEnum(UserRoleEnum)
+  role: UserRoleEnum;
 }
 
 export class UpdateTicketStatusDto {

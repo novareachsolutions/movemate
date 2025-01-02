@@ -1,4 +1,6 @@
-import { Injectable } from "@nestjs/common";
+// src/shared/gateways/chat.support.gateway.ts
+
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -36,14 +38,16 @@ interface ITicketStatusInput {
   ticketId: number;
 }
 
-@Injectable()
 @WebSocketGateway({
   namespace: "chat-support",
   cors: { origin: config.corsOrigin },
 })
+@Injectable()
 export class ChatSupportGateway extends BaseSocketGateway {
   constructor(
+    @Inject(forwardRef(() => SupportService))
     private readonly supportService: SupportService,
+    @Inject(forwardRef(() => NotificationService))
     private readonly notificationService: NotificationService,
   ) {
     super();
@@ -157,18 +161,20 @@ export class ChatSupportGateway extends BaseSocketGateway {
     });
   }
 
-  @SubscribeMessage("joinAgentRoom")
-  async handleJoinAgentRoom(@ConnectedSocket() client: Socket): Promise<void> {
+  @SubscribeMessage("joinSupportAgentRoom")
+  async handleJoinSupportAgentRoom(
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
     try {
-      await client.join("agents");
+      await client.join("support_agents");
       // Simple room join notification
-      this.sendMessageToRoom("agents", "agentJoined", {
+      this.sendMessageToRoom("support_agents", "supportAgentJoined", {
         agentId: client.id,
         timestamp: new Date(),
       });
     } catch (error) {
       this.sendMessageToClient(client.id, "error", {
-        message: "Failed to join agent room",
+        message: "Failed to join support agents room",
         error: error.message,
       });
     }
