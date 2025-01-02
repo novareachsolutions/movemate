@@ -8,6 +8,7 @@ import { Socket } from "socket.io";
 
 import configuration from "../../config/configuration";
 import { BaseSocketGateway } from "./base.socket";
+import { logger } from "../../logger";
 
 const config = configuration();
 
@@ -16,6 +17,16 @@ const config = configuration();
   cors: { origin: config.corsOrigin },
 })
 export class AgentNotificationGateway extends BaseSocketGateway {
+  @SubscribeMessage("joinRoom")
+  handleJoinRoom(
+    @MessageBody() data: { agentId: number },
+    @ConnectedSocket() client: Socket,
+  ): void {
+    const room = `agent:${data.agentId}`;
+    this.joinRoom(room, client);
+    logger.info(`AgentNotificationGateway: Agent ${data.agentId} joined room ${room}`);
+  }
+  
   @SubscribeMessage("newRequest")
   handleNewRequest(
     @MessageBody() data: any,

@@ -19,9 +19,10 @@ import { AuthGuard } from "../../../shared/guards/auth.guard";
 import { IApiResponse, ICustomRequest } from "../../../shared/interface";
 import { SendAPackageService } from "./sendPackage.service";
 import { TSendPackageOrder } from "./sendPackage.types";
+import { RoleGuard } from "../../../shared/guards/roles.guard";
 
 @Controller("order/send-package")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard,RoleGuard)
 export class SendPackageController {
   constructor(private readonly sendPackageService: SendAPackageService) {}
 

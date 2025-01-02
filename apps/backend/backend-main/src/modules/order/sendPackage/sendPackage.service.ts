@@ -30,15 +30,15 @@ import {
 } from "../../../shared/errors/sendAPackage";
 import { dbReadRepo, dbRepo } from "../../database/database.service";
 import { TSendPackageOrder } from "./sendPackage.types";
+import { PricingService } from "../../pricing/pricing.service";
+import { CustomerNotificationGateway } from "../../../shared/gateways/customer.notification.gateway";
 
 @Injectable()
 export class SendAPackageService {
+  constructor(private readonly pricingService: PricingService, private readonly customerNotificationGateway: CustomerNotificationGateway) { }
   async create(data: TSendPackageOrder): Promise<SendPackageOrder> {
-    logger.debug(
-      "SendAPackageService.create: Creating a new send package order",
-    );
-    const queryRunner =
-      dbRepo(SendPackageOrder).manager.connection.createQueryRunner();
+    logger.debug("SendAPackageService.create: Creating a new send package order");
+    const queryRunner = dbRepo(SendPackageOrder).manager.connection.createQueryRunner();
     await queryRunner.startTransaction();
 
     try {
@@ -92,6 +92,13 @@ export class SendAPackageService {
         );
       }
 
+      // Calculate price using PricingService
+      const price = this.pricingService.calculateFare({
+        distance: data.estimatedDistance,
+        estimatedTime: data.estimatedTime,
+        packageWeight: 3, // Static value for now
+      });
+
       const sendPackageOrder = queryRunner.manager.create(SendPackageOrder, {
         senderName: data.senderName,
         senderPhoneNumber: data.senderPhoneNumber,
@@ -104,16 +111,13 @@ export class SendAPackageService {
         estimatedDistance: data.estimatedDistance,
         estimatedTime: data.estimatedTime,
         customerId: data.customerId,
-        price: data.price,
+        price,
         type: OrderTypeEnum.DELIVERY,
         status: OrderStatusEnum.PENDING,
         paymentStatus: PaymentStatusEnum.NOT_PAID,
       });
 
-      const savedOrder = await queryRunner.manager.save(
-        SendPackageOrder,
-        sendPackageOrder,
-      );
+      const savedOrder = await queryRunner.manager.save(SendPackageOrder, sendPackageOrder);
       logger.debug(
         `SendAPackageService.create: Created SendPackageOrder with ID ${savedOrder.id}`,
       );
@@ -287,12 +291,9 @@ export class SendAPackageService {
 
   // ====== Agent Service Methods ======
 
-  async acceptOrder(
-    orderId: number,
-    agentId: number,
-  ): Promise<SendPackageOrder> {
+  async acceptOrder(orderId: number, agentId: number): Promise<SendPackageOrder> {
     logger.debug(
-      `SendAPackageService.acceptOrder: Agent attempting to accept order ID ${orderId}`,
+      `SendPackageService.acceptOrder: Agent attempting to accept order ID ${orderId}`,
     );
 
     const order = await dbRepo(SendPackageOrder).findOne({
@@ -315,9 +316,30 @@ export class SendAPackageService {
 
     const updatedOrder = await dbRepo(SendPackageOrder).save(order);
     logger.debug(
-      `SendAPackageService.acceptOrder: Order ID ${orderId} accepted successfully`,
+      `SendPackageService.acceptOrder: Order ID ${orderId} accepted successfully`,
     );
+
+    // Notify customer about acceptance
+    await this.notifyCustomerOrderAccepted(updatedOrder);
+
     return updatedOrder;
+  }
+
+  private async notifyCustomerOrderAccepted(order: SendPackageOrder): Promise<void> {
+    const notificationData = {
+      orderId: order.id,
+      agentId: order.agentId,
+      message: `Your order has been accepted by Agent ID ${order.agentId}.`,
+      timestamp: new Date(),
+    };
+    this.customerNotificationGateway.sendMessageToClient(
+      order.customerId.toString(), // Ensure customerId matches the WebSocket client ID format
+      "agentAcceptedRequest",
+      notificationData,
+    );
+    logger.debug(
+      `SendPackageService.notifyCustomerOrderAccepted: Notified customer ID ${order.customerId} about order acceptance.`,
+    );
   }
 
   async startOrder(

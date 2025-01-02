@@ -96,7 +96,7 @@ export class AuthService {
       logger.error(
         `AuthService.login: Role mismatch. Expected ${role}, got ${user.role}`,
       );
-      throw new UserAccessDeniedError(`Role mismatch. Expected ${role}`);
+      throw new UserAccessDeniedError(`You are not registered`);
     }
 
     const accessToken = this.tokenService.generateAccessToken(
