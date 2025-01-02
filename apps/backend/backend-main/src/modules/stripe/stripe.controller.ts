@@ -4,9 +4,10 @@ import Stripe from "stripe";
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { IApiResponse } from "../../shared/interface";
 import { StripeService } from "./stripe.service";
+import { RoleGuard } from "../../shared/guards/roles.guard";
 
 @Controller("stripe")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard,RoleGuard)
 export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 
