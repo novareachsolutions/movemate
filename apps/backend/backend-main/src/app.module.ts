@@ -28,7 +28,7 @@ import { RoleGuard } from "./shared/guards/roles.guard";
     AgentModule,
     UserModule,
     SendAPackageModule,
-    // StripeModule,
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],
