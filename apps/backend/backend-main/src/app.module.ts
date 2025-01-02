@@ -7,8 +7,9 @@ import configuration from "./config/configuration";
 import { AgentModule } from "./modules/agent/agent.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { DatabaseModule } from "./modules/database/database.module";
+import { GatewayModule } from "./modules/gateway/gateway.module";
 import { RedisModule } from "./modules/redis/redis.module";
-import { StripeModule } from "./modules/stripe/stripe.module";
+import { SupportModule } from "./modules/support/support.module";
 import { UserModule } from "./modules/user/user.module";
 import { AuthGuard } from "./shared/guards/auth.guard";
 import { OnboardingGuard } from "./shared/guards/onboarding.guard";
@@ -25,8 +26,14 @@ import { SendAPackageModule } from "./modules/order/sendPackage/sendPackage.modu
     RedisModule,
     AuthModule,
     AgentModule,
+    SupportModule,
+    GatewayModule,
     UserModule,
+<<<<<<< HEAD
+    // StripeModule,
+=======
     SendAPackageModule
+>>>>>>> 1ae0b14695ecfc005c2a5d4660b078ca93aae793
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],
