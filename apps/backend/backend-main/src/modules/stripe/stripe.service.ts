@@ -22,7 +22,7 @@ export class StripeService {
       throw new MissingStripeApiKeyException();
     }
     this.stripe = new Stripe(apiKey, {
-      apiVersion: "2024-11-20.acacia",
+      apiVersion: "2024-12-18.acacia",
     });
   }
 
@@ -34,33 +34,26 @@ export class StripeService {
    */
   async createCustomer(userId: number): Promise<Stripe.Customer> {
     logger.debug(
-      `StripeService.createCustomer: Creating customer for user ID ${userId}`,
+      `StripeService.createCustomer: Creating customer for user ${userId}`,
     );
 
-    const user = await dbReadRepo(User).findOneOrFail({
-      where: { id: userId },
-    });
+    const user = await dbReadRepo(User).findOne({ where: { id: userId } });
+    if (!user) {
+      throw new StripeCustomerCreationException("User not found");
+    }
 
     try {
       const customer = await this.stripe.customers.create({
         email: user.email,
-        name: `${user.firstName} ${user.lastName}`,
-        phone: user.phoneNumber,
-        metadata: {
-          userId: user.id.toString(),
-        },
+        metadata: { userId: user.id.toString() },
       });
-      logger.info(
-        `StripeService.createCustomer: Customer created with ID ${customer.id}`,
-      );
       return customer;
     } catch (error) {
       logger.error(
-        `StripeService.createCustomer: Failed to create customer. Error: ${error}`,
+        `StripeService.createCustomer: Error creating customer for user ${userId}`,
+        error,
       );
-      throw new StripeCustomerCreationException(
-        `Failed to create Stripe customer: ${error.message}`,
-      );
+      throw new StripeCustomerCreationException(error.message);
     }
   }
 
