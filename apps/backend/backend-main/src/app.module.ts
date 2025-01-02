@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import configuration from "./config/configuration";
@@ -15,6 +14,7 @@ import { UserModule } from "./modules/user/user.module";
 import { AuthGuard } from "./shared/guards/auth.guard";
 import { OnboardingGuard } from "./shared/guards/onboarding.guard";
 import { RoleGuard } from "./shared/guards/roles.guard";
+import { SendAPackageModule } from "./modules/order/sendPackage/sendPackage.module";
 
 @Module({
   imports: [
@@ -29,7 +29,11 @@ import { RoleGuard } from "./shared/guards/roles.guard";
     SupportModule,
     GatewayModule,
     UserModule,
+<<<<<<< HEAD
     // StripeModule,
+=======
+    SendAPackageModule
+>>>>>>> 1ae0b14695ecfc005c2a5d4660b078ca93aae793
   ],
   controllers: [AppController],
   providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],

@@ -1,3 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
 # Check if the .skip-commit-checks file exists to bypass the checks
 if [ -f ".skip-commit-checks" ]; then
   # Clean up after ourselves, remove the file to prevent future bypasses
@@ -12,6 +15,11 @@ fi
 
 # Enforce conventional commits for regular commits
 if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|release)\(.+\)!?: .{1,50}' "$1"; then
-  echo "Please use 'yarn commit' to commit changes."
+  echo "Invalid commit message format."
+  echo "Please use the conventional commit format:"
+  echo "  <type>(<scope>): <subject>"
+  echo "Examples:"
+  echo "  feat(auth): add login functionality"
+  echo "  fix(api): handle null values in response"
   exit 1
 fi

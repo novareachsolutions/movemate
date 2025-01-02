@@ -5,6 +5,7 @@ export enum AgentTypeEnum {
 }
 
 export enum AgentStatusEnum {
+  BUSY = "BUSY",
   OFFLINE = "OFFLINE",
   ONLINE = "ONLINE",
 }
@@ -30,6 +31,7 @@ export enum OrderStatusEnum {
   COMPLETED = "COMPLETED",
   IN_PROGRESS = "IN_PROGRESS",
   PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
 }
 
 export enum OrderTypeEnum {
