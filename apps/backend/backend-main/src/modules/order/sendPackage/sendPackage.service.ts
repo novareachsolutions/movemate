@@ -30,15 +30,14 @@ import {
 } from "../../../shared/errors/sendAPackage";
 import { dbReadRepo, dbRepo } from "../../database/database.service";
 import { TSendPackageOrder } from "./sendPackage.types";
+import { PricingService } from "../../pricing/pricing.service";
 
 @Injectable()
 export class SendAPackageService {
+  constructor(private readonly pricingService: PricingService) {} 
   async create(data: TSendPackageOrder): Promise<SendPackageOrder> {
-    logger.debug(
-      "SendAPackageService.create: Creating a new send package order",
-    );
-    const queryRunner =
-      dbRepo(SendPackageOrder).manager.connection.createQueryRunner();
+    logger.debug("SendAPackageService.create: Creating a new send package order");
+    const queryRunner = dbRepo(SendPackageOrder).manager.connection.createQueryRunner();
     await queryRunner.startTransaction();
 
     try {
@@ -92,6 +91,13 @@ export class SendAPackageService {
         );
       }
 
+      // Calculate price using PricingService
+      const price = this.pricingService.calculateFare({
+        distance: data.estimatedDistance,
+        estimatedTime: data.estimatedTime,
+        packageWeight: 3, // Static value for now
+      });
+
       const sendPackageOrder = queryRunner.manager.create(SendPackageOrder, {
         senderName: data.senderName,
         senderPhoneNumber: data.senderPhoneNumber,
@@ -104,16 +110,13 @@ export class SendAPackageService {
         estimatedDistance: data.estimatedDistance,
         estimatedTime: data.estimatedTime,
         customerId: data.customerId,
-        price: data.price,
+        price, 
         type: OrderTypeEnum.DELIVERY,
         status: OrderStatusEnum.PENDING,
         paymentStatus: PaymentStatusEnum.NOT_PAID,
       });
 
-      const savedOrder = await queryRunner.manager.save(
-        SendPackageOrder,
-        sendPackageOrder,
-      );
+      const savedOrder = await queryRunner.manager.save(SendPackageOrder, sendPackageOrder);
       logger.debug(
         `SendAPackageService.create: Created SendPackageOrder with ID ${savedOrder.id}`,
       );
