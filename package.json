@@ -21,16 +21,17 @@
     "prettier": "^3.3.3",
     "typescript": "^5.6.3"
   },
-  "scripts": {
-    "lint": "eslint 'apps/backend/backend-main/*.{ts,tsx}' 'apps/frontend/**/*.{ts,tsx}' --fix",
+"scripts": {
+    "lint": "eslint \"apps/frontend/**/*.{ts,tsx}\" --fix",
+    "lint:backend": "cd apps/backend/backend-main && npm run lint",
     "prettier": "prettier --write 'apps/**/*.{ts,tsx,json,css,scss,md}' 'shared/**/*.{ts,tsx,json,css,scss,md}'",
     "tsc": "tsc --noEmit --project tsconfig.json",
-    "validate": "yarn run prettier && yarn run lint",
+    "validate": "npm run prettier && npm run lint:backend && npm run lint:backend",
     "commit": "git-cz",
-    "prepare": "husky",
-    "install:all": "yarn install --frozen-lockfile",
-    "build": "yarn workspaces foreach run build",
-    "test": "yarn workspaces foreach run test"
+    "prepare": "husky install",
+    "install:all": "npm install --frozen-lockfile",
+    "build": "npm run workspaces foreach run build",
+    "test": "npm run workspaces foreach run test"
   },
   "config": {
     "commitizen": {

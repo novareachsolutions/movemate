@@ -1,20 +1,21 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { logger } from "../../logger";
-import { UnauthorizedError } from "../errors/authErrors";
+
 import { Agent } from "../../entity/Agent";
-import { UserRoleEnum } from "../../shared/enums";
+import { logger } from "../../logger";
 import { dbRepo } from "../../modules/database/database.service";
+import { UserRoleEnum } from "../../shared/enums";
+import { UnauthorizedError } from "../errors/authErrors";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const accessToken = this.extractTokenFromHeaders(request);
 
@@ -60,17 +61,23 @@ export class AuthGuard implements CanActivate {
       role: payload.role,
       phoneNumber: payload.phoneNumber,
     };
-    logger.debug(`AuthGuard.setUserInRequest: User ${payload.id} set in request`);
+    logger.debug(
+      `AuthGuard.setUserInRequest: User ${payload.id} set in request`,
+    );
   }
 
   private extractTokenFromHeaders(request: any): string | null {
     const authHeader = request.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.split(" ")[1];
-      logger.debug("AuthGuard.extractTokenFromHeaders: Token extracted from headers");
+      logger.debug(
+        "AuthGuard.extractTokenFromHeaders: Token extracted from headers",
+      );
       return token;
     }
-    logger.warn("AuthGuard.extractTokenFromHeaders: Token not found in headers");
+    logger.warn(
+      "AuthGuard.extractTokenFromHeaders: Token not found in headers",
+    );
     return null;
   }
 }

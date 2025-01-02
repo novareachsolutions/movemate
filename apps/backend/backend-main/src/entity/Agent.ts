@@ -1,7 +1,19 @@
-import { Column, Entity, Index, JoinColumn, OneToOne, RelationId, Unique } from "typeorm";
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToOne,
+  RelationId,
+  Unique,
+} from "typeorm";
 
 import { TAgent } from "../modules/agent/agent.types";
-import { AgentStatusEnum, AgentTypeEnum, ApprovalStatusEnum } from "../shared/enums";
+import {
+  AgentStatusEnum,
+  AgentTypeEnum,
+  ApprovalStatusEnum,
+} from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
 import { User } from "./User";
 
@@ -11,11 +23,10 @@ import { User } from "./User";
 @Entity()
 export class Agent extends BaseEntity implements TAgent {
   @OneToOne(() => User, {
-    cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
     onDelete: "CASCADE",
   })
-  @JoinColumn({ name: "userId" }) 
+  @JoinColumn({ name: "userId" })
   user: User;
 
   @RelationId((agent: Agent) => agent.user)

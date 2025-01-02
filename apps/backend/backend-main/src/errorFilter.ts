@@ -6,8 +6,8 @@ import { UserFacingError } from "./shared/errors/userFacing";
 
 @Catch()
 export class CustomExceptionFilter implements ExceptionFilter {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  catch(exception: unknown, host: ArgumentsHost) {
+  // This method is called when an exception is thrown
+  catch(exception: unknown, host: ArgumentsHost): Response<any> {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const status =

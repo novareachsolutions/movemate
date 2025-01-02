@@ -21,7 +21,7 @@ export class AgentNotificationGateway extends BaseSocketGateway {
     @MessageBody() data: any,
     @ConnectedSocket() _client: Socket,
   ): void {
-    this.sendMessageToRoom("agents", "newRequest", data);
+    void this.sendMessageToRoom("agents", "newRequest", data);
   }
 
   @SubscribeMessage("updateRequestStatus")
@@ -29,7 +29,7 @@ export class AgentNotificationGateway extends BaseSocketGateway {
     @MessageBody() data: any,
     @ConnectedSocket() _client: Socket,
   ): void {
-    this.sendMessageToRoom("agents", "updateRequestStatus", data);
+    void this.sendMessageToRoom("agents", "updateRequestStatus", data);
   }
 
   @SubscribeMessage("agentStatus")
@@ -37,6 +37,10 @@ export class AgentNotificationGateway extends BaseSocketGateway {
     @MessageBody() data: any,
     @ConnectedSocket() _client: Socket,
   ): void {
-    this.sendMessageToRoom("agents", "agentStatus", data);
+    void this.sendMessageToRoom("agents", "agentStatus", data);
+  }
+
+  sendMessageToAgent(agentId: number, event: string, message: any): void {
+    this.sendMessageToRoom(`agent:${agentId}`, event, message);
   }
 }

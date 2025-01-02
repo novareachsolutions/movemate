@@ -5,6 +5,7 @@ export enum AgentTypeEnum {
 }
 
 export enum AgentStatusEnum {
+  BUSY = "BUSY",
   OFFLINE = "OFFLINE",
   ONLINE = "ONLINE",
 }
@@ -19,9 +20,9 @@ export enum AgentRegistrationDocumentEnum {
 }
 
 export enum ApprovalStatusEnum {
+  APPROVED = "APPROVED",
   PENDING = "PENDING",
   REJECTED = "REJECTED",
-  APPROVED = "APPROVED",
 }
 
 // Order
@@ -30,6 +31,7 @@ export enum OrderStatusEnum {
   COMPLETED = "COMPLETED",
   IN_PROGRESS = "IN_PROGRESS",
   PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
 }
 
 export enum OrderTypeEnum {
@@ -45,10 +47,10 @@ export enum UserRoleEnum {
   SUPPORT = "SUPPORT",
 }
 
-//Payment
+// Payment
 export enum PaymentStatusEnum {
+  ERROR = "ERROR",
   NOT_PAID = "NOT_PAID",
   PAID = "PAID",
-  ERROR = "ERROR",
   REFUNDED = "REFUNDED",
 }
