@@ -519,7 +519,6 @@ export class AgentService {
         }
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.redisService
         .getClient()
         .subscribe(`acceptance:${orderId}`, (err) => {

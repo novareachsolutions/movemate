@@ -14,6 +14,7 @@ import { RedisService } from "../../redis/redis.service";
 import { SendPackageController } from "./sendPackage.controller";
 import { SendAPackageService } from "./sendPackage.service";
 import { PricingService } from "../../pricing/pricing.service";
+import { CustomerNotificationGateway } from "../../../shared/gateways/customer.notification.gateway";
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { PricingService } from "../../pricing/pricing.service";
     TokenService,
     AgentNotificationGateway,
     MediaService,
-    PricingService
+    PricingService,
+    CustomerNotificationGateway
   ],
 })
-export class SendAPackageModule {}
+export class SendAPackageModule { }
