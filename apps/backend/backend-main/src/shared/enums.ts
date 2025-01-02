@@ -5,6 +5,7 @@ export enum AgentTypeEnum {
 }
 
 export enum AgentStatusEnum {
+  BUSY = "BUSY",
   OFFLINE = "OFFLINE",
   ONLINE = "ONLINE",
 }
@@ -18,6 +19,12 @@ export enum AgentRegistrationDocumentEnum {
   VEHICLE_REGISTRATION = "VEHICLE_REGISTRATION",
 }
 
+export enum ApprovalStatusEnum {
+  APPROVED = "APPROVED",
+  PENDING = "PENDING",
+  REJECTED = "REJECTED",
+}
+
 export enum SubscripionStatusEnum {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
@@ -25,6 +32,7 @@ export enum SubscripionStatusEnum {
 
 // Order
 export enum OrderStatusEnum {
+  ACCEPTED = "ACCEPTED",
   CANCELED = "CANCELED",
   COMPLETED = "COMPLETED",
   IN_PROGRESS = "IN_PROGRESS",

@@ -204,7 +204,7 @@ export class AuthService {
     try {
       await this.twilioClient.messages.create({
         body: `Your OTP for NOVATECH SOL is ${otp}`,
-        from: this.configService.get<string>("TW_PHONE_NUMBER"),
+        from: this.configService.get<string>("TWILIO_PHONE_NUMBER"),
         to: phoneNumber,
       });
       logger.debug(

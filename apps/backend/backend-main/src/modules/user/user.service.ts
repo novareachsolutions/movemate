@@ -44,9 +44,7 @@ export class UserService {
    * @returns The user entity.
    */
   async getUserById(id: number): Promise<User> {
-    return await dbReadRepo(User).findOneOrFail({
-      where: { id },
-    });
+    return await dbReadRepo(User).findOneOrFail({ where: { id } });
   }
 
   /**
@@ -56,9 +54,7 @@ export class UserService {
    */
   async getUserProfile(getUserProfileDto: TGetUserProfile): Promise<User> {
     const filteredInput = filterEmptyValues(getUserProfileDto);
-    return await dbReadRepo(User).findOneOrFail({
-      where: filteredInput,
-    });
+    return await dbReadRepo(User).findOneOrFail({ where: filteredInput });
   }
 
   /**
@@ -82,12 +78,15 @@ export class UserService {
     const user = await dbReadRepo(User).findOne({ where: { id } });
 
     if (!user) {
+      logger.error(`UserService.updateUser: User with ID ${id} not found.`);
       throw new UserNotFoundError(`User with ID ${id} not found.`);
     }
 
     const filteredUpdateUser = filterEmptyValues(updateUserDto);
-    logger.info(
-      `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(filteredUpdateUser)}`,
+    logger.debug(
+      `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(
+        filteredUpdateUser,
+      )}`,
     );
 
     return await dbRepo(User).update(id, filteredUpdateUser);
@@ -99,7 +98,7 @@ export class UserService {
    * @returns The result of the delete operation.
    */
   async deleteUser(id: string): Promise<DeleteResult> {
-    logger.info(`UserService.deleteUser: Deleting user with ID ${id}`);
+    logger.debug(`UserService.deleteUser: Deleting user with ID ${id}`);
     return await dbRepo(User).softDelete(id);
   }
 }

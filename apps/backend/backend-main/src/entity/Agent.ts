@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
   OneToMany,
   OneToOne,
   RelationId,
@@ -12,6 +13,7 @@ import { TAgent } from "../modules/agent/agent.types";
 import {
   AgentStatusEnum,
   AgentTypeEnum,
+  ApprovalStatusEnum,
   SubscripionStatusEnum,
 } from "../shared/enums";
 import { AgentSubscription } from "./AgentSubscription";
@@ -26,10 +28,10 @@ import { Wallet } from "./Wallet";
 @Entity()
 export class Agent extends BaseEntity implements TAgent {
   @OneToOne(() => User, {
-    cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
     onDelete: "CASCADE",
   })
+  @JoinColumn({ name: "userId" })
   user: User;
 
   @RelationId((agent: Agent) => agent.user)
@@ -93,4 +95,12 @@ export class Agent extends BaseEntity implements TAgent {
 
   @OneToOne(() => Wallet, (wallet) => wallet.agent)
   wallet: Wallet;
+
+  @Column({
+    type: "enum",
+    enum: ApprovalStatusEnum,
+    default: ApprovalStatusEnum.PENDING,
+    nullable: false,
+  })
+  approvalStatus: ApprovalStatusEnum;
 }

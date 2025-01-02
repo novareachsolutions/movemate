@@ -26,6 +26,7 @@ import { StripeService } from "./stripe.service";
 
 @Controller("stripe")
 @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 export class StripeController {
   private readonly logger = new Logger(StripeController.name);
   constructor(

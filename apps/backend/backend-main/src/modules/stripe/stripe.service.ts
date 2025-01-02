@@ -1,13 +1,10 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Stripe from "stripe";
 
 import { Agent } from "../../entity/Agent";
 import { logger } from "../../logger";
+import { MissingStripeApiKeyException } from "../../shared/errors/stripe";
 import {
   TConnectAccountRequest,
   TCreateSubscriptionRequest,
@@ -23,7 +20,7 @@ export class StripeService {
     const apiKey = this.configService.get<string>("STRIPE_API_KEY");
     if (!apiKey) {
       logger.error("StripeService: Stripe API key is not configured");
-      throw new InternalServerErrorException("Stripe API key is not set");
+      throw new MissingStripeApiKeyException();
     }
     this.stripe = new Stripe(apiKey, {
       apiVersion: "2024-12-18.acacia",

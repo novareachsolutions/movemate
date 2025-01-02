@@ -2,6 +2,7 @@ import { Column, Entity, Index, ManyToOne, RelationId } from "typeorm";
 
 import { BaseEntity } from "./BaseEntity";
 import { SendPackageOrder } from "./SendPackageOrder";
+import { SendPackageOrder } from "./SendPackageOrder";
 import { User } from "./User";
 
 @Index("IDX_review_customerId", ["customerId"], {
@@ -21,7 +22,7 @@ export class OrderReview extends BaseEntity {
   @ManyToOne(() => User, {
     cascade: true,
     deferrable: "INITIALLY IMMEDIATE",
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     nullable: false,
   })
   customer: User;
@@ -37,8 +38,11 @@ export class OrderReview extends BaseEntity {
     nullable: false,
   })
   sendPackageOrder: SendPackageOrder;
+  sendPackageOrder: SendPackageOrder;
 
   @RelationId((review: OrderReview) => review.sendPackageOrder)
+  @RelationId((review: OrderReview) => review.sendPackageOrder)
   @Column({ type: "integer" })
+  sendPackageOrderId: number;
   sendPackageOrderId: number;
 }
