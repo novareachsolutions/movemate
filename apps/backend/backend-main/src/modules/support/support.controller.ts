@@ -18,7 +18,7 @@ import { SupportService } from "./support.service";
 
 @Controller("support")
 export class SupportController {
-  constructor(private readonly ticketService: SupportService) {}
+  constructor(private readonly ticketService: SupportService) { }
 
   @Post("ticket")
   async createTicket(
@@ -114,6 +114,17 @@ export class SupportController {
       success: true,
       message: "Note added successfully",
       data: note,
+    };
+  }
+  @Get("ticket/:ticketId/messages")
+  async getTicketMessages(
+    @Param("ticketId") ticketId: number,
+  ): Promise<IApiResponse<ChatMessage[]>> {
+    const messages = await this.ticketService.getMessages(ticketId);
+    return {
+      success: true,
+      message: "Messages retrieved successfully",
+      data: messages,
     };
   }
 }

@@ -217,6 +217,19 @@ export class SupportService {
     return updatedTicket;
   }
 
+  async getMessages(ticketId: number): Promise<ChatMessage[]> {
+    const ticket = await this.getTicketDetails(ticketId); // Ensures the ticket exists
+
+    // Fetch messages related to the ticket, ordered by creation time (ascending)
+    const messages = await dbRepo(ChatMessage)
+      .createQueryBuilder("message")
+      .where("message.ticketId = :ticketId", { ticketId })
+      .orderBy("message.createdAt", "ASC")
+      .getMany();
+
+    return messages;
+  }
+
   async addNote(input: AddNoteDto): Promise<TicketNote> {
     const ticket = await this.getTicketDetails(input.ticketId);
 
