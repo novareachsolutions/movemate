@@ -28,17 +28,23 @@ import {
   SendPackageOrderNotCompletedError,
   SendPackageReviewCommentRequiredError,
 } from "../../../shared/errors/sendAPackage";
-import { dbReadRepo, dbRepo } from "../../database/database.service";
-import { TSendPackageOrder } from "./sendPackage.types";
-import { PricingService } from "../../pricing/pricing.service";
 import { CustomerNotificationGateway } from "../../../shared/gateways/customer.notification.gateway";
+import { dbReadRepo, dbRepo } from "../../database/database.service";
+import { PricingService } from "../../pricing/pricing.service";
+import { TSendPackageOrder } from "./sendPackage.types";
 
 @Injectable()
 export class SendAPackageService {
-  constructor(private readonly pricingService: PricingService, private readonly customerNotificationGateway: CustomerNotificationGateway) { }
+  constructor(
+    private readonly pricingService: PricingService,
+    private readonly customerNotificationGateway: CustomerNotificationGateway,
+  ) {}
   async create(data: TSendPackageOrder): Promise<SendPackageOrder> {
-    logger.debug("SendAPackageService.create: Creating a new send package order");
-    const queryRunner = dbRepo(SendPackageOrder).manager.connection.createQueryRunner();
+    logger.debug(
+      "SendAPackageService.create: Creating a new send package order",
+    );
+    const queryRunner =
+      dbRepo(SendPackageOrder).manager.connection.createQueryRunner();
     await queryRunner.startTransaction();
 
     try {
@@ -117,7 +123,10 @@ export class SendAPackageService {
         paymentStatus: PaymentStatusEnum.NOT_PAID,
       });
 
-      const savedOrder = await queryRunner.manager.save(SendPackageOrder, sendPackageOrder);
+      const savedOrder = await queryRunner.manager.save(
+        SendPackageOrder,
+        sendPackageOrder,
+      );
       logger.debug(
         `SendAPackageService.create: Created SendPackageOrder with ID ${savedOrder.id}`,
       );
@@ -291,7 +300,10 @@ export class SendAPackageService {
 
   // ====== Agent Service Methods ======
 
-  async acceptOrder(orderId: number, agentId: number): Promise<SendPackageOrder> {
+  async acceptOrder(
+    orderId: number,
+    agentId: number,
+  ): Promise<SendPackageOrder> {
     logger.debug(
       `SendPackageService.acceptOrder: Agent attempting to accept order ID ${orderId}`,
     );
@@ -323,23 +335,6 @@ export class SendAPackageService {
     await this.notifyCustomerOrderAccepted(updatedOrder);
 
     return updatedOrder;
-  }
-
-  private async notifyCustomerOrderAccepted(order: SendPackageOrder): Promise<void> {
-    const notificationData = {
-      orderId: order.id,
-      agentId: order.agentId,
-      message: `Your order has been accepted by Agent ID ${order.agentId}.`,
-      timestamp: new Date(),
-    };
-    this.customerNotificationGateway.sendMessageToClient(
-      order.customerId.toString(), // Ensure customerId matches the WebSocket client ID format
-      "agentAcceptedRequest",
-      notificationData,
-    );
-    logger.debug(
-      `SendPackageService.notifyCustomerOrderAccepted: Notified customer ID ${order.customerId} about order acceptance.`,
-    );
   }
 
   async startOrder(
@@ -521,5 +516,23 @@ export class SendAPackageService {
       `SendAPackageService.getAllOrders: Retrieved ${orders.length} orders`,
     );
     return orders;
+  }
+
+  // private methods
+  private notifyCustomerOrderAccepted(order: SendPackageOrder): void {
+    const notificationData = {
+      orderId: order.id,
+      agentId: order.agentId,
+      message: `Your order has been accepted by Agent ID ${order.agentId}.`,
+      timestamp: new Date(),
+    };
+    this.customerNotificationGateway.sendMessageToClient(
+      order.customerId.toString(),
+      "agentAcceptedRequest",
+      notificationData,
+    );
+    logger.debug(
+      `SendPackageService.notifyCustomerOrderAccepted: Notified customer ID ${order.customerId} about order acceptance.`,
+    );
   }
 }

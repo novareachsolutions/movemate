@@ -34,7 +34,7 @@ export class AgentService {
     private readonly notificationGateway: AgentNotificationGateway,
     private readonly tokenService: TokenService,
     private readonly mediaService: MediaService,
-  ) { }
+  ) {}
 
   async createAgent(
     agent: TAgent,
@@ -254,11 +254,6 @@ export class AgentService {
     }
   }
 
-  private extractKeyFromUrl(fileUrl: string): string {
-    const urlParts = fileUrl.split("/");
-    return urlParts[urlParts.length - 1]; // Extract the S3 object key
-  }
-
   async removeDocument(agentId: number, documentId: number): Promise<void> {
     logger.debug(
       `AgentService.removeDocument: Removing document ID ${documentId} for agent ID ${agentId}.`,
@@ -325,35 +320,24 @@ export class AgentService {
     latitude: number,
     longitude: number,
   ): Promise<void> {
-    logger.debug(
-      `AgentService.updateAgentLocation: Updating location for agent ID ${agentId} to (${latitude}, ${longitude}).`,
-    );
-    const agent = await this.getAgentById(agentId);
-    if (agent.status !== AgentStatusEnum.ONLINE) {
+    try {
+      logger.debug(`Updating location for agent ID ${agentId}`);
+      const member = `agent:${agentId}`;
+      await this.redisService
+        .getClient()
+        .geoadd("agents:locations", longitude, latitude, member);
+      await this.redisService.set(
+        `agent:${agentId}:status`,
+        AgentStatusEnum.ONLINE,
+        "EX",
+        3600,
+      );
+    } catch (error) {
       logger.error(
-        `AgentService.updateAgentLocation: Cannot update location. Agent ID ${agentId} is not ONLINE.`,
+        `Failed to update location for agent ID ${agentId}: ${error.message}`,
       );
-      throw new InternalServerErrorException(
-        "Cannot update location. Agent is not ONLINE.",
-      );
+      throw new InternalServerErrorException("Failed to update agent location");
     }
-
-    const member = `agent:${agentId}`;
-    logger.debug(
-      `AgentService.updateAgentLocation: Adding/updating location in Redis for member ${member}.`,
-    );
-    await this.redisService
-      .getClient()
-      .geoadd("agents:locations", longitude, latitude, member);
-    logger.debug(
-      `AgentService.updateAgentLocation: Setting agent status to ONLINE in Redis for agent ID ${agentId}.`,
-    );
-    await this.redisService.set(
-      `agent:${agentId}:status`,
-      AgentStatusEnum.ONLINE,
-      "EX",
-      3600,
-    );
   }
 
   async getNearbyAgents(
@@ -487,58 +471,6 @@ export class AgentService {
     return null;
   }
 
-  private waitForAcceptance(
-    orderId: string,
-    timeoutMs: number,
-  ): Promise<number | null> {
-    logger.debug(
-      `AgentService.waitForAcceptance: Waiting for acceptance of order ID ${orderId} for ${timeoutMs} ms.`,
-    );
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => {
-        this.redisService.getClient().off(`acceptance:${orderId}`, listener);
-        logger.debug(
-          `AgentService.waitForAcceptance: Timeout reached for order ID ${orderId}.`,
-        );
-        resolve(null);
-      }, timeoutMs);
-      const listener = async (
-        _channel: string,
-        message: string,
-      ): Promise<any> => {
-        const data = JSON.parse(message);
-        if (data.orderId === orderId) {
-          clearTimeout(timeout);
-          await this.redisService
-            .getClient()
-            .unsubscribe(`acceptance:${orderId}`);
-          logger.debug(
-            `AgentService.waitForAcceptance: Order ID ${orderId} accepted by agent ID ${data.agentId}.`,
-          );
-          resolve(data.agentId);
-        }
-      };
-
-      this.redisService
-        .getClient()
-        .subscribe(`acceptance:${orderId}`, (err) => {
-          if (err) {
-            logger.error(
-              `AgentService.waitForAcceptance: Failed to subscribe to acceptance channel: ${err.message}`,
-            );
-            clearTimeout(timeout);
-            resolve(null);
-          } else {
-            logger.debug(
-              `AgentService.waitForAcceptance: Subscribed to acceptance channel for order ID ${orderId}.`,
-            );
-          }
-        });
-
-      this.redisService.getClient().on("message", listener);
-    });
-  }
-
   async acceptOrder(orderId: string, agentId: number): Promise<void> {
     logger.debug(
       `AgentService.acceptOrder: Agent ID ${agentId} is accepting order ID ${orderId}.`,
@@ -632,5 +564,47 @@ export class AgentService {
 
     // Save the updated document to the database
     await dbRepo(AgentDocument).save(document);
+  }
+
+  private extractKeyFromUrl(fileUrl: string): string {
+    const urlParts = fileUrl.split("/");
+    return urlParts[urlParts.length - 1]; // Extract the S3 object key
+  }
+
+  private waitForAcceptance(
+    orderId: string,
+    timeoutMs: number,
+  ): Promise<number | null> {
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        this.redisService.getClient().off(`acceptance:${orderId}`, listener);
+        resolve(null);
+      }, timeoutMs);
+
+      const listener = async (
+        _channel: string,
+        message: string,
+      ): Promise<void> => {
+        const data = JSON.parse(message);
+        if (data.orderId === orderId) {
+          clearTimeout(timeout);
+          await this.redisService
+            .getClient()
+            .unsubscribe(`acceptance:${orderId}`);
+          resolve(data.agentId);
+        }
+      };
+
+      void this.redisService
+        .getClient()
+        .subscribe(`acceptance:${orderId}`, (err) => {
+          if (err) {
+            clearTimeout(timeout);
+            resolve(null);
+          }
+        });
+
+      this.redisService.getClient().on("message", listener);
+    });
   }
 }

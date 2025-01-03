@@ -1,8 +1,7 @@
-// src/pricing/pricing.module.ts
+import { Module } from "@nestjs/common";
 
-import { Module } from '@nestjs/common';
-import { PricingService } from './pricing.service';
-import { PricingController } from './pricing.controller';
+import { PricingController } from "./pricing.controller";
+import { PricingService } from "./pricing.service";
 
 @Module({
   providers: [PricingService],

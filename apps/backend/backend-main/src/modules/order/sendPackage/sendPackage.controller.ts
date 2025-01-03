@@ -16,13 +16,13 @@ import { SendPackageOrder } from "../../../entity/SendPackageOrder";
 import { Roles } from "../../../shared/decorators/roles.decorator";
 import { UserRoleEnum } from "../../../shared/enums";
 import { AuthGuard } from "../../../shared/guards/auth.guard";
+import { RoleGuard } from "../../../shared/guards/roles.guard";
 import { IApiResponse, ICustomRequest } from "../../../shared/interface";
 import { SendAPackageService } from "./sendPackage.service";
 import { TSendPackageOrder } from "./sendPackage.types";
-import { RoleGuard } from "../../../shared/guards/roles.guard";
 
 @Controller("order/send-package")
-@UseGuards(AuthGuard,RoleGuard)
+@UseGuards(AuthGuard, RoleGuard)
 export class SendPackageController {
   constructor(private readonly sendPackageService: SendAPackageService) {}
 

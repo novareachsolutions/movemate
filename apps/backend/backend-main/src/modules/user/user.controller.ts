@@ -21,10 +21,10 @@ import { UserRoleEnum } from "../../shared/enums";
 import { UnauthorizedError } from "../../shared/errors/authErrors";
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
+import { RoleGuard } from "../../shared/guards/roles.guard";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { UserService } from "./user.service";
 import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
-import { RoleGuard } from "../../shared/guards/roles.guard";
 
 @Controller("user")
 export class UserController {
@@ -78,7 +78,7 @@ export class UserController {
    * GET /user/me
    */
   @Get()
-  @UseGuards(AuthGuard,RoleGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.CUSTOMER)
   async getCurrentUser(
     @Req() request: ICustomRequest,
@@ -98,7 +98,7 @@ export class UserController {
    * GET /user/profile/:id
    */
   @Get("profile/:id")
-  @UseGuards(AuthGuard,RoleGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getUserById(
     @Param("id", ParseUUIDPipe) id: number,
@@ -116,7 +116,7 @@ export class UserController {
    * POST /user/profile
    */
   @Post("profile")
-  @UseGuards(AuthGuard,RoleGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getUserProfile(
     @Body() getUserProfileDto: TGetUserProfile,
@@ -134,7 +134,7 @@ export class UserController {
    * GET /user/list
    */
   @Get("list")
-  @UseGuards(AuthGuard,RoleGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getAllUsers(): Promise<IApiResponse<User[]>> {
     const users = await this.userService.getAllUsers();
@@ -150,7 +150,7 @@ export class UserController {
    * PUT /user/profile/:id
    */
   @Patch("profile/:id")
-  @UseGuards(AuthGuard,RoleGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async updateUser(
     @Param("id", ParseUUIDPipe) id: number,
@@ -169,7 +169,7 @@ export class UserController {
    * DELETE /user/profile/:id
    */
   @Delete("profile/:id")
-  @UseGuards(AuthGuard,RoleGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async deleteUser(
     @Param("id", ParseUUIDPipe) id: string,

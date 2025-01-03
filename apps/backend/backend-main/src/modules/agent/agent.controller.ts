@@ -29,18 +29,18 @@ import {
 import { UnauthorizedError } from "../../shared/errors/authErrors";
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
+import { RoleGuard } from "../../shared/guards/roles.guard";
 import { FileToUrlInterceptor } from "../../shared/interceptors/file-to-url.interceptor";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { AgentService } from "./agent.service";
 import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
-import { RoleGuard } from "../../shared/guards/roles.guard";
 
 @Controller("agent")
 export class AgentController {
   constructor(
     private readonly agentService: AgentService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   @Post("signup")
   @UseGuards(OnboardingGuard)
@@ -301,7 +301,11 @@ export class AgentController {
     const { approvalStatus } = body;
 
     // Call service method to update the document's approval status
-    await this.agentService.updateDocumentApprovalStatus(agentId, documentId, approvalStatus);
+    await this.agentService.updateDocumentApprovalStatus(
+      agentId,
+      documentId,
+      approvalStatus,
+    );
 
     return {
       success: true,
@@ -339,5 +343,4 @@ export class AgentController {
       data: { assignedAgentId: null },
     };
   }
-
 }

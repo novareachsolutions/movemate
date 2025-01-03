@@ -1,6 +1,6 @@
 import { Column, Entity } from "typeorm";
 
-import { AgentTypeEnum, ApprovalStatusEnum } from "../shared/enums";
+import { AgentTypeEnum } from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
 
 @Entity()
