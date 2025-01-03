@@ -8,30 +8,47 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { Response } from "express";
 import { UpdateResult } from "typeorm";
 
 import { Agent } from "../../entity/Agent";
+import { RequiredDocument } from "../../entity/RequiredDocument";
 import { Roles } from "../../shared/decorators/roles.decorator";
-import { AgentStatusEnum, UserRoleEnum } from "../../shared/enums";
+import {
+  AgentStatusEnum,
+  AgentTypeEnum,
+  ApprovalStatusEnum,
+  UserRoleEnum,
+} from "../../shared/enums";
 import { UnauthorizedError } from "../../shared/errors/authErrors";
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
+import { RoleGuard } from "../../shared/guards/roles.guard";
+import { FileToUrlInterceptor } from "../../shared/interceptors/file-to-url.interceptor";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { AgentService } from "./agent.service";
 import { TAgent, TAgentDocument, TAgentPartial } from "./agent.types";
 
 @Controller("agent")
 export class AgentController {
-  constructor(private readonly agentService: AgentService) {}
+  constructor(
+    private readonly agentService: AgentService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post("signup")
   @UseGuards(OnboardingGuard)
   async create(
     @Req() request: ICustomRequest,
     @Body() agent: TAgent,
-  ): Promise<IApiResponse<Agent>> {
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<IApiResponse<{ agent: Agent; accessToken: string }>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
     if (
       agent.user.phoneNumber &&
@@ -42,16 +59,29 @@ export class AgentController {
       );
     }
     agent.user.phoneNumber = phoneNumberFromGuard;
-    const data = await this.agentService.createAgent(agent);
+
+    const {
+      agent: createdAgent,
+      accessToken,
+      refreshToken,
+    } = await this.agentService.createAgent(agent);
+
+    response.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
+    });
+
     return {
       success: true,
       message: "Agent created successfully.",
-      data,
+      data: { agent: createdAgent, accessToken },
     };
   }
 
   @Get("profile")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.AGENT)
   async getOwnProfile(
     @Req() request: ICustomRequest,
@@ -66,7 +96,7 @@ export class AgentController {
   }
 
   @Patch("profile")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.AGENT)
   async updateOwnProfile(
     @Body() updateAgentPartial: TAgentPartial,
@@ -85,8 +115,9 @@ export class AgentController {
   }
 
   @Post("document")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.AGENT)
+  @UseInterceptors(FileInterceptor("file"), FileToUrlInterceptor)
   async submitOwnDocument(
     @Body() submitDocumentDto: TAgentDocument,
     @Req() request: ICustomRequest,
@@ -95,7 +126,9 @@ export class AgentController {
     const document: TAgentDocument = {
       ...submitDocumentDto,
       agentId,
+      url: submitDocumentDto.url,
     };
+
     const data = await this.agentService.submitDocument(agentId, document);
     return {
       success: true,
@@ -105,7 +138,7 @@ export class AgentController {
   }
 
   @Delete("document/:documentId")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.AGENT)
   async removeOwnDocument(
     @Param("documentId", ParseIntPipe) documentId: number,
@@ -121,7 +154,7 @@ export class AgentController {
   }
 
   @Patch("status")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.AGENT)
   async setOwnAgentStatus(
     @Body() body: { status: AgentStatusEnum },
@@ -138,7 +171,7 @@ export class AgentController {
   }
 
   @Get("profile/:id")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getAgentProfile(
     @Param("id", ParseIntPipe) agentId: number,
@@ -152,7 +185,7 @@ export class AgentController {
   }
 
   @Patch("profile/:id")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async updateAgentProfile(
     @Param("id", ParseIntPipe) agentId: number,
@@ -172,7 +205,7 @@ export class AgentController {
   }
 
   @Post("document/:id")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async submitAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
@@ -191,7 +224,7 @@ export class AgentController {
   }
 
   @Delete("document/:id/:documentId")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async removeAgentDocument(
     @Param("id", ParseIntPipe) agentId: number,
@@ -206,7 +239,7 @@ export class AgentController {
   }
 
   @Get("list")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getAllAgents(): Promise<IApiResponse<Agent[]>> {
     const agents = await this.agentService.getAllAgents();
@@ -218,7 +251,7 @@ export class AgentController {
   }
 
   @Patch("location")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.AGENT)
   async updateLocation(
     @Body() body: { latitude: number; longitude: number },
@@ -231,6 +264,83 @@ export class AgentController {
       success: true,
       message: "Location updated successfully.",
       data: null,
+    };
+  }
+
+  @Post("required-document")
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(UserRoleEnum.ADMIN)
+  async createRequiredDocument(
+    @Body()
+    createRequiredDocumentDto: {
+      name: string;
+      description?: string;
+      agentType: AgentTypeEnum;
+      isRequired: boolean;
+      isExpiry: boolean;
+    },
+  ): Promise<IApiResponse<RequiredDocument>> {
+    const requiredDocument = await this.agentService.createRequiredDocument(
+      createRequiredDocumentDto,
+    );
+    return {
+      success: true,
+      message: "Required document created successfully.",
+      data: requiredDocument,
+    };
+  }
+
+  @Patch(":agentId/document/:documentId/approval-status")
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(UserRoleEnum.ADMIN)
+  async updateDocumentApprovalStatus(
+    @Param("agentId", ParseIntPipe) agentId: number,
+    @Param("documentId", ParseIntPipe) documentId: number,
+    @Body() body: { approvalStatus: ApprovalStatusEnum },
+  ): Promise<IApiResponse<null>> {
+    const { approvalStatus } = body;
+
+    // Call service method to update the document's approval status
+    await this.agentService.updateDocumentApprovalStatus(
+      agentId,
+      documentId,
+      approvalStatus,
+    );
+
+    return {
+      success: true,
+      message: `Document approval status updated to ${approvalStatus}.`,
+      data: null,
+    };
+  }
+
+  @Post("assign-rider/:orderId")
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.AGENT)
+  async assignRider(
+    @Param("orderId") orderId: string,
+    @Body() body: { pickupLatitude: number; pickupLongitude: number },
+  ): Promise<IApiResponse<{ assignedAgentId: number | null }>> {
+    const { pickupLatitude, pickupLongitude } = body;
+
+    const assignedAgentId = await this.agentService.assignRider(
+      pickupLatitude,
+      pickupLongitude,
+      orderId,
+    );
+
+    if (assignedAgentId) {
+      return {
+        success: true,
+        message: `Rider assigned successfully.`,
+        data: { assignedAgentId },
+      };
+    }
+
+    return {
+      success: false,
+      message: `No rider could be assigned.`,
+      data: { assignedAgentId: null },
     };
   }
 }

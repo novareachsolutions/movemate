@@ -1,5 +1,3 @@
-// src/entity/SupportTicket.ts
-
 import { Column, Entity, ManyToOne, OneToMany, RelationId } from "typeorm";
 
 import {

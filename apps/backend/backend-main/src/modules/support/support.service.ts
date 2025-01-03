@@ -1,8 +1,7 @@
-// src/modules/support/support.service.ts
-
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
 
@@ -218,9 +217,12 @@ export class SupportService {
   }
 
   async getMessages(ticketId: number): Promise<ChatMessage[]> {
-    const ticket = await this.getTicketDetails(ticketId); // Ensures the ticket exists
+    const ticket = await this.getTicketDetails(ticketId);
 
-    // Fetch messages related to the ticket, ordered by creation time (ascending)
+    if (ticket) {
+      throw new InternalServerErrorException("Ticket invalid");
+    }
+
     const messages = await dbRepo(ChatMessage)
       .createQueryBuilder("message")
       .where("message.ticketId = :ticketId", { ticketId })

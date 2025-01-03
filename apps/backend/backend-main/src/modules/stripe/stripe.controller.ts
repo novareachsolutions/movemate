@@ -2,11 +2,12 @@ import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import Stripe from "stripe";
 
 import { AuthGuard } from "../../shared/guards/auth.guard";
+import { RoleGuard } from "../../shared/guards/roles.guard";
 import { IApiResponse } from "../../shared/interface";
 import { StripeService } from "./stripe.service";
 
 @Controller("stripe")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RoleGuard)
 export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 

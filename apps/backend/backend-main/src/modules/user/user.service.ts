@@ -8,18 +8,23 @@ import {
   UserNotFoundError,
 } from "../../shared/errors/user";
 import { filterEmptyValues } from "../../utils/filter";
+import { TokenService } from "../auth/utils/generateTokens";
 import { dbReadRepo, dbRepo } from "../database/database.service";
 import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Injectable()
 export class UserService {
+  constructor(private readonly tokenService: TokenService) {}
+
   /**
    * Create a new user.
    * @param createUserDto Data Transfer Object for creating a user.
    * @returns The created user entity.
    */
-  async createUser(createUserDto: TCreateUser): Promise<number> {
-    const { email, phoneNumber } = createUserDto;
+  async createUser(
+    createUserDto: TCreateUser,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const { email, phoneNumber, role } = createUserDto;
 
     const existingUser = await dbReadRepo(User).findOne({
       where: { email, phoneNumber },
@@ -35,7 +40,15 @@ export class UserService {
     }
 
     const user: Pick<User, "id"> = await dbRepo(User).save(createUserDto);
-    return user.id;
+
+    const accessToken = this.tokenService.generateAccessToken(
+      user.id,
+      phoneNumber,
+      role,
+    );
+    const refreshToken = this.tokenService.generateRefreshToken(user.id);
+
+    return { accessToken, refreshToken };
   }
 
   /**

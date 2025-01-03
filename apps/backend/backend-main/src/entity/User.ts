@@ -12,8 +12,7 @@ export class User extends BaseEntity {
   phoneNumber: string;
 
   @Column({
-    type: "enum",
-    enum: UserRoleEnum,
+    type: "varchar",
   })
   role: UserRoleEnum;
 

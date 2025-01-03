@@ -8,8 +8,11 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UseGuards,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Response } from "express";
 import { DeleteResult, UpdateResult } from "typeorm";
 
 import { User } from "../../entity/User";
@@ -18,13 +21,17 @@ import { UserRoleEnum } from "../../shared/enums";
 import { UnauthorizedError } from "../../shared/errors/authErrors";
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
+import { RoleGuard } from "../../shared/guards/roles.guard";
 import { IApiResponse, ICustomRequest } from "../../shared/interface";
 import { UserService } from "./user.service";
 import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Controller("user")
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {}
 
   /**
    * Create a new user.
@@ -35,7 +42,8 @@ export class UserController {
   async createUser(
     @Body() createUserDto: TCreateUser,
     @Req() request: ICustomRequest,
-  ): Promise<IApiResponse<number>> {
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<IApiResponse<{ accessToken: string }>> {
     const phoneNumberFromGuard = request.user.phoneNumber;
     if (
       createUserDto.phoneNumber &&
@@ -47,11 +55,21 @@ export class UserController {
     }
     createUserDto.phoneNumber = phoneNumberFromGuard;
     createUserDto.role = UserRoleEnum.CUSTOMER;
-    const userId = await this.userService.createUser(createUserDto);
+
+    const { accessToken, refreshToken } =
+      await this.userService.createUser(createUserDto);
+
+    response.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: this.configService.get<string>("ENVIRONMENT") === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
+    });
+
     return {
       success: true,
       message: "User created successfully.",
-      data: userId,
+      data: { accessToken },
     };
   }
 
@@ -60,7 +78,7 @@ export class UserController {
    * GET /user/me
    */
   @Get()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.CUSTOMER)
   async getCurrentUser(
     @Req() request: ICustomRequest,
@@ -80,7 +98,7 @@ export class UserController {
    * GET /user/profile/:id
    */
   @Get("profile/:id")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getUserById(
     @Param("id", ParseUUIDPipe) id: number,
@@ -98,7 +116,7 @@ export class UserController {
    * POST /user/profile
    */
   @Post("profile")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getUserProfile(
     @Body() getUserProfileDto: TGetUserProfile,
@@ -116,8 +134,8 @@ export class UserController {
    * GET /user/list
    */
   @Get("list")
-  // @UseGuards(AuthGuard)
-  // @Roles(UserRoleEnum.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(UserRoleEnum.ADMIN)
   async getAllUsers(): Promise<IApiResponse<User[]>> {
     const users = await this.userService.getAllUsers();
     return {
@@ -132,7 +150,7 @@ export class UserController {
    * PUT /user/profile/:id
    */
   @Patch("profile/:id")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async updateUser(
     @Param("id", ParseUUIDPipe) id: number,
@@ -151,7 +169,7 @@ export class UserController {
    * DELETE /user/profile/:id
    */
   @Delete("profile/:id")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async deleteUser(
     @Param("id", ParseUUIDPipe) id: string,

@@ -1,8 +1,16 @@
-import { Column, Entity, Index, JoinColumn, OneToOne, RelationId } from "typeorm";
-import { SendPackageOrder } from "./SendPackageOrder";
-import { BaseEntity } from "./BaseEntity";
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToOne,
+  RelationId,
+} from "typeorm";
 
-@Index('IDX_report_orderId', ['sendPackageOrderId'], {
+import { BaseEntity } from "./BaseEntity";
+import { SendPackageOrder } from "./SendPackageOrder";
+
+@Index("IDX_report_orderId", ["sendPackageOrderId"], {
   where: '"deletedAt" IS NULL',
 })
 @Entity()
@@ -13,9 +21,13 @@ export class Report extends BaseEntity {
   @Column({ type: "varchar", length: 255, nullable: true })
   details: string;
 
-  @OneToOne(() => SendPackageOrder, (sendPackageOrder) => sendPackageOrder.report, {
-    onDelete: "CASCADE",
-  })
+  @OneToOne(
+    () => SendPackageOrder,
+    (sendPackageOrder) => sendPackageOrder.report,
+    {
+      onDelete: "CASCADE",
+    },
+  )
   @JoinColumn({ name: "sendPackageOrderId" })
   sendPackageOrder: SendPackageOrder;
 

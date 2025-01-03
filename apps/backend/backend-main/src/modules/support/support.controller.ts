@@ -1,5 +1,3 @@
-// src/modules/support/support.controller.ts
-
 import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 
 import { ChatMessage } from "../../entity/ChatMessage";
@@ -18,7 +16,7 @@ import { SupportService } from "./support.service";
 
 @Controller("support")
 export class SupportController {
-  constructor(private readonly ticketService: SupportService) { }
+  constructor(private readonly ticketService: SupportService) {}
 
   @Post("ticket")
   async createTicket(

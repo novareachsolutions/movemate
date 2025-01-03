@@ -7,6 +7,8 @@ import { OnboardingGuard } from "../../shared/guards/onboarding.guard";
 import { AuthService } from "../auth/auth.service";
 import { TokenService } from "../auth/utils/generateTokens";
 import { OtpService } from "../auth/utils/otp";
+import { AwsModule } from "../media/aws.module";
+import { MediaService } from "../media/media.service";
 import { RedisService } from "../redis/redis.service";
 import { AgentController } from "./agent.controller";
 import { AgentService } from "./agent.service";
@@ -16,6 +18,7 @@ import { AgentService } from "./agent.service";
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    AwsModule,
   ],
   controllers: [AgentController],
   providers: [
@@ -27,6 +30,7 @@ import { AgentService } from "./agent.service";
     OtpService,
     TokenService,
     AgentNotificationGateway,
+    MediaService,
   ],
   exports: [AgentService],
 })

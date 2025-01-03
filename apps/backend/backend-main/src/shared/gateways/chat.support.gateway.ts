@@ -1,5 +1,3 @@
-// src/shared/gateways/chat.support.gateway.ts
-
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import {
   ConnectedSocket,

@@ -34,7 +34,6 @@ export class MediaService {
       Key: `${Date.now()}-${file.originalname}`,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: "public-read",
     };
 
     try {

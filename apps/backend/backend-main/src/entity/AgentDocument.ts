@@ -1,5 +1,6 @@
 import { Column, Entity, Index, ManyToOne, RelationId, Unique } from "typeorm";
 
+import { ApprovalStatusEnum } from "../shared/enums";
 import { Agent } from "./Agent";
 import { BaseEntity } from "./BaseEntity";
 
@@ -27,4 +28,13 @@ export class AgentDocument extends BaseEntity {
   @RelationId((doc: AgentDocument) => doc.agent)
   @Column({ type: "integer" })
   agentId: number;
+
+  @Column({ type: "date", nullable: true })
+  expiry: Date;
+
+  @Column({
+    type: "varchar",
+    default: ApprovalStatusEnum.PENDING,
+  })
+  approvalStatus: ApprovalStatusEnum;
 }

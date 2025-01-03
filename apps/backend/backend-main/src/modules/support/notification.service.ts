@@ -1,5 +1,3 @@
-// src/modules/support/notification.service.ts
-
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 
 import { ChatMessage } from "../../entity/ChatMessage";

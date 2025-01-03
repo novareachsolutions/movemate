@@ -41,13 +41,13 @@ export abstract class BaseSocketGateway implements OnGatewayInit {
 
   // Send a message to a specific room
   sendMessageToRoom(room: string, event: string, message: any): void {
-    void this.server.to(room).emit(event, message);
+    this.server.to(room).emit(event, message);
     logger.info(`Message sent to room ${room}: ${event}`);
   }
 
   // Send a message to a specific client
   sendMessageToClient(clientId: string, event: string, message: any): void {
-    void this.server.to(clientId).emit(event, message);
+    this.server.to(clientId).emit(event, message);
     logger.info(`Message sent to client ${clientId}: ${event}`);
   }
 }
