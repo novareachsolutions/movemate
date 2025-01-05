@@ -9,8 +9,8 @@ import {
 @Injectable()
 export class AppService {
   constructor(
-    private healthCheckService: HealthCheckService,
-    private httpHealthIndicator: HttpHealthIndicator,
+    private readonly healthCheckService: HealthCheckService,
+    private readonly httpHealthIndicator: HttpHealthIndicator,
   ) {}
 
   @HealthCheck()

@@ -86,7 +86,6 @@ export class SendPackageOrder extends BaseEntity {
 
   @Column({ type: "time", nullable: false })
   estimatedTime: number;
-  estimatedTime: number;
 
   @ManyToOne(() => User, (user) => user.id, { nullable: true })
   @JoinColumn({ name: "customerId" })
@@ -158,7 +157,6 @@ export class SendPackageOrder extends BaseEntity {
 
   @OneToOne(() => OrderReview, (orderReview) => orderReview.sendPackageOrder, {
     nullable: true,
-    onDelete: "SET NULL",
     onDelete: "SET NULL",
   })
   @JoinColumn({ name: "orderReviewId" })
