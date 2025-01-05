@@ -218,7 +218,7 @@ export class SupportService {
   }
 
   async getMessages(ticketId: number): Promise<ChatMessage[]> {
-    const ticket = await this.getTicketDetails(ticketId); // Ensures the ticket exists
+    await this.getTicketDetails(ticketId); // Ensures the ticket exists
 
     // Fetch messages related to the ticket, ordered by creation time (ascending)
     const messages = await dbRepo(ChatMessage)

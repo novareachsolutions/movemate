@@ -18,7 +18,7 @@ import { SupportService } from "./support.service";
 
 @Controller("support")
 export class SupportController {
-  constructor(private readonly ticketService: SupportService) { }
+  constructor(private readonly ticketService: SupportService) {}
 
   @Post("ticket")
   async createTicket(
