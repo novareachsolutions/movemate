@@ -369,6 +369,20 @@ export class StripeService {
     }
   }
 
+  /**
+   * The `handleWebhook` function handles Stripe webhook events by verifying the
+   * signature and returning the event.
+   * @param {string} signature - The `signature` parameter in the `handleWebhook` function is typically
+   * a string that represents the signature of the webhook payload. This signature is used for
+   * verifying the authenticity and integrity of the webhook data to ensure that it was sent by the
+   * expected source and has not been tampered with during transit.
+   * @param {Buffer} rawBody - The `rawBody` parameter in the `handleWebhook` function represents the
+   * raw request body of the incoming webhook event. This is the data that Stripe sends to your webhook
+   * endpoint when an event occurs, and it typically contains information about the event that
+   * triggered the webhook.
+   * @returns The `handleWebhook` function is returning a Promise that resolves to a `Stripe.Event`
+   * object.
+   */
   async handleWebhook(
     signature: string,
     rawBody: Buffer,

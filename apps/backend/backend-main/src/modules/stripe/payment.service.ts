@@ -16,6 +16,15 @@ import { StripeService } from "./stripe.service";
 export class PaymentService {
   constructor(private readonly stripeService: StripeService) {}
 
+  /**
+   * The function `createOrder` processes an order, calculates commission if an agent is involved,
+   * creates a payment intent, and saves payment details in the database.
+   * @param {TCreateOrderRequest} orderData - The `orderData` parameter in the `createOrder` function
+   * represents the data needed to create a new order. It likely includes information such as the order
+   * ID, amount, currency, and any other relevant details for processing the order.
+   * @returns The `createOrder` function returns a Promise that resolves to a `TOrderResponse` object.
+   * The `TOrderResponse` object contains the following properties:
+   */
   async createOrder(orderData: TCreateOrderRequest): Promise<TOrderResponse> {
     const order = await dbReadRepo(SendPackageOrder).findOne({
       where: { id: orderData.orderId },
@@ -65,6 +74,15 @@ export class PaymentService {
     };
   }
 
+  /**
+   * The function `handlePaymentSuccess` updates payment and order statuses, and agent wallet balance
+   * if applicable, based on a successful payment with a given payment intent ID. Used in the stripe
+   * webhook handler.
+   * @param {string} paymentIntentId - The `paymentIntentId` parameter is a string that represents the
+   * unique identifier of a payment intent in the Stripe payment system. This function
+   * `handlePaymentSuccess` is designed to handle the successful completion of a payment process by
+   * updating the payment and order statuses in the database. It also updates the agent's
+   */
   async handlePaymentSuccess(paymentIntentId: string): Promise<void> {
     const payment = await dbReadRepo(Payment).findOne({
       where: { stripePaymentIntentId: paymentIntentId },
@@ -95,6 +113,13 @@ export class PaymentService {
     }
   }
 
+  /**
+   * The function `handleTransferCreated` updates the wallet balance of an agent and changes the status
+   * of a payment to PAID based on a Stripe transfer. Used in the stripe webhook handler.
+   * @param transfer - The `transfer` parameter in the `handleTransferCreated` function represents a
+   * Stripe transfer object. This object contains information about a transfer of funds from a Stripe
+   * account to a connected bank account or debit card.
+   */
   async handleTransferCreated(transfer: Stripe.Transfer): Promise<void> {
     const payment = await dbReadRepo(Payment).findOne({
       where: { stripeTransferId: transfer.id },
