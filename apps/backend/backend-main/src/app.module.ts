@@ -1,6 +1,8 @@
+import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
+import { TerminusModule } from "@nestjs/terminus";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
@@ -9,6 +11,7 @@ import { AgentModule } from "./modules/agent/agent.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { DatabaseModule } from "./modules/database/database.module";
 import { GatewayModule } from "./modules/gateway/gateway.module";
+import { SendAPackageModule } from "./modules/order/sendPackage/sendPackage.module";
 import { SendAPackageModule } from "./modules/order/sendPackage/sendPackage.module";
 import { RedisModule } from "./modules/redis/redis.module";
 import { StripeModule } from "./modules/stripe/stripe.module";
@@ -32,6 +35,8 @@ import { RoleGuard } from "./shared/guards/roles.guard";
     GatewayModule,
     UserModule,
     SendAPackageModule,
+    TerminusModule,
+    HttpModule,
     StripeModule,
   ],
   controllers: [AppController],

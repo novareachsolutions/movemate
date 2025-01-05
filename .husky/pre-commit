@@ -6,3 +6,4 @@ fi
 
 cd apps/backend/backend-main
 npm run validate
+git add .

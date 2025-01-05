@@ -1,4 +1,3 @@
-// src/entity/Report.ts
 import {
   Column,
   Entity,

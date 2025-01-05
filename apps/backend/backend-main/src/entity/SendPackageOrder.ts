@@ -86,6 +86,7 @@ export class SendPackageOrder extends BaseEntity {
 
   @Column({ type: "time", nullable: false })
   estimatedTime: number;
+  estimatedTime: number;
 
   @ManyToOne(() => User, (user) => user.id, { nullable: true })
   @JoinColumn({ name: "customerId" })
@@ -95,6 +96,10 @@ export class SendPackageOrder extends BaseEntity {
   @Column({ type: "integer", nullable: true })
   customerId: number;
 
+  @ManyToOne(() => Agent, (agent) => agent.id, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @ManyToOne(() => Agent, (agent) => agent.id, {
     nullable: true,
     onDelete: "SET NULL",
@@ -116,6 +121,7 @@ export class SendPackageOrder extends BaseEntity {
   actualTime: number;
 
   @Column({ type: "varchar", nullable: true })
+  @Column({ type: "varchar", nullable: true })
   cancellationReason: string;
 
   @Column({
@@ -125,6 +131,7 @@ export class SendPackageOrder extends BaseEntity {
   })
   canceledBy: UserRoleEnum;
 
+  @Column({ type: "varchar", nullable: true })
   @Column({ type: "varchar", nullable: true })
   completionPhoto: string;
 
@@ -151,6 +158,7 @@ export class SendPackageOrder extends BaseEntity {
 
   @OneToOne(() => OrderReview, (orderReview) => orderReview.sendPackageOrder, {
     nullable: true,
+    onDelete: "SET NULL",
     onDelete: "SET NULL",
   })
   @JoinColumn({ name: "orderReviewId" })
