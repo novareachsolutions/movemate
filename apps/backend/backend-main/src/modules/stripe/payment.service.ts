@@ -1,15 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import Stripe from "stripe";
 
-import { DropLocation } from "../../entity/DropLocation";
+import { Agent } from "../../entity/Agent";
 import { Payment } from "../../entity/Payment";
-import { PickupLocation } from "../../entity/PickupLocation";
 import { SendPackageOrder } from "../../entity/SendPackageOrder";
-import { logger } from "../../logger";
-import {
-  OrderTypeEnum,
-  PaymentStatusEnum,
-  PaymentTypeEnum,
-} from "../../shared/enums";
+import { OrderStatusEnum, PaymentStatusEnum } from "../../shared/enums";
 import {
   TCreateOrderRequest,
   TOrderResponse,
@@ -22,122 +17,98 @@ export class PaymentService {
   constructor(private readonly stripeService: StripeService) {}
 
   async createOrder(orderData: TCreateOrderRequest): Promise<TOrderResponse> {
-    try {
-      // Validate locations
-      const pickupLocation = await dbReadRepo(PickupLocation).findOne({
-        where: { id: orderData.pickupLocationId },
+    const order = await dbReadRepo(SendPackageOrder).findOne({
+      where: { id: orderData.orderId },
+      relations: ["agent"],
+    });
+
+    if (!order) {
+      throw new NotFoundException("Order not found");
+    }
+
+    // Calculate commission if agent exists
+    let transferAmount = orderData.amount;
+    if (order.agent) {
+      const commission = orderData.amount * order.agent.commissionRate;
+      transferAmount = orderData.amount - commission;
+    }
+
+    // Create payment intent
+    const paymentIntent = await this.stripeService.createPaymentIntent({
+      amount: orderData.amount,
+      currency: orderData.currency,
+      description: `Payment for order #${order.id}`,
+      transfer_data: order.agent
+        ? {
+            destination: order.agent.stripeAccountId,
+            amount: Math.round(transferAmount * 100),
+          }
+        : undefined,
+    });
+
+    // Create payment record
+    await dbRepo(Payment).save({
+      order,
+      amount: orderData.amount,
+      currency: orderData.currency,
+      stripePaymentIntentId: paymentIntent.id,
+      status: PaymentStatusEnum.PENDING,
+      commission: order.agent
+        ? orderData.amount * order.agent.commissionRate
+        : 0,
+    });
+
+    return {
+      orderId: order.id,
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+    };
+  }
+
+  async handlePaymentSuccess(paymentIntentId: string): Promise<void> {
+    const payment = await dbReadRepo(Payment).findOne({
+      where: { stripePaymentIntentId: paymentIntentId },
+      relations: ["order", "order.agent"],
+    });
+
+    if (!payment) {
+      throw new NotFoundException("Payment not found");
+    }
+
+    // Update payment status
+    await dbRepo(Payment).update(payment.id, {
+      status: PaymentStatusEnum.PAID,
+    });
+
+    // Update order status
+    await dbRepo(SendPackageOrder).update(payment.order.id, {
+      paymentStatus: PaymentStatusEnum.PAID,
+      status: OrderStatusEnum.PENDING,
+    });
+
+    // Update agent wallet if exists
+    if (payment.order.agent) {
+      const transferAmount = payment.amount - payment.commissionAmount;
+      await dbRepo(Agent).update(payment.order.agent.id, {
+        walletBalance: () => `wallet_balance + ${transferAmount}`,
       });
-      if (!pickupLocation) {
-        logger.error(
-          `PaymentService.createOrder: Pickup location ${orderData.pickupLocationId} not found`,
-        );
-        throw new NotFoundException("Pickup location not found");
-      }
-
-      const dropLocation = await dbReadRepo(DropLocation).findOne({
-        where: { id: orderData.dropLocationId },
-      });
-      if (!dropLocation) {
-        logger.error(
-          `PaymentService.createOrder: Drop location ${orderData.dropLocationId} not found`,
-        );
-        throw new NotFoundException("Drop location not found");
-      }
-
-      // Calculate order amount based on distance or fixed rate
-      const amount = await this.calculateOrderAmount(
-        pickupLocation,
-        dropLocation,
-      );
-
-      // Create order
-      const order: any = await dbRepo(SendPackageOrder).save({
-        ...orderData,
-        paymentStatus: PaymentStatusEnum.PENDING,
-        type: OrderTypeEnum.DELIVERY,
-        estimatedDistance: amount.distance,
-        estimatedTime: amount.time,
-        price: amount.price,
-      });
-
-      // Create payment intent
-      const paymentIntent = await this.stripeService.createPaymentIntent({
-        amount: amount.price,
-        currency: "aud",
-        description: `Payment for order #${order.id}`,
-      });
-
-      // Create payment record
-      await dbRepo(Payment).save({
-        stripePaymentIntentId: paymentIntent.id,
-        type: PaymentTypeEnum.ORDER,
-        amount: amount.price,
-        status: PaymentStatusEnum.PENDING,
-        order: { id: order.id },
-      });
-
-      logger.info(
-        `PaymentService.createOrder: Created order ${order.id} with payment intent ${paymentIntent.id}`,
-      );
-
-      return {
-        orderId: order.id,
-        clientSecret: paymentIntent.client_secret,
-        amount: amount.price,
-      };
-    } catch (error) {
-      logger.error("PaymentService.createOrder: Failed to create order", error);
-      throw error;
     }
   }
 
-  private calculateOrderAmount(
-    pickup: PickupLocation,
-    drop: DropLocation,
-  ): Promise<{ price: number; distance: number; time: number }> {
-    // Implement your pricing logic here
-    // This is a simple example - replace with your actual calculation
-    const distance = this.calculateDistance(
-      pickup.latitude,
-      pickup.longitude,
-      drop.latitude,
-      drop.longitude,
-    );
-
-    const baseRate = 10; // Base rate in AUD
-    const perKmRate = 2; // Rate per km in AUD
-    const price = baseRate + distance * perKmRate;
-    const estimatedTime = distance * 3; // Simple estimation: 3 minutes per km
-
-    return Promise.resolve({
-      price: Math.round(price * 100) / 100, // Round to 2 decimal places
-      distance: Math.round(distance * 100) / 100,
-      time: Math.round(estimatedTime),
+  async handleTransferCreated(transfer: Stripe.Transfer): Promise<void> {
+    const payment = await dbReadRepo(Payment).findOne({
+      where: { stripeTransferId: transfer.id },
+      relations: ["order", "order.agent"],
     });
-  }
 
-  private calculateDistance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number,
-  ): number {
-    // Implement distance calculation (e.g., Haversine formula)
-    // This is a simplified version
-    const R = 6371; // Earth's radius in km
-    const dLat = this.deg2rad(lat2 - lat1);
-    const dLon = this.deg2rad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.deg2rad(lat1)) *
-        Math.cos(this.deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
-  }
+    if (payment && payment.order.agent) {
+      await dbRepo(Agent).update(payment.order.agent.id, {
+        walletBalance: () => `wallet_balance + ${transfer.amount / 100}`,
+      });
 
-  private deg2rad(deg: number): number {
-    return deg * (Math.PI / 180);
+      await dbRepo(Payment).update(payment.id, {
+        status: PaymentStatusEnum.PAID,
+      });
+    }
   }
 }

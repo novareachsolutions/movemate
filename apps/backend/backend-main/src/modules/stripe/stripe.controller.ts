@@ -2,15 +2,14 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Logger,
   Param,
   ParseIntPipe,
   Post,
-  Query,
-  Redirect,
+  RawBody,
   UseGuards,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 
 import { AuthGuard } from "../../shared/guards/auth.guard";
 import { IApiResponse } from "../../shared/interface";
@@ -26,13 +25,11 @@ import { StripeService } from "./stripe.service";
 
 @Controller("stripe")
 @UseGuards(AuthGuard)
-@UseGuards(AuthGuard)
 export class StripeController {
   private readonly logger = new Logger(StripeController.name);
   constructor(
     private readonly stripeService: StripeService,
     private readonly paymentService: PaymentService,
-    private readonly configService: ConfigService,
   ) {}
 
   @Post("connect-account")
@@ -83,39 +80,34 @@ export class StripeController {
     };
   }
 
-  @Post("orders/send-package")
+  @Post("payments/create-order")
   async createOrder(
     @Body() orderData: TCreateOrderRequest,
   ): Promise<IApiResponse<TOrderResponse>> {
     const data = await this.paymentService.createOrder(orderData);
     return {
       success: true,
-      message: "Order created successfully.",
+      message: "Order created successfully",
       data,
     };
   }
 
-  @Get("refresh-account-link")
-  @Redirect()
-  async handleRefreshAccountLink(
-    @Query("agent_id") agentId: string,
-  ): Promise<{ url: string }> {
-    this.logger.log(`Refreshing account link for agent ${agentId}`);
-    const { url } = await this.stripeService.createAccountLink(
-      parseInt(agentId, 10),
-    );
-    return { url };
-  }
+  @Post("webhook")
+  async handleWebhook(
+    @Headers("stripe-signature") signature: string,
+    @RawBody() rawBody: Buffer,
+  ): Promise<{ received: boolean }> {
+    const event = await this.stripeService.handleWebhook(signature, rawBody);
 
-  @Get("return-account-link")
-  @Redirect()
-  handleReturnAccountLink(
-    @Query("agent_id") agentId: string,
-  ): Promise<{ url: string }> {
-    // Redirect to your frontend success page
-    const frontendUrl = this.configService.get<string>("FRONTEND_URL");
-    return Promise.resolve({
-      url: `${frontendUrl}/agent/onboarding-success?agent_id=${agentId}`,
-    });
+    switch (event.type) {
+      case "payment_intent.succeeded":
+        await this.paymentService.handlePaymentSuccess(event.data.object.id);
+        break;
+      case "transfer.created":
+        await this.paymentService.handleTransferCreated(event.data.object);
+        break;
+    }
+
+    return { received: true };
   }
 }

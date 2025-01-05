@@ -27,20 +27,39 @@ export class StripeService {
     });
   }
 
+  /**
+   * This function creates a payment intent using the Stripe API with optional transfer
+   * data.
+   * @param params - The `createPaymentIntent` function is an asynchronous function that creates a
+   * payment intent using the provided parameters. The parameters include:
+   * @returns The `createPaymentIntent` function returns a Promise that resolves to a
+   * `Stripe.PaymentIntent` object.
+   */
   async createPaymentIntent(params: {
     amount: number;
     currency: string;
     description?: string;
+    transfer_data?: {
+      destination: string;
+      amount: number;
+    };
   }): Promise<Stripe.PaymentIntent> {
     try {
-      const paymentIntent = await this.stripe.paymentIntents.create({
+      const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
         amount: Math.round(params.amount * 100),
         currency: params.currency,
         description: params.description,
         automatic_payment_methods: {
           enabled: true,
         },
-      });
+      };
+
+      if (params.transfer_data) {
+        paymentIntentParams.transfer_data = params.transfer_data;
+      }
+
+      const paymentIntent =
+        await this.stripe.paymentIntents.create(paymentIntentParams);
 
       logger.info(
         `StripeService.createPaymentIntent: Created payment intent ${paymentIntent.id}`,
@@ -55,6 +74,19 @@ export class StripeService {
     }
   }
 
+  /**
+   * The function `createConnectedAccount` creates a Stripe Connect account for an agent and returns
+   * the account ID and a link for onboarding.
+   * @param {TConnectAccountRequest} data - The `createConnectedAccount` function takes in a parameter
+   * `data` of type `TConnectAccountRequest`. This parameter likely contains information needed to
+   * create a connected account, such as `agentId`, `email`, and `businessType`. The function then uses
+   * this data to create a Stripe Connect account
+   * @returns The function `createConnectedAccount` returns a Promise that resolves to an object with
+   * two properties:
+   * 1. `accountId`: a string representing the ID of the created Stripe Connect account.
+   * 2. `accountLink`: a string representing the URL for the account onboarding link associated with
+   * the created account.
+   */
   async createConnectedAccount(data: TConnectAccountRequest): Promise<{
     accountId: string;
     accountLink: string;
@@ -74,10 +106,11 @@ export class StripeService {
       // Create Stripe Connect account
       const account = await this.stripe.accounts.create({
         type: "express",
-        country: data.country,
+        country: "AU",
         email: data.email,
         capabilities: {
           transfers: { requested: true },
+          bank_transfer_payments: { requested: true },
           card_payments: { requested: true },
         },
         business_type: data.businessType || "individual",
@@ -113,6 +146,19 @@ export class StripeService {
     }
   }
 
+  /**
+   * The function `createAccountLink` generates a Stripe account link for a given agent ID and returns
+   * the link URL along with its expiration time. This way the agent can complete the onboarding process
+   * with Stripe by clicking on the link.
+   * @param {number} agentId - The `agentId` parameter is the unique identifier of the agent for whom
+   * we want to create a Stripe account link. This ID is used to retrieve the agent's information from
+   * the database and generate a unique account link for them to complete the onboarding process with
+   * Stripe.
+   * @returns The `createAccountLink` function returns a Promise that resolves to an object with two
+   * properties: `url` and `expiresAt`. The `url` property contains the URL for the account link
+   * created, and the `expiresAt` property contains the expiration time for the link in ISO string
+   * format, which is set to 30 minutes from the current time.
+   */
   async createAccountLink(agentId: number): Promise<{
     url: string;
     expiresAt: string;
@@ -131,8 +177,8 @@ export class StripeService {
 
       const accountLink = await this.stripe.accountLinks.create({
         account: agent.stripeAccountId,
-        refresh_url: `${this.configService.get("APP_URL")}/stripe/refresh-account-link`,
-        return_url: `${this.configService.get("APP_URL")}/stripe/return-account-link`,
+        refresh_url: `${this.configService.get("APP_URL")}/stripe/refresh-account-link`, // TODO: Replace with the actual Frontend URL
+        return_url: `${this.configService.get("APP_URL")}/stripe/return-account-link`, // TODO: Replace with the actual Frontend URL
         type: "account_onboarding",
       });
 
@@ -153,6 +199,19 @@ export class StripeService {
     }
   }
 
+  /**
+   * This function creates a virtual card using Stripe API with specified spending controls
+   * and returns the card details and amount for the customer.
+   * @param {TCreateVirtualCardRequest} data - The `createVirtualCard` function takes in a parameter
+   * `data` of type `TCreateVirtualCardRequest`. This parameter likely contains information needed to
+   * create a virtual card, such as the amount, currency, and any other necessary details for the card
+   * creation process.
+   * @returns The `createVirtualCard` function returns a Promise that resolves to an object with the
+   * following properties:
+   * - `cardDetails`: An object containing details of the virtual card created, including the last 4
+   * digits (`last4`), expiry month (`expiryMonth`), and expiry year (`expiryYear`).
+   * - `amount`: The amount associated with the virtual card, which is obtained from the `data
+   */
   async createVirtualCard(data: TCreateVirtualCardRequest): Promise<{
     cardDetails: any;
     amount: number;
@@ -192,6 +251,18 @@ export class StripeService {
     }
   }
 
+  /**
+   * The function `createSubscription` creates a subscription for a given agent using the
+   * Stripe API.
+   * @param {TCreateSubscriptionRequest} data - The `createSubscription` function you provided is an
+   * asynchronous function that creates a subscription for a given agent using the Stripe API. Here's a
+   * breakdown of the function:
+   * @returns The `createSubscription` function returns a Promise that resolves to an object with two
+   * properties:
+   * 1. `clientSecret`: a string representing the client secret of the latest payment intent associated
+   * with the subscription.
+   * 2. `subscriptionId`: a string representing the ID of the created subscription.
+   */
   async createSubscription(data: TCreateSubscriptionRequest): Promise<{
     clientSecret: string;
     subscriptionId: string;
@@ -256,6 +327,14 @@ export class StripeService {
     }
   }
 
+  /**
+   * The function `createTransfer` creates a transfer using the Stripe API with specified
+   * amount, destination, and optional instant payout option.
+   * @param params - The `createTransfer` function takes in an object `params` with the following
+   * properties:
+   * @returns The `createTransfer` function returns a Promise that resolves with a `Stripe.Transfer`
+   * object once the transfer creation process is completed.
+   */
   async createTransfer(params: {
     amount: number;
     destination: string;

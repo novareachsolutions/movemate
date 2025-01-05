@@ -20,7 +20,6 @@ import { AgentSubscription } from "./AgentSubscription";
 import { BaseEntity } from "./BaseEntity";
 import { Payment } from "./Payment";
 import { User } from "./User";
-import { Wallet } from "./Wallet";
 
 @Index("IDX_agent_userId", ["userId"], { where: '"deletedAt" IS NULL' })
 @Index("IDX_agent_status", ["status"], { where: '"deletedAt" IS NULL' })
@@ -92,9 +91,6 @@ export class Agent extends BaseEntity implements TAgent {
 
   @OneToMany(() => AgentSubscription, (subscription) => subscription.agent)
   subscriptions: AgentSubscription[];
-
-  @OneToOne(() => Wallet, (wallet) => wallet.agent)
-  wallet: Wallet;
 
   @Column({
     type: "enum",

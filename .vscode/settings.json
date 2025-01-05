@@ -5,5 +5,9 @@
   },
   "eslint.enable": true,
   "eslint.lintTask.enable": true,
-  "eslint.validate": ["javascript", "typescript"]
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ],
+  "docwriter.style": "JSDoc"
 }

@@ -1,11 +1,5 @@
-import { WalletTransaction } from "../../entity/WalletTransaction";
-import {
-  PaymentStatusEnum,
-  PaymentTypeEnum,
-  WalletTransactionTypeEnum,
-} from "../enums";
+import { PaymentStatusEnum, PaymentTypeEnum } from "../enums";
 
-// *** Types ***
 // -- Entity Specific ---
 export type TPayment = {
   stripePaymentIntentId: string;
@@ -24,15 +18,6 @@ export type TCreatePaymentIntent = {
   orderId?: number;
   agentId?: number;
   description?: string;
-};
-
-export type TWalletTransaction = {
-  walletId: number;
-  type: WalletTransactionTypeEnum;
-  amount: number;
-  balanceAfter: number;
-  reference?: string;
-  paymentId?: number;
 };
 
 // -- Controller Specific ---
@@ -61,37 +46,21 @@ export type TWithdrawalRequest = {
   isExpress: boolean;
 };
 
-export type TTransactionResponse = {
-  transactions: WalletTransaction[];
-  total: number;
-  page: number;
-  limit: number;
-};
-
 export type TBalanceResponse = {
   balance: number;
   pendingBalance: number;
 };
 
 export type TCreateOrderRequest = {
-  senderName: string;
-  senderPhoneNumber: string;
-  receiverName: string;
-  receiverPhoneNumber: string;
-  packageType: string;
-  pickupLocationId: number;
-  dropLocationId: number;
-  deliveryInstructions?: string;
+  agentId?: number;
+  amount: number;
+  currency: string;
+  customerId: number;
+  orderId: number;
 };
 
 export type TOrderResponse = {
-  orderId: number;
   clientSecret: string;
-  amount: number;
+  orderId: number;
+  paymentIntentId: string;
 };
-
-// *** Interfaces ***
-export interface ICreditWalletOptions {
-  paymentId?: number;
-  reference?: string;
-}

@@ -20,7 +20,7 @@ export class Payment extends BaseEntity {
   @Column({
     type: "enum",
     enum: PaymentStatusEnum,
-    default: PaymentStatusEnum.NOT_PAID,
+    default: PaymentStatusEnum.PENDING,
     nullable: false,
   })
   status: PaymentStatusEnum;
@@ -33,6 +33,9 @@ export class Payment extends BaseEntity {
 
   @Column({ type: "varchar", length: 255, nullable: true })
   failureReason: string;
+
+  @Column({ type: "varchar", length: 255, nullable: false })
+  stripeTransferId: string;
 
   @ManyToOne(() => SendPackageOrder, (order) => order.payments, {
     nullable: true,
