@@ -1,13 +1,20 @@
 import { Controller, Get } from "@nestjs/common";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { HealthCheckResult } from "@nestjs/terminus";
+import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import {
+  HealthCheck,
+  HealthCheckResult,
+  HealthCheckService,
+  HttpHealthIndicator,
+} from "@nestjs/terminus";
 
-import { AppService } from "./app.service";
-import { HealthCheckResponseDto } from "./utils/app.dto";
-@ApiTags("Health")
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+import { HealthCheckResponseDto } from "../utils/app.dto";
+
+@Controller("health")
+export class HealthController {
+  constructor(
+    private healthCheckService: HealthCheckService,
+    private httpHealthIndicator: HttpHealthIndicator,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -58,7 +65,16 @@ export class AppController {
       },
     },
   })
-  checkHealth(): Promise<HealthCheckResult> {
-    return this.appService.check();
+  @HealthCheck()
+  check(): Promise<HealthCheckResult> {
+    return this.healthCheckService.check([
+      // HTTP health check
+      async (): Promise<any> =>
+        await this.httpHealthIndicator.pingCheck(
+          "nestjs-docs",
+          "https://docs.nestjs.com",
+        ),
+      // TODO: Database (TypeORM) health check
+    ]);
   }
 }

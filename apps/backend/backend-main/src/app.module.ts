@@ -1,12 +1,9 @@
-import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { TerminusModule } from "@nestjs/terminus";
 
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import configuration from "./config/configuration";
+import { HealthModule } from "./health/health.module";
 import { AgentModule } from "./modules/agent/agent.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { DatabaseModule } from "./modules/database/database.module";
@@ -26,6 +23,7 @@ import { RoleGuard } from "./shared/guards/roles.guard";
       load: [configuration],
     }),
     DatabaseModule,
+    HealthModule,
     RedisModule,
     AuthModule,
     AgentModule,
@@ -33,10 +31,7 @@ import { RoleGuard } from "./shared/guards/roles.guard";
     GatewayModule,
     UserModule,
     SendAPackageModule,
-    TerminusModule,
-    HttpModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, RoleGuard, OnboardingGuard, AuthGuard, JwtService],
+  providers: [RoleGuard, OnboardingGuard, AuthGuard, JwtService],
 })
 export class AppModule {}
