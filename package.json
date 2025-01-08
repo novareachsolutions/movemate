@@ -6,7 +6,6 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "apps/backend/backend-main",
     "apps/frontend/web/admin"
   ],
   "devDependencies": {

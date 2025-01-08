@@ -23,6 +23,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration-generate": "rm -rf out && npm run build && ./node_modules/.bin/typeorm migration:generate --dataSource './out/ormconfig.js' --pretty true",
     "migration-create": "npm run build && ./node_modules/.bin/typeorm migration:create",
+    "migration-run": "npm run build && node ./out/node_modules/typeorm/cli.js migration:run --dataSource ./out/ormconfig.js",
+    "migration-revert": "npm run build && node ./out/node_modules/typeorm/cli.js migration:revert --dataSource ./out/ormconfig.js",
     "commit": "git-cz"
   },
   "dependencies": {
@@ -34,6 +36,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-socket.io": "^10.4.15",
+    "@nestjs/swagger": "^8.1.0",
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.4.13",
