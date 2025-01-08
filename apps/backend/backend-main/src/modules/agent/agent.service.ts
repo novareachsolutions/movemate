@@ -4,6 +4,7 @@ import { DeleteResult, QueryRunner, UpdateResult } from "typeorm";
 import { Agent } from "../../entity/Agent";
 import { AgentDocument } from "../../entity/AgentDocument";
 import { RequiredDocument } from "../../entity/RequiredDocument";
+import { SendPackageOrder } from "../../entity/SendPackageOrder";
 import { User } from "../../entity/User";
 import { logger } from "../../logger";
 import {
@@ -11,6 +12,7 @@ import {
   AgentTypeEnum,
   ApprovalStatusEnum,
 } from "../../shared/enums";
+import { SendPackageAgentAcceptError } from "../../shared/errors/sendAPackage";
 import {
   UserAlreadyExistsError,
   UserDocumentAlreadyExistsError,
@@ -31,7 +33,7 @@ import { radii } from "./agents.constants";
 export class AgentService {
   constructor(
     private readonly redisService: RedisService,
-    private readonly notificationGateway: AgentNotificationGateway,
+    private readonly agentNotificationGateway: AgentNotificationGateway,
     private readonly tokenService: TokenService,
     private readonly mediaService: MediaService,
   ) {}
@@ -324,7 +326,7 @@ export class AgentService {
       logger.debug(`Updating location for agent ID ${agentId}`);
       const member = `agent:${agentId}`;
       await this.redisService
-        .getClient()
+        .getGeneralClient()
         .geoadd("agents:locations", longitude, latitude, member);
       await this.redisService.set(
         `agent:${agentId}:status`,
@@ -350,7 +352,7 @@ export class AgentService {
     );
     const radiusMeters = radiusKm * 1000;
     const results = (await this.redisService
-      .getClient()
+      .getGeneralClient()
       .georadius(
         "agents:locations",
         longitude,
@@ -377,9 +379,48 @@ export class AgentService {
     logger.debug(
       `AgentService.assignRider: Assigning rider for order ID ${orderId} at location (${pickupLatitude}, ${pickupLongitude}).`,
     );
+
+    const orderIdNum = parseInt(orderId, 10);
+    if (isNaN(orderIdNum)) {
+      logger.error(`AgentService.assignRider: Invalid orderId ${orderId}.`);
+      throw new InternalServerErrorException("Invalid order ID provided.");
+    }
+
+    const order = await dbReadRepo(SendPackageOrder).findOne({
+      where: { id: orderIdNum },
+      relations: ["pickupLocation", "dropLocation"],
+    });
+
+    if (!order) {
+      logger.error(`AgentService.assignRider: Order ID ${orderId} not found.`);
+      throw new UserNotFoundError(`Order with ID ${orderId} not found.`);
+    }
+
+    if (order.agentId) {
+      throw new SendPackageAgentAcceptError(
+        `This Order cannot be assigned as it is already accepted`,
+      );
+    }
+
+    const pickupAddress = order.pickupLocation?.addressLine1 || "N/A";
+    const dropAddress = order.dropLocation?.addressLine1 || "N/A";
+    const estimatedDistance = order.estimatedDistance || 0;
+    const estimatedTime = order.estimatedTime || "00:00:00";
+
     const notifiedAgents = new Set<number>();
 
     for (const { km, limit } of radii) {
+      const currentOrder = await dbReadRepo(SendPackageOrder).findOne({
+        where: { id: orderIdNum },
+      });
+
+      if (currentOrder.agentId) {
+        logger.debug(
+          `AgentService.assignRider: Order ID ${orderId} has been accepted by Agent ID ${currentOrder.agentId}. Stopping assignment process.`,
+        );
+        return;
+      }
+
       logger.debug(
         `AgentService.assignRider: Searching within ${km} km with a limit of ${limit} agents.`,
       );
@@ -388,8 +429,9 @@ export class AgentService {
         pickupLongitude,
         km,
       );
+
       logger.debug(
-        `AgentService.assignRider: Found ${nearbyAgents.length} nearby agents within ${km} km.`,
+        `AgentService.assignRider: Nearby agents: ${JSON.stringify(nearbyAgents)}`,
       );
 
       const availableAgents = await Promise.all(
@@ -418,7 +460,9 @@ export class AgentService {
       ).then((results) => results.filter((agent) => agent !== null));
 
       logger.debug(
-        `AgentService.assignRider: ${availableAgents.length} agents available within ${km} km.`,
+        `AgentService.assignRider: Available agents within ${km} km: ${JSON.stringify(
+          availableAgents,
+        )}`,
       );
 
       const selectedAgents = availableAgents.slice(0, limit);
@@ -426,33 +470,39 @@ export class AgentService {
         `AgentService.assignRider: Selecting ${selectedAgents.length} agents to notify.`,
       );
 
-      if (selectedAgents.length === 0) {
+      if (selectedAgents.length > 0) {
+        selectedAgents.forEach((agent) => notifiedAgents.add(agent.agentId));
+
+        selectedAgents.forEach((agent) => {
+          logger.debug(
+            `AgentService.assignRider: Notifying agent ID ${agent.agentId} about order ID ${orderId}.`,
+          );
+          this.agentNotificationGateway.sendMessageToAgent(
+            agent.agentId,
+            "newRequest",
+            {
+              orderId,
+              pickupAddress,
+              dropAddress,
+              estimatedDistance,
+              estimatedTime,
+            },
+          );
+        });
+      } else {
         logger.debug(
-          `AgentService.assignRider: No agents to notify within ${km} km.`,
+          `AgentService.assignRider: No agents available to notify within ${km} km.`,
         );
-        continue;
       }
 
-      selectedAgents.forEach((agent) => notifiedAgents.add(agent.agentId));
+      logger.debug(
+        `AgentService.assignRider: Initiating wait for acceptance for order ID ${orderId} after processing ${km} km radius.`,
+      );
+      const assignedAgentId = await this.waitForAcceptance(orderId, 40000); // Wait for 40 seconds
+      logger.debug(
+        `AgentService.assignRider: waitForAcceptance completed for order ID ${orderId}.`,
+      );
 
-      selectedAgents.forEach((agent) => {
-        logger.debug(
-          `AgentService.assignRider: Notifying agent ID ${agent.agentId} about order ID ${orderId}.`,
-        );
-        this.notificationGateway.sendMessageToAgent(
-          agent.agentId,
-          "newRequest",
-          {
-            orderId,
-            pickupLocation: {
-              latitude: pickupLatitude,
-              longitude: pickupLongitude,
-            },
-          },
-        );
-      });
-
-      const assignedAgentId = await this.waitForAcceptance(orderId, 40000);
       if (assignedAgentId) {
         logger.debug(
           `AgentService.assignRider: Order ID ${orderId} accepted by agent ID ${assignedAgentId}.`,
@@ -460,7 +510,7 @@ export class AgentService {
         return assignedAgentId;
       } else {
         logger.debug(
-          `AgentService.assignRider: No agent accepted order ID ${orderId} within the timeout.`,
+          `AgentService.assignRider: No agent accepted order ID ${orderId} within the timeout of ${km} km.`,
         );
       }
     }
@@ -482,14 +532,18 @@ export class AgentService {
       `AgentService.acceptOrder: Publishing acceptance data to Redis for order ID ${orderId}.`,
     );
     await this.redisService
-      .getClient()
+      .getGeneralClient()
       .publish(`acceptance:${orderId}`, JSON.stringify(acceptanceData));
 
-    // this is to notify the other agents that the order is taken, not necessary for now
+    // Optionally notify other agents that the order has been taken
     // logger.debug(
     //   `AgentService.acceptOrder: Notifying other agents that order ID ${orderId} is taken by agent ID ${agentId}.`,
     // );
-    // this.notificationGateway.sendMessageToRoom("agents", "ORDER_TAKEN", { orderId, agentId });
+    // this.agentNotificationGateway.sendMessageToRoom(
+    //   "agents",
+    //   "ORDER_TAKEN",
+    //   { orderId, agentId },
+    // );
   }
 
   async createRequiredDocument(createRequiredDocumentDto: {
@@ -576,35 +630,68 @@ export class AgentService {
     timeoutMs: number,
   ): Promise<number | null> {
     return new Promise((resolve) => {
-      const timeout = setTimeout(() => {
-        this.redisService.getClient().off(`acceptance:${orderId}`, listener);
-        resolve(null);
-      }, timeoutMs);
+      const subscriber = this.redisService.getSubscriberClient();
+      const channel = `acceptance:${orderId}`;
 
-      const listener = async (
-        _channel: string,
-        message: string,
-      ): Promise<void> => {
-        const data = JSON.parse(message);
-        if (data.orderId === orderId) {
-          clearTimeout(timeout);
-          await this.redisService
-            .getClient()
-            .unsubscribe(`acceptance:${orderId}`);
-          resolve(data.agentId);
+      const onMessage = (msgChannel: string, message: string): void => {
+        if (msgChannel !== channel) {
+          return;
+        }
+
+        try {
+          const data = JSON.parse(message);
+          if (data.orderId === orderId && typeof data.agentId === "number") {
+            logger.debug(
+              `waitForAcceptance: Received acceptance from agent ID ${data.agentId} for order ID ${orderId}.`,
+            );
+            clearTimeout(timeoutHandle); // Clear the timeout since acceptance is received
+            subscriber.removeListener("message", onMessage);
+            void subscriber.unsubscribe(channel).catch((err) => {
+              logger.error(
+                `waitForAcceptance: Failed to unsubscribe from ${channel}: ${err}`,
+              );
+            });
+            resolve(data.agentId);
+          }
+        } catch (err) {
+          logger.error(
+            `waitForAcceptance: Error parsing message on ${channel}: ${err}`,
+          );
         }
       };
 
-      void this.redisService
-        .getClient()
-        .subscribe(`acceptance:${orderId}`, (err) => {
-          if (err) {
-            clearTimeout(timeout);
-            resolve(null);
-          }
+      subscriber.on("message", onMessage);
+
+      // Handle the Promise returned by subscribe
+      subscriber
+        .subscribe(channel)
+        .then(() => {
+          logger.debug(`waitForAcceptance: Subscribed to ${channel}.`);
+        })
+        .catch((err) => {
+          logger.error(
+            `waitForAcceptance: Failed to subscribe to ${channel}: ${err}`,
+          );
+          subscriber.removeListener("message", onMessage);
+          resolve(null);
         });
 
-      this.redisService.getClient().on("message", listener);
+      logger.debug(
+        `waitForAcceptance: Waiting for acceptance for order ID ${orderId} with timeout of ${timeoutMs} ms.`,
+      );
+
+      const timeoutHandle = setTimeout(() => {
+        logger.debug(
+          `waitForAcceptance: Timeout reached for order ID ${orderId}.`,
+        );
+        subscriber.removeListener("message", onMessage);
+        void subscriber.unsubscribe(channel).catch((err) => {
+          logger.error(
+            `waitForAcceptance: Failed to unsubscribe from ${channel} after timeout: ${err}`,
+          );
+        });
+        resolve(null);
+      }, timeoutMs);
     });
   }
 }

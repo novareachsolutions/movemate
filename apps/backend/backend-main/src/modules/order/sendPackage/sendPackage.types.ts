@@ -16,7 +16,7 @@ export type TSendPackageOrder = {
   pickupLocation: TLocation;
   dropLocation: TLocation;
   estimatedDistance: number;
-  estimatedTime: number;
+  estimatedTime: string;
   customerId: number;
   price?: number;
 };

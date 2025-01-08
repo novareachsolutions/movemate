@@ -4,7 +4,7 @@ import {
   Delete,
   Get,
   Param,
-  ParseUUIDPipe,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -101,7 +101,7 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async getUserById(
-    @Param("id", ParseUUIDPipe) id: number,
+    @Param("id", ParseIntPipe) id: number,
   ): Promise<IApiResponse<User>> {
     const user = await this.userService.getUserById(id);
     return {
@@ -153,7 +153,7 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async updateUser(
-    @Param("id", ParseUUIDPipe) id: number,
+    @Param("id", ParseIntPipe) id: number,
     @Body() updateUserDto: TUpdateUser,
   ): Promise<IApiResponse<UpdateResult>> {
     const result = await this.userService.updateUser(id, updateUserDto);
@@ -172,7 +172,7 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRoleEnum.ADMIN)
   async deleteUser(
-    @Param("id", ParseUUIDPipe) id: string,
+    @Param("id", ParseIntPipe) id: string,
   ): Promise<IApiResponse<DeleteResult>> {
     const result = await this.userService.deleteUser(id);
     return {

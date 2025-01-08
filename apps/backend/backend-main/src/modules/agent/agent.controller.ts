@@ -316,7 +316,7 @@ export class AgentController {
 
   @Post("assign-rider/:orderId")
   @UseGuards(AuthGuard, RoleGuard)
-  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.AGENT)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.CUSTOMER)
   async assignRider(
     @Param("orderId") orderId: string,
     @Body() body: { pickupLatitude: number; pickupLongitude: number },

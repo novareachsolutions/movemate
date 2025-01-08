@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { Between } from "typeorm";
+import { Between, In } from "typeorm";
 
 import { DropLocation } from "../../../entity/DropLocation";
 import { OrderReview } from "../../../entity/OrderReview";
@@ -28,7 +28,9 @@ import {
   SendPackageOrderNotCompletedError,
   SendPackageReviewCommentRequiredError,
 } from "../../../shared/errors/sendAPackage";
+import { UserHasRunningOrderError } from "../../../shared/errors/user";
 import { CustomerNotificationGateway } from "../../../shared/gateways/customer.notification.gateway";
+import { parseTimeToMinutes } from "../../../utils/timeFns";
 import { dbReadRepo, dbRepo } from "../../database/database.service";
 import { PricingService } from "../../pricing/pricing.service";
 import { TSendPackageOrder } from "./sendPackage.types";
@@ -48,6 +50,29 @@ export class SendAPackageService {
     await queryRunner.startTransaction();
 
     try {
+      // Check if the user already has a running order
+      const existingRunningOrder = await queryRunner.manager.findOne(
+        SendPackageOrder,
+        {
+          where: {
+            customerId: data.customerId,
+            status: In([
+              OrderStatusEnum.PENDING,
+              OrderStatusEnum.IN_PROGRESS,
+              OrderStatusEnum.ACCEPTED,
+            ]),
+          },
+        },
+      );
+
+      if (existingRunningOrder) {
+        logger.error(
+          `SendAPackageService.create: User with ID ${data.customerId} already has a running order with ID ${existingRunningOrder.id}`,
+        );
+        throw new UserHasRunningOrderError(`You already have a running order.`);
+      }
+
+      // Check or create PickupLocation
       let pickupLocation = await queryRunner.manager.findOne(PickupLocation, {
         where: {
           latitude: data.pickupLocation.latitude,
@@ -98,10 +123,11 @@ export class SendAPackageService {
         );
       }
 
-      // Calculate price using PricingService
+      const estimatedTimeInMinutes = parseTimeToMinutes(data.estimatedTime);
+
       const price = this.pricingService.calculateFare({
         distance: data.estimatedDistance,
-        estimatedTime: data.estimatedTime,
+        estimatedTime: estimatedTimeInMinutes,
         packageWeight: 3, // Static value for now
       });
 
@@ -142,6 +168,11 @@ export class SendAPackageService {
           ...error,
         },
       );
+
+      if (error instanceof UserHasRunningOrderError) {
+        throw error;
+      }
+
       throw new InternalServerErrorException(
         "Failed to create send package order",
       );
@@ -318,7 +349,13 @@ export class SendAPackageService {
 
     if (order.status !== OrderStatusEnum.PENDING) {
       throw new SendPackageAgentAcceptError(
-        `Order ID ${orderId} cannot be accepted in its current status`,
+        `This Order cannot be accepted in its current status`,
+      );
+    }
+
+    if (order.agentId) {
+      throw new SendPackageAgentAcceptError(
+        `This Order cannot be accepted as it is already assigned`,
       );
     }
 

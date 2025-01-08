@@ -81,7 +81,7 @@ export class SendPackageOrder extends BaseEntity {
   estimatedDistance: number;
 
   @Column({ type: "time", nullable: false })
-  estimatedTime: number;
+  estimatedTime: string;
 
   @ManyToOne(() => User, (user) => user.id, { nullable: true })
   @JoinColumn({ name: "customerId" })

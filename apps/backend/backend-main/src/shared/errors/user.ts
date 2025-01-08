@@ -111,3 +111,11 @@ export class UserExpiryDateRequiredError extends UserFacingError {
     this.statusCode = 400;
   }
 }
+
+export class UserHasRunningOrderError extends UserFacingError {
+  constructor(message?: string) {
+    super(message || "User already has a running order");
+    this.name = "UserHasRunningOrderError";
+    this.statusCode = 409;
+  }
+}

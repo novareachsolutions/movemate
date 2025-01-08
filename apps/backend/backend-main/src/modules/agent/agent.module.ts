@@ -29,8 +29,9 @@ import { AgentService } from "./agent.service";
     JwtService,
     OtpService,
     TokenService,
-    AgentNotificationGateway,
     MediaService,
+    TokenService,
+    AgentNotificationGateway,
   ],
   exports: [AgentService],
 })

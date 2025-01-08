@@ -219,7 +219,7 @@ export class SupportService {
   async getMessages(ticketId: number): Promise<ChatMessage[]> {
     const ticket = await this.getTicketDetails(ticketId);
 
-    if (ticket) {
+    if (!ticket) {
       throw new InternalServerErrorException("Ticket invalid");
     }
 
