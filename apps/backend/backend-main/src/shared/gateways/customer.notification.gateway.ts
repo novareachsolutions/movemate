@@ -12,8 +12,7 @@ import { BaseSocketGateway } from "./base.socket";
 
 const config = configuration();
 
-@WebSocketGateway({
-  port: config.websocketPorts.customerNotification,
+@WebSocketGateway(config.websocketPorts.customerNotification, {
   cors: { origin: config.corsOrigin },
 })
 export class CustomerNotificationGateway extends BaseSocketGateway {
