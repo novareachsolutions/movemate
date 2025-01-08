@@ -15,11 +15,11 @@ export class NotificationService {
         private readonly configService: ConfigService,
     ) {
         const firebaseConfig: ServiceAccount = {
-            projectId: this.configService.get<string>('firebase.projectId'),
+            projectId: this.configService.get<string>('FIREBASE_PROJECT_ID'),
             privateKey: this.configService
-                .get<string>('firebase.privateKey')
+                .get<string>('FIREBASE_PRIVATE_KEY')
                 .replace(/\\n/g, '\n'),
-            clientEmail: this.configService.get<string>('firebase.clientEmail'),
+            clientEmail: this.configService.get<string>('FIREBASE_CLIENT_EMAIL'),
         };
 
         this.firebaseAdmin = admin.initializeApp({
