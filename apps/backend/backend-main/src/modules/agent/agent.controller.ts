@@ -21,7 +21,6 @@ import { Agent } from "../../entity/Agent";
 import { RequiredDocument } from "../../entity/RequiredDocument";
 import { Roles } from "../../shared/decorators/roles.decorator";
 import {
-  AgentStatusEnum,
   AgentTypeEnum,
   ApprovalStatusEnum,
   UserRoleEnum,
@@ -150,23 +149,6 @@ export class AgentController {
       success: true,
       message: "Document removed successfully.",
       data: null,
-    };
-  }
-
-  @Patch("status")
-  @UseGuards(AuthGuard, RoleGuard)
-  @Roles(UserRoleEnum.AGENT)
-  async setOwnAgentStatus(
-    @Body() body: { status: AgentStatusEnum },
-    @Req() request: ICustomRequest,
-  ): Promise<IApiResponse<UpdateResult>> {
-    const { status } = body;
-    const agentId = request.user.agent.id;
-    const data = await this.agentService.setAgentStatus(agentId, status);
-    return {
-      success: true,
-      message: `Agent status updated to ${status}.`,
-      data,
     };
   }
 

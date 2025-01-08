@@ -14,6 +14,7 @@ import {
 } from "../../shared/enums";
 import { SendPackageAgentAcceptError } from "../../shared/errors/sendAPackage";
 import {
+  UserAccessDeniedError,
   UserAlreadyExistsError,
   UserDocumentAlreadyExistsError,
   UserExpiryDateRequiredError,
@@ -167,6 +168,13 @@ export class AgentService {
       throw new UserNotFoundError(`Agent with ID ${agentId} not found.`);
     }
 
+    if (!isAdmin && agent.approvalStatus !== ApprovalStatusEnum.APPROVED) {
+      logger.error(
+        `AgentService.setAgentStatus: Cannot update. Agent ID ${agentId} not approved.`,
+      );
+      throw new UserAccessDeniedError("Cannot update. Agent is not approved.");
+    }
+
     const filteredUpdateAgent = filterEmptyValues(updateAgent);
     if (!isAdmin) {
       delete filteredUpdateAgent.approvalStatus;
@@ -306,7 +314,7 @@ export class AgentService {
       logger.error(
         `AgentService.setAgentStatus: Cannot set status. Agent ID ${agentId} not approved.`,
       );
-      throw new UserInvalidDocumentError(
+      throw new UserAccessDeniedError(
         "Cannot set status. Agent is not approved.",
       );
     }
@@ -322,24 +330,28 @@ export class AgentService {
     latitude: number,
     longitude: number,
   ): Promise<void> {
-    try {
-      logger.debug(`Updating location for agent ID ${agentId}`);
-      const member = `agent:${agentId}`;
-      await this.redisService
-        .getGeneralClient()
-        .geoadd("agents:locations", longitude, latitude, member);
-      await this.redisService.set(
-        `agent:${agentId}:status`,
-        AgentStatusEnum.ONLINE,
-        "EX",
-        3600,
-      );
-    } catch (error) {
+    logger.debug(`Updating location for agent ID ${agentId}`);
+    const agent = await this.getAgentById(agentId);
+
+    if (agent.approvalStatus !== ApprovalStatusEnum.APPROVED) {
       logger.error(
-        `Failed to update location for agent ID ${agentId}: ${error.message}`,
+        `AgentService.setAgentStatus: Cannot update location. Agent ID ${agentId} not approved.`,
       );
-      throw new InternalServerErrorException("Failed to update agent location");
+      throw new UserAccessDeniedError(
+        "Cannot update location. Agent is not approved.",
+      );
     }
+
+    const member = `agent:${agentId}`;
+    await this.redisService
+      .getGeneralClient()
+      .geoadd("agents:locations", longitude, latitude, member);
+    await this.redisService.set(
+      `agent:${agentId}:status`,
+      AgentStatusEnum.ONLINE,
+      "EX",
+      3600,
+    );
   }
 
   async getNearbyAgents(
