@@ -6,16 +6,10 @@ import { User } from "./User";
 
 @Entity()
 export class PromotionUsage extends BaseEntity {
-  @ManyToOne(() => PromotionCode, (promotionCode) => promotionCode.usages, {
-    nullable: false,
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => PromotionCode, { nullable: false, onDelete: "CASCADE" })
   promotionCode: PromotionCode;
 
-  @ManyToOne(() => User, (user) => user.promotionUsages, {
-    nullable: false,
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { nullable: false, onDelete: "CASCADE" })
   user: User;
 
   @CreateDateColumn()

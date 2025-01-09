@@ -6,16 +6,10 @@ import { User } from "./User";
 
 @Entity()
 export class Referral extends BaseEntity {
-  @ManyToOne(() => ReferralCode, (referralCode) => referralCode.referrals, {
-    nullable: false,
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => ReferralCode, { nullable: false, onDelete: "CASCADE" })
   referralCode: ReferralCode;
 
-  @ManyToOne(() => User, (user) => user.referredBy, {
-    nullable: false,
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { nullable: false, onDelete: "CASCADE" })
   referredUser: User;
 
   @CreateDateColumn()

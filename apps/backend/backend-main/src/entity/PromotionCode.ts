@@ -1,8 +1,7 @@
-import { Column, Entity, ManyToOne, OneToMany, Unique } from "typeorm";
+import { Column, Entity, ManyToOne, Unique } from "typeorm";
 
 import { OrderTypeEnum } from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
-import { PromotionUsage } from "./PromotionUsage";
 import { User } from "./User";
 
 @Entity()
@@ -30,18 +29,13 @@ export class PromotionCode extends BaseEntity {
   expirationDate: Date;
 
   @Column({
-    type: "varchar",
+    type: "enum",
+    enum: OrderTypeEnum,
     array: true,
     nullable: false,
   })
   applicableOrderTypes: OrderTypeEnum[];
-  s;
-  @ManyToOne(() => User, (user) => user.createdPromotions, {
-    nullable: false,
-    onDelete: "SET NULL",
-  })
-  createdBy: User;
 
-  @OneToMany(() => PromotionUsage, (usage) => usage.promotionCode)
-  usages: PromotionUsage[];
+  @ManyToOne(() => User, { nullable: false, onDelete: "SET NULL" })
+  createdBy: User;
 }

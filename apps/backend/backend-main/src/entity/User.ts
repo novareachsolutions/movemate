@@ -1,11 +1,7 @@
-import { Column, Entity, Index, OneToMany, Unique } from "typeorm";
+import { Column, Entity, Index, Unique } from "typeorm";
 
 import { UserRoleEnum } from "../shared/enums";
 import { BaseEntity } from "./BaseEntity";
-import { PromotionCode } from "./PromotionCode";
-import { PromotionUsage } from "./PromotionUsage";
-import { Referral } from "./Referral";
-import { ReferralCode } from "./ReferralCode";
 
 @Index("IDX_user_role", ["role"], { where: '"deletedAt" IS NULL' })
 @Unique("UQ_user_email", ["email"])
@@ -42,18 +38,6 @@ export class User extends BaseEntity {
   @Column({ type: "integer", nullable: true })
   postalCode: number;
 
-  @OneToMany(() => ReferralCode, (referralCode) => referralCode.referrer)
-  referralCodes: ReferralCode[];
-
-  @OneToMany(() => Referral, (referral) => referral.referredUser)
-  referredBy: Referral[];
-
-  @OneToMany(() => PromotionUsage, (usage) => usage.user)
-  promotionUsages: PromotionUsage[];
-
   @Column({ type: "float", default: 0 })
   referralCredits: number;
-
-  @OneToMany(() => PromotionCode, (promotion) => promotion.createdBy)
-  createdPromotions: PromotionCode[];
 }
