@@ -9,7 +9,6 @@ import { SendPackageOrder } from "../../../entity/SendPackageOrder";
 import { logger } from "../../../logger";
 import {
   OrderStatusEnum,
-  OrderTypeEnum,
   PaymentStatusEnum,
   UserRoleEnum,
 } from "../../../shared/enums";
@@ -105,7 +104,6 @@ export class SendAPackageService {
         estimatedTime: data.estimatedTime,
         customerId: data.customerId,
         price: data.price,
-        type: OrderTypeEnum.DELIVERY,
         status: OrderStatusEnum.PENDING,
         paymentStatus: PaymentStatusEnum.NOT_PAID,
       });

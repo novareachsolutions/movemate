@@ -50,9 +50,8 @@ export class SendPackageOrder extends BaseEntity {
   status: OrderStatusEnum;
 
   @Column({
-    type: "enum",
-    enum: OrderTypeEnum,
-    default: OrderTypeEnum.DELIVERY,
+    type: "varchar",
+    default: OrderTypeEnum.SEND_PACKAGE,
     nullable: false,
   })
   type: OrderTypeEnum;
