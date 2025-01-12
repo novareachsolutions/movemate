@@ -6,7 +6,6 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "apps/backend/*",
     "apps/frontend/web/admin"
   ],
   "devDependencies": {
@@ -39,6 +38,7 @@
     }
   },
   "dependencies": {
+    "@nestjs/core": "^10.4.15",
     "@scalar/nestjs-api-reference": "^0.3.174",
     "eslint": "^9.15.0",
     "eslint-define-config": "^2.1.0",
