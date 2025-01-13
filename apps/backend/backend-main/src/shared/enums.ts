@@ -35,8 +35,10 @@ export enum OrderStatusEnum {
 }
 
 export enum OrderTypeEnum {
-  DELIVERY = "DELIVERY",
-  PICKUP = "PICKUP",
+  BUY_FROM_STORE = "BUY_FROM_STORE",
+  CAR_TOWING = "CAR_TOWING",
+  HOUSE_MOVING = "HOUSE_MOVING",
+  SEND_PACKAGE = "SEND_PACKAGE",
 }
 
 // User

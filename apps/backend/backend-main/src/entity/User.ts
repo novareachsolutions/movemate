@@ -37,4 +37,7 @@ export class User extends BaseEntity {
 
   @Column({ type: "integer", nullable: true })
   postalCode: number;
+
+  @Column({ type: "float", default: 0 })
+  referralCredits: number;
 }
