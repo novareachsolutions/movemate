@@ -110,7 +110,6 @@ export class StripeService {
         email: data.email,
         capabilities: {
           transfers: { requested: true },
-          bank_transfer_payments: { requested: true },
           card_payments: { requested: true },
         },
         business_type: data.businessType || "individual",
