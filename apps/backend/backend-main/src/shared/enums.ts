@@ -25,6 +25,11 @@ export enum ApprovalStatusEnum {
   REJECTED = "REJECTED",
 }
 
+export enum SubscripionStatusEnum {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
 // Order
 export enum OrderStatusEnum {
   ACCEPTED = "ACCEPTED",
@@ -52,5 +57,30 @@ export enum PaymentStatusEnum {
   ERROR = "ERROR",
   NOT_PAID = "NOT_PAID",
   PAID = "PAID",
+  PENDING = "PENDING",
   REFUNDED = "REFUNDED",
+}
+
+export enum SubscriptionStatusEnum {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
+export enum PaymentTypeEnum {
+  ORDER = "ORDER",
+  SUBSCRIPTION = "SUBSCRIPTION",
+  WITHDRAWAL = "WITHDRAWAL",
+}
+
+export enum WalletTransactionTypeEnum {
+  CREDIT = "CREDIT",
+  DEBIT = "DEBIT",
+  REFUND = "REFUND",
+  WITHDRAWAL = "WITHDRAWAL",
+}
+
+export enum SubscriptionPlanEnum {
+  DAILY = "DAILY",
+  MONTHLY = "MONTHLY",
+  WEEKLY = "WEEKLY",
 }
