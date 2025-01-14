@@ -21,6 +21,7 @@ import {
 import { UpdateResult } from "typeorm";
 
 import { Agent } from "../../entity/Agent";
+import { AgentProfileResponse } from "../../shared/agents/agent.decorators";
 import { Roles } from "../../shared/decorators/roles.decorator";
 import {
   AgentStatusEnum,
@@ -129,45 +130,7 @@ export class AgentController {
   @Roles(UserRoleEnum.AGENT)
   @ApiBearerAuth("JWT-auth")
   @ApiOperation({ summary: "Get own agent profile" })
-  @ApiResponse({
-    status: 200,
-    description: "Agent profile retrieved successfully",
-    schema: {
-      example: {
-        success: true,
-        message: "Agent profile retrieved successfully",
-        data: {
-          id: 1,
-          abnNumber: "12345678901",
-          agentType: AgentTypeEnum.CAR_TOWING,
-          vehicleMake: "Toyota",
-          vehicleModel: "Hilux",
-          vehicleYear: 2020,
-          profilePhoto: "https://example.com/photo.jpg",
-          status: AgentStatusEnum.ONLINE,
-          approvalStatus: ApprovalStatusEnum.APPROVED,
-          user: {
-            id: 1,
-            email: "agent@example.com",
-            phoneNumber: "+61412345678",
-          },
-          createdAt: "2024-03-26T10:00:00.000Z",
-          updatedAt: "2024-03-26T10:00:00.000Z",
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 404,
-    description: "Agent not found",
-    schema: {
-      example: {
-        success: false,
-        message: "Agent not found for ID 1",
-        statusCode: 404,
-      },
-    },
-  })
+  @AgentProfileResponse()
   async getOwnProfile(
     @Req() request: ICustomRequest,
   ): Promise<IApiResponse<Agent>> {
