@@ -23,6 +23,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration-generate": "rm -rf out && npm run build && ./node_modules/.bin/typeorm migration:generate --dataSource './out/ormconfig.js' --pretty true",
     "migration-create": "npm run build && ./node_modules/.bin/typeorm migration:create",
+    "migration:run": "rm -rf out && yarn run build && ./node_modules/.bin/typeorm migration:run --dataSource './out/ormconfig.js' -t each",
     "commit": "git-cz"
   },
   "dependencies": {
