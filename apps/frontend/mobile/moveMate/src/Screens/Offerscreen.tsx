@@ -1,14 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import {StyleSheet, Text, View} from 'react-native';
+import React from 'react';
 
 const Offerscreen = () => {
-    return (
-        <View>
-            <Text>Offerscreen</Text>
-        </View>
-    )
-}
+  return (
+    <View>
+      <Text>Offerscreen</Text>
+    </View>
+  );
+};
 
-export default Offerscreen
+export default Offerscreen;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
