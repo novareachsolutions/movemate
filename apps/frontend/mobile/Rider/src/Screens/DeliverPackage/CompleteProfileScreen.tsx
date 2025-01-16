@@ -2,14 +2,24 @@ import React from 'react';
 import {SafeAreaView, StyleSheet, View} from 'react-native';
 import ProfileForm from '../../components/ProfileForm';
 import StepIndicator from '../../components/StepIndicator';
-import {useNavigation} from '@react-navigation/native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {colors} from '../../theme/colors';
-import {DeliverAPackage} from '../../navigation/ScreenNames';
+import {DeliverAPackage, DeliverAPackageParamList} from '../../navigation/ScreenNames';
+
+type FormFields = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  address: string;
+  suburb: string;
+  state: string;
+  postalCode: string;
+};
 
 const DAPCompleteProfileScreen = () => {
-  const navigation = useNavigation();
+const navigation = useNavigation<NavigationProp<DeliverAPackageParamList>>();
 
-  const handleFormSubmit = (formData: any) => {
+  const handleFormSubmit = (formData: FormFields) => {
     console.log('Form submitted:', formData);
     navigation.navigate(DeliverAPackage.UploadDocuments);
   };

@@ -20,7 +20,7 @@ const AppLayoutScreen = () => {
         tabBarLabelStyle: {fontSize: 12},
         headerShown: false,
         tabBarLabelPosition: 'above-icon',
-        tabBarIcon: ({focused, color}) => {
+        tabBarIcon: ({color}) => {
           // Common icon for active and inactive states
           let icon;
           if (route.name === AppScreens.HomeScreen) {

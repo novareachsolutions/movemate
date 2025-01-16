@@ -9,13 +9,14 @@ import {
   SafeAreaView,
   TouchableWithoutFeedback,
   Keyboard,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
 import {images} from '../assets/images/images';
 import TitleDescription from '../components/TitleDescription';
-import {useNavigation} from '@react-navigation/native';
-import {DeliverAPackage} from '../navigation/ScreenNames';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {DeliverAPackage, DeliverAPackageParamList} from '../navigation/ScreenNames';
 
 const services = [
   {
@@ -41,8 +42,7 @@ const services = [
 ];
 
 const SelectServiceScreen: React.FC = () => {
-  const navigation = useNavigation();
-
+  const navigation = useNavigation<NavigationProp<DeliverAPackageParamList>>();
   const renderService = ({item}: {item: (typeof services)[0]}) => (
     <TouchableOpacity
       style={styles.card}
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
   },
   cardDescription: {

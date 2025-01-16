@@ -8,12 +8,13 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   SafeAreaView,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
 import TitleDescription from '../components/TitleDescription';
-import {useNavigation} from '@react-navigation/native';
-import {AuthScreens} from '../navigation/ScreenNames';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {AuthScreens, AuthScreensParamList} from '../navigation/ScreenNames';
 
 interface OtpScreenProps {
   route: {
@@ -27,7 +28,7 @@ const OtpScreen: React.FC<OtpScreenProps> = ({route}) => {
   const [timer, setTimer] = useState(60);
   const [error, setError] = useState(false);
   const inputs = useRef<TextInput[]>([]);
-  const navigation = useNavigation(); // Add navigation hook
+  const navigation = useNavigation<NavigationProp<AuthScreensParamList>>();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.text.primary,
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.semiBold as any,
+    fontWeight: typography.fontWeight.semiBold as TextStyle['fontWeight'],
   },
   buttonTextFilled: {
     color: colors.white,

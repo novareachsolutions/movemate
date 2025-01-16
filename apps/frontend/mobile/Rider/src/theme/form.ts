@@ -1,11 +1,11 @@
-import {StyleSheet} from 'react-native';
+import {StyleSheet, TextStyle} from 'react-native';
 import {colors} from './colors';
 import {typography} from './typography';
 
 export const formStyles = StyleSheet.create({
   inputLabel: {
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     fontFamily: typography.fontFamily.regular,
     color: colors.text.primaryGrey,
     marginBottom: 7,
@@ -48,7 +48,7 @@ export const formStyles = StyleSheet.create({
     color: colors.text.primaryGrey,
     fontSize: typography.fontSize.medium,
     fontFamily: typography.fontFamily.regular,
-    fontWeight: typography.fontWeight.semiBold as any,
+    fontWeight: typography.fontWeight.semiBold as TextStyle['fontWeight'],
   },
   buttonTextEnabled: {
     color: colors.white,
@@ -61,7 +61,7 @@ export const formStyles = StyleSheet.create({
     fontSize: typography.fontSize.small,
     color: colors.text.primaryGrey,
     fontFamily: typography.fontFamily.regular,
-    fontWeight: typography.fontWeight.regular as any,
+    fontWeight: typography.fontWeight.regular as TextStyle['fontWeight'],
     textAlign: 'center',
     marginHorizontal: 25,
     marginTop: 10,

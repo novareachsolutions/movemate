@@ -1,5 +1,12 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  TextStyle,
+} from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
 import {images} from '../assets/images/images';
@@ -70,7 +77,7 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     color: colors.white,
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.semiBold as any,
+    fontWeight: typography.fontWeight.semiBold as TextStyle['fontWeight'],
   },
 });
 

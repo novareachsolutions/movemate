@@ -8,19 +8,20 @@ import {
   Image,
   Keyboard,
   TouchableWithoutFeedback,
+  TextStyle,
 } from 'react-native';
 import PhoneInput from 'react-native-phone-number-input';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
 import {images} from '../assets/images/images';
-import {useNavigation} from '@react-navigation/native';
-import {AuthScreens} from '../navigation/ScreenNames';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {AuthScreens, AuthScreensParamList} from '../navigation/ScreenNames';
 
 const {width} = Dimensions.get('window');
 
 const Login: React.FC = () => {
   const phoneInput = useRef<PhoneInput>(null);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AuthScreensParamList>>();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isFilled, setIsFilled] = useState(false);
   const [isFocused, setIsFocused] = useState(false); // Track focus state
@@ -28,7 +29,7 @@ const Login: React.FC = () => {
   const handlePhoneNumberChange = (number: string) => {
     setIsFocused(true);
     setPhoneNumber(number);
-    setIsFilled(number.length > 0); // Change button style when input is filled
+    setIsFilled(number.length > 0);
   };
 
   const handleSendCode = () => {
@@ -50,12 +51,12 @@ const Login: React.FC = () => {
         <PhoneInput
           ref={phoneInput}
           defaultValue={phoneNumber}
-          defaultCode="AU" // Default country code: Australia (+61)
+          defaultCode="AU"
           layout="first"
           onChangeFormattedText={handlePhoneNumberChange}
           containerStyle={[
             styles.phoneContainer,
-            isFocused && {borderColor: colors.purple}, // Change border color on focus
+            isFocused && {borderColor: colors.purple},
           ]}
           textContainerStyle={styles.textInput}
           textInputStyle={styles.textInputStyle}
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: typography.fontSize.large,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.purple,
     textAlign: 'left',
     marginBottom: 10,

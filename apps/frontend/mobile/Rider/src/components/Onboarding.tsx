@@ -7,19 +7,23 @@ import {
   Dimensions,
   FlatList,
   TouchableOpacity,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  ImageSourcePropType,
+  TextStyle,
 } from 'react-native';
 import {typography} from '../theme/typography';
 import {colors} from '../theme/colors';
 import {images} from '../assets/images/images';
-import {useNavigation} from '@react-navigation/native';
-import {AuthScreens} from '../navigation/ScreenNames';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {AuthScreens, AuthScreensParamList} from '../navigation/ScreenNames';
 const {width, height} = Dimensions.get('window');
 
 interface Slide {
   id: number;
   title: string;
   subtitle: string;
-  image: any;
+  image: ImageSourcePropType;
   description: string;
 }
 
@@ -35,8 +39,8 @@ const slides: Slide[] = [
 
 const Onboarding: React.FC = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const navigation = useNavigation();
-  const updateSlidePosition = (e: any) => {
+  const navigation = useNavigation<NavigationProp<AuthScreensParamList>>();
+  const updateSlidePosition = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = e.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffsetX / width);
     setCurrentSlideIndex(currentIndex);
@@ -88,7 +92,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.large,
     fontFamily: typography.fontFamily.regular,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
   },
   subtitle: {color: colors.purple},
   description: {
@@ -98,7 +102,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: colors.text.primary,
     paddingHorizontal: 20,
-    fontWeight: typography.fontWeight.medium as any,
+    fontWeight: typography.fontWeight.medium as TextStyle['fontWeight'],
   },
   footer: {
     height: height * 0.21,
@@ -126,13 +130,13 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
   },
   skip: {
     color: colors.purple,
     marginTop: 10,
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.medium as any,
+    fontWeight: typography.fontWeight.medium as TextStyle['fontWeight'],
   },
 });
 

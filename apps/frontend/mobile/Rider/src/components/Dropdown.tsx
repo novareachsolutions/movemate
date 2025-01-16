@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Modal,
   FlatList,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     marginBottom: 7,
     color: colors.text.primaryGrey,
   },

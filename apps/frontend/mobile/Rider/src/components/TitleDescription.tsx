@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, TextStyle} from 'react-native';
 import {typography} from '../theme/typography'; // Import typography
 import {colors} from '../theme/colors'; // Import colors
 
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: typography.fontSize.large,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.purple,
     fontFamily: typography.fontFamily.regular,
     textAlign: 'left',
