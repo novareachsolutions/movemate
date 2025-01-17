@@ -26,7 +26,7 @@ import {
   AgentPostDocumentSwagger,
   AgentSignUpSwagger,
   AgentUpdateLocationSwagger,
-} from "../../shared/agents/agent.decorators";
+} from "../../shared/decorators/agents/agent.decorators";
 import { Roles } from "../../shared/decorators/roles.decorator";
 import { AgentStatusEnum, UserRoleEnum } from "../../shared/enums";
 import { UnauthorizedError } from "../../shared/errors/authErrors";

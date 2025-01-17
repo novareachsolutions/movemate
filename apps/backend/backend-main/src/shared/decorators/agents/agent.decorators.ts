@@ -12,8 +12,12 @@ import {
   CreateAgentDto,
   UpdateAgentProfileDto,
   UpdateAgentStatusDto,
-} from "../../modules/agent/dto/agent.dto";
-import { AgentStatusEnum, AgentTypeEnum, ApprovalStatusEnum } from "../enums";
+} from "../../../modules/agent/dto/agent.dto";
+import {
+  AgentStatusEnum,
+  AgentTypeEnum,
+  ApprovalStatusEnum,
+} from "../../enums";
 
 export const AgentSignUpSwagger = (): any => {
   return applyDecorators(
