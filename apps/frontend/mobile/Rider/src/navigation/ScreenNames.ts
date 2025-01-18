@@ -2,7 +2,7 @@ export type AuthScreensParamList = {
   OnboardingScreen: undefined;
   LoginScreen: undefined;
   OtpScreen: {
-    phoneNumber:string
+    phoneNumber: string;
   };
   SelectServiceScreen: undefined;
 };
@@ -18,6 +18,9 @@ export const AppScreens = {
   Home: 'HomeScreen',
   Dashboard: 'DashboardScreen',
   DocumentReview: 'DocumentReviewScreen',
+  FAQScreen: 'FAQScreenScreen',
+  CancellationReason: 'CancellationReasonScreen',
+  Chat: 'ChatScreen',
 };
 
 export type DeliverAPackageParamList = {
@@ -28,6 +31,7 @@ export type DeliverAPackageParamList = {
   EnterVehicleDetailsScreen: undefined;
   EnterABNScreen: undefined;
   AddProfilePhotoScreen: undefined;
+  HomeScreen: undefined;
 };
 
 export const DeliverAPackage = {
@@ -38,4 +42,5 @@ export const DeliverAPackage = {
   EnterVehicleDetails: 'EnterVehicleDetailsScreen',
   EnterABN: 'EnterABNScreen',
   AddProfilePhoto: 'AddProfilePhotoScreen',
+  Home: 'HomeScreen',
 } as const;

@@ -34,15 +34,18 @@ export const formStyles = StyleSheet.create({
     marginTop: 5,
   },
   button: {
-    borderWidth: 1,
-    borderColor: colors.purple,
-    borderRadius: 8,
+    borderRadius: 12,
     paddingVertical: 12,
     marginTop: 20,
     alignItems: 'center',
   },
   buttonEnabled: {
     backgroundColor: colors.purple,
+    borderWidth: 1,
+    borderColor: colors.purple,
+  },
+  buttonSuccess: {
+    backgroundColor: colors.green,
   },
   buttonText: {
     color: colors.text.primaryGrey,

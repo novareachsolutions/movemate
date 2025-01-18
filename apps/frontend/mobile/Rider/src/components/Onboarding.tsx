@@ -16,7 +16,11 @@ import {typography} from '../theme/typography';
 import {colors} from '../theme/colors';
 import {images} from '../assets/images/images';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {AuthScreens, AuthScreensParamList} from '../navigation/ScreenNames';
+import {
+  AuthScreens,
+  AuthScreensParamList,
+  DeliverAPackage,
+} from '../navigation/ScreenNames';
 const {width, height} = Dimensions.get('window');
 
 interface Slide {
@@ -47,7 +51,7 @@ const Onboarding: React.FC = () => {
   };
 
   const handleNavigation = () => {
-    navigation.navigate(AuthScreens.Login);
+    navigation.navigate(DeliverAPackage.Home);
   };
   const Footer = () => (
     <View style={styles.footer}>

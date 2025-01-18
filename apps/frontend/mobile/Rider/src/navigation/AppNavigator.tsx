@@ -13,6 +13,10 @@ import DocumentReviewScreen from '../Screens/DocumentReviewScreen';
 import EnterVehicleDetailsScreen from '../Screens/DeliverPackage/EnterVehicleDetailsScreen';
 import EnterABNScreen from '../Screens/DeliverPackage/EnterABN';
 import AddProfilePhotoScreen from '../Screens/DeliverPackage/AddProfilePhotoScreen';
+import HomeScreen from '../Screens/DeliverPackage/HomeScreen';
+import FAQScreen from '../Screens/FaqScreen';
+import CancellationReasonScreen from '../Screens/CancellationReasonScreen';
+import ChatScreen from '../components/ChatModule';
 
 const Stack = createNativeStackNavigator();
 
@@ -72,11 +76,31 @@ const App = () => {
           component={AddProfilePhotoScreen}
           options={{headerShown: true}}
         />
+        <Stack.Screen
+          name={DeliverAPackage.Home}
+          component={HomeScreen}
+          options={{headerShown: false}}
+        />
 
         {/* App */}
         <Stack.Screen
           name={AppScreens.DocumentReview}
           component={DocumentReviewScreen}
+          options={{headerShown: true}}
+        />
+        <Stack.Screen
+          name={AppScreens.FAQScreen}
+          component={FAQScreen}
+          options={{headerShown: true}}
+        />
+        <Stack.Screen
+          name={AppScreens.CancellationReason}
+          component={CancellationReasonScreen}
+          options={{headerShown: true}}
+        />
+        <Stack.Screen
+          name={AppScreens.Chat}
+          component={ChatScreen}
           options={{headerShown: true}}
         />
       </Stack.Navigator>
