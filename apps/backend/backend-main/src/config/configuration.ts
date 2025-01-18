@@ -53,7 +53,11 @@ export default (): Record<string, any> => ({
       parseInt(process.env.AGENT_NOTIFICATION_PORT, 10) || 3001,
     customerNotification:
       parseInt(process.env.CUSTOMER_NOTIFICATION_PORT, 10) || 3002,
-    chatSupport: parseInt(process.env.CHAT_SUPPORT_PORT, 10) || 3003,
-    notification: parseInt(process.env.NOTIFICATION_PORT, 10) || 3004,
+    riderToCustomerChat:
+      parseInt(process.env.RIDER_TO_CUSTOMER_CHAT_PORT, 10) || 3004,
+    customerToSupportChat:
+      parseInt(process.env.CUSTOMER_TO_SUPPORT_CHAT_PORT, 10) || 3005,
+    riderToSupportChat:
+      parseInt(process.env.RIDER_TO_SUPPORT_CHAT_PORT, 10) || 3006,
   },
 });
