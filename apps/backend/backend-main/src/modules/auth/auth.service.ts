@@ -219,7 +219,9 @@ export class AuthService {
         `AuthService.sendOtp: OTP sent successfully to ${phoneNumber}`,
       );
     } catch (error: any) {
-      this.logger.error(`Failed to send OTP. Error: ${error}`);
+      this.logger.error(
+        `AuthService.sendOtp: Failed to send OTP. Error: ${error}`,
+      );
       throw new InternalServerErrorException("Failed to send OTP.");
     }
   }
