@@ -47,6 +47,6 @@ async function bootstrap(): Promise<void> {
   app.useWebSocketAdapter(new IoAdapter(app));
 
   await app.listen(config.port ?? 3000);
-  logger.log(`Application is running on: ${await app.getUrl()}`);
+  logger.log(`🚀 Application is running on: ${await app.getUrl()}`);
 }
 void bootstrap();

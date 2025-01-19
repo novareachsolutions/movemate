@@ -1,9 +1,8 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as AWS from "aws-sdk";
 import { ManagedUpload } from "aws-sdk/clients/s3";
 
-import { logger } from "../../logger";
 import {
   MediaDeleteError,
   MediaInvalidKeyError,
@@ -14,6 +13,7 @@ import {
 @Injectable()
 export class MediaService {
   private readonly bucketName: string;
+  private readonly logger = new Logger(MediaService.name);
 
   constructor(
     @Inject("S3") private readonly s3: AWS.S3,
@@ -21,12 +21,18 @@ export class MediaService {
   ) {
     this.bucketName = this.configService.get<string>("AWS_S3_BUCKET_NAME");
     if (!this.bucketName) {
+      this.logger.error(
+        "MediaService.constructor: S3 Bucket name is not configured",
+      );
       throw new MediaInvalidKeyError("S3 Bucket name is not configured");
     }
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
     if (!file) {
+      this.logger.error(
+        "MediaService.uploadFile: No file was provided in the request.",
+      );
       throw new MediaMissingFileError("No file was provided in the request.");
     }
     const params: AWS.S3.PutObjectRequest = {
@@ -41,16 +47,24 @@ export class MediaService {
       const uploadResult: ManagedUpload.SendData = await this.s3
         .upload(params)
         .promise();
-      logger.debug(`File uploaded successfully. URL: ${uploadResult.Location}`);
+      this.logger.debug(
+        `MediaService.uploadFile: File uploaded successfully. URL: ${uploadResult.Location}`,
+      );
       return uploadResult.Location;
     } catch (error) {
-      logger.error("Error uploading file to S3", error);
+      this.logger.error(
+        "MediaService.uploadFile:  Error uploading file to S3",
+        error,
+      );
       throw new MediaUploadError("Failed to upload file");
     }
   }
 
   async deleteFile(key: string): Promise<string> {
     if (!key) {
+      this.logger.error(
+        "MediaService.deleteFile: File key is required for deletion",
+      );
       throw new MediaInvalidKeyError("File key is required for deletion");
     }
 
@@ -61,10 +75,15 @@ export class MediaService {
 
     try {
       await this.s3.deleteObject(params).promise();
-      logger.debug(`File with key ${key} deleted successfully.`);
+      this.logger.debug(
+        `MediaService.deleteFile: File with key ${key} deleted successfully.`,
+      );
       return `File with key ${key} deleted successfully.`;
     } catch (error) {
-      logger.error(`Error deleting file with key ${key} from S3`, error);
+      this.logger.error(
+        `MediaService.deleteFile: Error deleting file with key ${key} from S3`,
+        error,
+      );
       throw new MediaDeleteError(`Failed to delete file with key ${key}`);
     }
   }

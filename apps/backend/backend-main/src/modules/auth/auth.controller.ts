@@ -3,6 +3,7 @@ import {
   Controller,
   ForbiddenException,
   Headers,
+  Logger,
   Post,
   Req,
   Res,
@@ -23,6 +24,8 @@ import { AuthService } from "./auth.service";
 @ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
@@ -33,7 +36,14 @@ export class AuthController {
   async requestOtp(
     @Body("phoneNumber") phoneNumber: string,
   ): Promise<IApiResponse<null>> {
+    this.logger.debug(
+      `AuthController.requestOtp: Requesting OTP for ${phoneNumber}`,
+    );
     await this.authService.requestOtp(phoneNumber);
+
+    this.logger.log(
+      `AuthController.requestOtp: OTP sent successfully to ${phoneNumber}`,
+    );
     return { success: true, message: "OTP sent successfully.", data: null };
   }
 
@@ -44,12 +54,21 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<IApiResponse<null>> {
     const { phoneNumber, otp } = body;
+
+    this.logger.debug(
+      `AuthController.verifyOtp: Verifying OTP for ${phoneNumber}`,
+    );
+
     const onboardingToken = await this.authService.signupInitiate(
       phoneNumber,
       otp,
     );
 
     response.setHeader("onboarding_token", onboardingToken);
+
+    this.logger.log(
+      `AuthController.verifyOtp: OTP verified successfully for ${phoneNumber}`,
+    );
     return { success: true, message: "OTP verified successfully.", data: null };
   }
 
@@ -61,6 +80,9 @@ export class AuthController {
     @Res() response: Response,
   ): Promise<void> {
     const { phoneNumber, otp } = body;
+    this.logger.debug(
+      `AuthController.login: Logging in with OTP for ${phoneNumber}`,
+    );
     const { accessToken, refreshToken } = await this.authService.login(
       phoneNumber,
       otp,
@@ -74,6 +96,9 @@ export class AuthController {
       maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
     });
 
+    this.logger.log(
+      `AuthController.login: Login successful for ${phoneNumber}`,
+    );
     response.json({
       success: true,
       message: "Login successful.",
@@ -87,6 +112,8 @@ export class AuthController {
     @Res() response: Response,
     @Req() request: Request,
   ): Promise<void> {
+    this.logger.debug("AuthController.refreshToken: Refreshing tokens");
+
     const refreshToken = request.cookies["refresh_token"];
     if (!refreshToken) {
       throw new ForbiddenException("Refresh token not found.");
@@ -101,6 +128,10 @@ export class AuthController {
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
     });
+
+    this.logger.log(
+      "AuthController.refreshToken: Tokens refreshed successfully",
+    );
 
     response.json({
       success: true,
