@@ -15,8 +15,8 @@ import {formStyles} from '../../theme/form';
 import {typography} from '../../theme/typography';
 import {images} from '../../assets/images/images';
 import ConfirmPhotoModal from './ConfirmPhotoModal';
-import {useNavigation} from '@react-navigation/native';
-import {AppScreens} from '../../navigation/ScreenNames';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {AppScreens, AppScreensParamList, AuthScreensParamList} from '../../navigation/ScreenNames';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -46,7 +46,7 @@ const InfoRow: React.FC<{iconSource: any; text: string; bold?: boolean}> = ({
   </View>
 );
 
-const ExpandedModal: React.FC<ExpandedModalProps> = ({
+const OrderExpandedModal: React.FC<ExpandedModalProps> = ({
   isVisible,
   onClose,
   driverName,
@@ -57,7 +57,7 @@ const ExpandedModal: React.FC<ExpandedModalProps> = ({
   const [height] = useState(new Animated.Value(SCREEN_HEIGHT * 0.2)); // Start with 20% height
   const [isExpanded, setIsExpanded] = useState(false);
   const [isConfirmPhotoVisible, setIsConfirmPhotoVisible] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppScreensParamList>>();
 
   const handleExpand = () => {
     setIsExpanded(true);
@@ -364,4 +364,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ExpandedModal;
+export default OrderExpandedModal;

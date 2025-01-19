@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,10 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { colors } from '../../theme/colors';
-import { formStyles } from '../../theme/form';
-import { typography } from '../../theme/typography';
-import { images } from '../../assets/images/images';
+import {colors} from '../../theme/colors';
+import {formStyles} from '../../theme/form';
+import {typography} from '../../theme/typography';
+import {images} from '../../assets/images/images';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -49,8 +49,7 @@ const DeliveryModal: React.FC<DeliveryModalProps> = ({
       visible={isVisible}
       animationType="slide"
       onRequestClose={onClose}
-      transparent
-    >
+      transparent>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Header Section */}
@@ -100,15 +99,15 @@ const DeliveryModal: React.FC<DeliveryModalProps> = ({
           {/* Proof of Delivery */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Proof of Delivery</Text>
-            <Text style={styles.proofText}>Take a photo to confirm delivery</Text>
+            <Text style={styles.proofText}>
+              Take a photo to confirm delivery
+            </Text>
             <TouchableOpacity
               style={[formStyles.button, formStyles.buttonEnabled]}
-              onPress={handleTakePhoto}
-            >
+              onPress={handleTakePhoto}>
               <Image source={images.camera} style={styles.cameraIcon} />
               <Text
-                style={[formStyles.buttonText, formStyles.buttonTextEnabled]}
-              >
+                style={[formStyles.buttonText, formStyles.buttonTextEnabled]}>
                 Take Photo
               </Text>
             </TouchableOpacity>
@@ -117,8 +116,7 @@ const DeliveryModal: React.FC<DeliveryModalProps> = ({
           {/* Order Delivered Button */}
           <TouchableOpacity
             style={[formStyles.button, formStyles.buttonSuccess]}
-            onPress={handleOrderDelivered}
-          >
+            onPress={handleOrderDelivered}>
             <Text style={[formStyles.buttonText, formStyles.buttonTextEnabled]}>
               Order Delivered
             </Text>
@@ -142,7 +140,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5,

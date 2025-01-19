@@ -19,6 +19,8 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {
   AuthScreens,
   AuthScreensParamList,
+  BuyFromStore,
+  BuyFromStoreParamList,
   DeliverAPackage,
 } from '../navigation/ScreenNames';
 const {width, height} = Dimensions.get('window');
@@ -43,7 +45,7 @@ const slides: Slide[] = [
 
 const Onboarding: React.FC = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const navigation = useNavigation<NavigationProp<AuthScreensParamList>>();
+  const navigation = useNavigation<NavigationProp<BuyFromStoreParamList>>();
   const updateSlidePosition = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = e.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffsetX / width);
@@ -51,7 +53,7 @@ const Onboarding: React.FC = () => {
   };
 
   const handleNavigation = () => {
-    navigation.navigate(DeliverAPackage.Home);
+    navigation.navigate(BuyFromStore.ItemsReviewScreen);
   };
   const Footer = () => (
     <View style={styles.footer}>

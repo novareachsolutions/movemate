@@ -14,6 +14,15 @@ export const AuthScreens = {
   SelectService: 'SelectServiceScreen',
 } as const;
 
+export type AppScreensParamList = {
+  HomeScreen: undefined;
+  DashboardScreen: undefined;
+  DocumentReviewScreen: undefined;
+  FAQScreenScreen: undefined;
+  CancellationReasonScreen: undefined;
+  ChatScreen: undefined;
+};
+
 export const AppScreens = {
   Home: 'HomeScreen',
   Dashboard: 'DashboardScreen',
@@ -21,7 +30,7 @@ export const AppScreens = {
   FAQScreen: 'FAQScreenScreen',
   CancellationReason: 'CancellationReasonScreen',
   Chat: 'ChatScreen',
-};
+} as const;
 
 export type DeliverAPackageParamList = {
   CompleteProfileScreen: undefined;
@@ -43,4 +52,12 @@ export const DeliverAPackage = {
   EnterABN: 'EnterABNScreen',
   AddProfilePhoto: 'AddProfilePhotoScreen',
   Home: 'HomeScreen',
+} as const;
+
+export type BuyFromStoreParamList = {
+  ItemsReviewScreen: undefined;
+};
+
+export const BuyFromStore = {
+  ItemsReviewScreen: 'ItemsReviewScreen',
 } as const;

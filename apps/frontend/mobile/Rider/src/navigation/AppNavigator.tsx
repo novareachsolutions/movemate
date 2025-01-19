@@ -1,7 +1,8 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {AppScreens, AuthScreens, DeliverAPackage} from './ScreenNames';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { AppScreens, AuthScreens, BuyFromStore, DeliverAPackage } from './ScreenNames';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Onboarding from '../components/Onboarding';
 import Login from '../Screens/LoginScreen';
 import OtpScreen from '../Screens/OtpScreen';
@@ -17,6 +18,7 @@ import HomeScreen from '../Screens/DeliverPackage/HomeScreen';
 import FAQScreen from '../Screens/FaqScreen';
 import CancellationReasonScreen from '../Screens/CancellationReasonScreen';
 import ChatScreen from '../components/ChatModule';
+import ItemsReviewScreen from '../Screens/BuyFromStore/ItemsReviewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,81 +29,88 @@ const App = () => {
         <Stack.Screen
           name={AuthScreens.Onboarding}
           component={Onboarding}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name={AuthScreens.Login}
           component={Login}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name={AuthScreens.Otp}
-          component={OtpScreen}
-          options={{headerShown: false}}
+          component={OtpScreen as React.FC}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name={AuthScreens.SelectService}
           component={SelectServiceScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
-        {/* Deliver a package */}
+        {/* Deliver a Package */}
         <Stack.Screen
           name={DeliverAPackage.CompleteProfile}
           component={DAPCompleteProfileScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name={DeliverAPackage.UploadDocuments}
           component={DAPUploadDocumentsScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name={DeliverAPackage.UploadDocumentDetails}
           component={DAPUploadDocumentDetailsScreen}
-          options={{headerShown: true}}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name={DeliverAPackage.EnterVehicleDetails}
           component={EnterVehicleDetailsScreen}
-          options={{headerShown: true}}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name={DeliverAPackage.EnterABN}
           component={EnterABNScreen}
-          options={{headerShown: true}}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name={DeliverAPackage.AddProfilePhoto}
           component={AddProfilePhotoScreen}
-          options={{headerShown: true}}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name={DeliverAPackage.Home}
           component={HomeScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
+        />
+
+        {/* Buy From Store */}
+        <Stack.Screen
+          name={BuyFromStore.ItemsReviewScreen}
+          component={ItemsReviewScreen}
+          options={{ headerShown: true }}
         />
 
         {/* App */}
         <Stack.Screen
           name={AppScreens.DocumentReview}
-          component={DocumentReviewScreen}
-          options={{headerShown: true}}
+          component={DocumentReviewScreen as React.FC}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name={AppScreens.FAQScreen}
           component={FAQScreen}
-          options={{headerShown: true}}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name={AppScreens.CancellationReason}
           component={CancellationReasonScreen}
-          options={{headerShown: true}}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name={AppScreens.Chat}
-          component={ChatScreen}
-          options={{headerShown: true}}
+          component={ChatScreen as React.FC}
+          options={{ headerShown: true }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -14,8 +14,8 @@ import {typography} from '../theme/typography';
 import {formStyles} from '../theme/form';
 import {images} from '../assets/images/images';
 import FAQModal from '../components/Modals/FaqModal';
-import {useNavigation} from '@react-navigation/native';
-import {AppScreens} from '../navigation/ScreenNames';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {AppScreens, AppScreensParamList} from '../navigation/ScreenNames';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -55,7 +55,7 @@ const FAQs: FAQ[] = [
 
 const FAQScreen: React.FC = () => {
   const [selectedFAQ, setSelectedFAQ] = useState<FAQ | null>(null);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppScreensParamList>>();
 
   const renderFAQItem = ({item}: {item: FAQ}) => (
     <TouchableOpacity
