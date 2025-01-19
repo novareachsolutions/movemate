@@ -6,7 +6,6 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "apps/backend/*",
     "apps/frontend/web/admin"
   ],
   "devDependencies": {
@@ -23,15 +22,15 @@
   },
   "scripts": {
     "lint": "eslint \"apps/frontend/**/*.{ts,tsx}\" --fix",
-    "lint:backend": "cd apps/backend/backend-main && yarn lint",
+    "lint:backend": "cd apps/backend/backend-main && npm run lint",
     "prettier": "prettier --write 'apps/**/*.{ts,tsx,json,css,scss,md}' 'shared/**/*.{ts,tsx,json,css,scss,md}'",
     "tsc": "tsc --noEmit --project tsconfig.json",
-    "validate": "yarn run prettier && yarn run lint:backend && yarn run lint",
+    "validate": "npm run prettier && npm run lint:backend",
     "commit": "git-cz",
-    "prepare": "husky",
-    "install:all": "yarn install --frozen-lockfile",
-    "build": "yarn workspaces foreach run build",
-    "test": "yarn workspaces foreach run test"
+    "prepare": "husky install",
+    "install:all": "npm install --frozen-lockfile",
+    "build": "npm run workspaces foreach run build",
+    "test": "npm run workspaces foreach run test"
   },
   "config": {
     "commitizen": {
@@ -39,6 +38,8 @@
     }
   },
   "dependencies": {
+    "@nestjs/core": "^10.4.15",
+    "@scalar/nestjs-api-reference": "^0.3.174",
     "eslint": "^9.15.0",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-perfectionist": "^4.0.3",
