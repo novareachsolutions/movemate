@@ -1,7 +1,6 @@
-import { Column, Entity, OneToOne, RelationId } from "typeorm";
+import { Column, Entity } from "typeorm";
 
 import { BaseEntity } from "./BaseEntity";
-import { Order } from "./Order";
 
 @Entity()
 export class PickupLocation extends BaseEntity {
@@ -19,11 +18,4 @@ export class PickupLocation extends BaseEntity {
 
   @Column({ type: "float" })
   longitude: number;
-
-  @OneToOne(() => Order, (order) => order.pickupLocation)
-  order: Order;
-
-  @RelationId((pickupLocation: PickupLocation) => pickupLocation.order)
-  @Column({ type: "integer" })
-  orderId: number;
 }

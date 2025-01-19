@@ -1,7 +1,9 @@
-# Check for unstaged changes
-if ! git diff --quiet; then
-  echo "You have unstaged changes. Please stage your changes before committing."
+# Check for unstaged changes in backend/backend-main
+if ! git diff --quiet apps/backend/backend-main; then
+  echo "You have unstaged changes in apps/backend/backend-main. Please stage your changes before committing."
   exit 1
 fi
 
-yarn run validate
+cd apps/backend/backend-main
+npm run validate
+git add .
