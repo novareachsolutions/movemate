@@ -16,7 +16,10 @@ import {typography} from '../theme/typography';
 import {colors} from '../theme/colors';
 import {images} from '../assets/images/images';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {AuthScreens, AuthScreensParamList} from '../navigation/ScreenNames';
+import {
+  BuyFromStore,
+  BuyFromStoreParamList,
+} from '../navigation/ScreenNames';
 const {width, height} = Dimensions.get('window');
 
 interface Slide {
@@ -39,7 +42,7 @@ const slides: Slide[] = [
 
 const Onboarding: React.FC = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const navigation = useNavigation<NavigationProp<AuthScreensParamList>>();
+  const navigation = useNavigation<NavigationProp<BuyFromStoreParamList>>();
   const updateSlidePosition = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = e.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffsetX / width);
@@ -47,7 +50,7 @@ const Onboarding: React.FC = () => {
   };
 
   const handleNavigation = () => {
-    navigation.navigate(AuthScreens.Login);
+    navigation.navigate(BuyFromStore.ItemsReviewScreen);
   };
   const Footer = () => (
     <View style={styles.footer}>

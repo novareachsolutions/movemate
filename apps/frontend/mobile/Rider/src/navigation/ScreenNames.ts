@@ -2,7 +2,7 @@ export type AuthScreensParamList = {
   OnboardingScreen: undefined;
   LoginScreen: undefined;
   OtpScreen: {
-    phoneNumber:string
+    phoneNumber: string;
   };
   SelectServiceScreen: undefined;
 };
@@ -14,11 +14,23 @@ export const AuthScreens = {
   SelectService: 'SelectServiceScreen',
 } as const;
 
+export type AppScreensParamList = {
+  HomeScreen: undefined;
+  DashboardScreen: undefined;
+  DocumentReviewScreen: undefined;
+  FAQScreenScreen: undefined;
+  CancellationReasonScreen: undefined;
+  ChatScreen: undefined;
+};
+
 export const AppScreens = {
   Home: 'HomeScreen',
   Dashboard: 'DashboardScreen',
   DocumentReview: 'DocumentReviewScreen',
-};
+  FAQScreen: 'FAQScreenScreen',
+  CancellationReason: 'CancellationReasonScreen',
+  Chat: 'ChatScreen',
+} as const;
 
 export type DeliverAPackageParamList = {
   CompleteProfileScreen: undefined;
@@ -28,6 +40,7 @@ export type DeliverAPackageParamList = {
   EnterVehicleDetailsScreen: undefined;
   EnterABNScreen: undefined;
   AddProfilePhotoScreen: undefined;
+  HomeScreen: undefined;
 };
 
 export const DeliverAPackage = {
@@ -38,4 +51,13 @@ export const DeliverAPackage = {
   EnterVehicleDetails: 'EnterVehicleDetailsScreen',
   EnterABN: 'EnterABNScreen',
   AddProfilePhoto: 'AddProfilePhotoScreen',
+  Home: 'HomeScreen',
+} as const;
+
+export type BuyFromStoreParamList = {
+  ItemsReviewScreen: undefined;
+};
+
+export const BuyFromStore = {
+  ItemsReviewScreen: 'ItemsReviewScreen',
 } as const;

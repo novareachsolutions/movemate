@@ -16,7 +16,10 @@ import {typography} from '../theme/typography';
 import {images} from '../assets/images/images';
 import TitleDescription from '../components/TitleDescription';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {DeliverAPackage, DeliverAPackageParamList} from '../navigation/ScreenNames';
+import {
+  DeliverAPackage,
+  DeliverAPackageParamList,
+} from '../navigation/ScreenNames';
 
 const services = [
   {

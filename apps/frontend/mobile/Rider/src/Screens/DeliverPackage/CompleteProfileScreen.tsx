@@ -4,7 +4,10 @@ import ProfileForm from '../../components/ProfileForm';
 import StepIndicator from '../../components/StepIndicator';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {colors} from '../../theme/colors';
-import {DeliverAPackage, DeliverAPackageParamList} from '../../navigation/ScreenNames';
+import {
+  DeliverAPackage,
+  DeliverAPackageParamList,
+} from '../../navigation/ScreenNames';
 
 type FormFields = {
   firstName: string;
@@ -17,7 +20,7 @@ type FormFields = {
 };
 
 const DAPCompleteProfileScreen = () => {
-const navigation = useNavigation<NavigationProp<DeliverAPackageParamList>>();
+  const navigation = useNavigation<NavigationProp<DeliverAPackageParamList>>();
 
   const handleFormSubmit = (formData: FormFields) => {
     console.log('Form submitted:', formData);
