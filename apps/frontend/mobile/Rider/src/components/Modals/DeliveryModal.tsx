@@ -6,14 +6,12 @@ import {
   StyleSheet,
   Modal,
   Image,
-  Dimensions,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../../theme/colors';
 import {formStyles} from '../../theme/form';
 import {typography} from '../../theme/typography';
 import {images} from '../../assets/images/images';
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface DeliveryModalProps {
   isVisible: boolean;
@@ -36,7 +34,7 @@ const DeliveryModal: React.FC<DeliveryModalProps> = ({
 
   const handleTakePhoto = () => {
     setIsTakingPhoto(true);
-    console.log('Take Photo button clicked'); // Replace this with your camera logic
+    console.log('Take Photo button clicked',isTakingPhoto); // Replace this with your camera logic
   };
 
   const handleOrderDelivered = () => {
@@ -150,7 +148,7 @@ const styles = StyleSheet.create({
   },
   driverName: {
     fontSize: typography.fontSize.large,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
   },
   deliveryAddress: {
@@ -173,7 +171,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
     marginBottom: 10,
   },

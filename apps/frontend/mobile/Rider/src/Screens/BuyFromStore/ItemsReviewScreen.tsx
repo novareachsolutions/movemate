@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  TextStyle,
 } from 'react-native';
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import {colors} from '../../theme/colors';
+import {typography} from '../../theme/typography';
 import BottomModal from '../../components/Modals/BottomModal';
 import CountdownTimer from '../../components/CountdownTimer';
 
@@ -23,22 +24,20 @@ interface Item {
 const ItemCard: React.FC<{
   item: Item;
   onOutOfStockPress: () => void;
-}> = ({ item, onOutOfStockPress }) => {
+}> = ({item, onOutOfStockPress}) => {
   return (
     <View style={styles.cardContainer}>
-      <Image source={{ uri: item.image }} style={styles.itemImage as any} />
+      <Image source={{uri: item.image}} style={styles.itemImage} />
       <Text style={styles.itemName}>{item.name}</Text>
       <Text style={styles.itemQuantity}>x{item.quantity}</Text>
       <TouchableOpacity
         style={styles.fullWidthAvailableButton}
-        onPress={() => console.log('Marked Available')}
-      >
+        onPress={() => console.log('Marked Available')}>
         <Text style={styles.buttonText}>Available</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.fullWidthOutOfStockButton}
-        onPress={onOutOfStockPress}
-      >
+        onPress={onOutOfStockPress}>
         <Text style={styles.buttonText}>Out Of Stock</Text>
       </TouchableOpacity>
     </View>
@@ -46,7 +45,9 @@ const ItemCard: React.FC<{
 };
 
 const ItemReviewScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'Pending' | 'Approved' | 'Rejected'>('Pending');
+  const [activeTab, setActiveTab] = useState<
+    'Pending' | 'Approved' | 'Rejected'
+  >('Pending');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [items] = useState<Item[]>([
     {
@@ -69,7 +70,7 @@ const ItemReviewScreen: React.FC = () => {
     Rejected: 0,
   };
 
-  const renderItem = ({ item }: { item: Item }) => (
+  const renderItem = ({item}: {item: Item}) => (
     <ItemCard item={item} onOutOfStockPress={() => setIsModalVisible(true)} />
   );
 
@@ -79,13 +80,21 @@ const ItemReviewScreen: React.FC = () => {
       <View style={styles.headerContainer}>
         <View style={styles.headerTopRow}>
           <CountdownTimer initialSeconds={60} />
-          <Text style={styles.headerStatus}>Waiting for customer confirmation...</Text>
+          <Text style={styles.headerStatus}>
+            Waiting for customer confirmation...
+          </Text>
           <View style={styles.headerIconsContainer}>
             <TouchableOpacity>
-              <Image source={{ uri: 'https://via.placeholder.com/24' }} style={styles.headerIcon} />
+              <Image
+                source={{uri: 'https://via.placeholder.com/24'}}
+                style={styles.headerIcon}
+              />
             </TouchableOpacity>
             <TouchableOpacity>
-              <Image source={{ uri: 'https://via.placeholder.com/24' }} style={styles.headerIcon} />
+              <Image
+                source={{uri: 'https://via.placeholder.com/24'}}
+                style={styles.headerIcon}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -93,13 +102,18 @@ const ItemReviewScreen: React.FC = () => {
 
       {/* Tabs */}
       <View style={styles.tabsContainer}>
-        {['Pending', 'Approved', 'Rejected'].map((tab) => (
+        {['Pending', 'Approved', 'Rejected'].map(tab => (
           <TouchableOpacity
             key={tab}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
-            onPress={() => setActiveTab(tab as 'Pending' | 'Approved' | 'Rejected')}
-          >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+            onPress={() =>
+              setActiveTab(tab as 'Pending' | 'Approved' | 'Rejected')
+            }>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab && styles.activeTabText,
+              ]}>
               {tabCounts[tab as 'Pending' | 'Approved' | 'Rejected'] > 0
                 ? `${tab} (${tabCounts[tab as 'Pending' | 'Approved' | 'Rejected']})`
                 : tab}
@@ -112,7 +126,7 @@ const ItemReviewScreen: React.FC = () => {
       <FlatList
         data={items}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         numColumns={2}
         contentContainerStyle={styles.listContainer}
       />
@@ -123,15 +137,26 @@ const ItemReviewScreen: React.FC = () => {
       </TouchableOpacity>
 
       {/* Out Of Stock Modal */}
-      <BottomModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+      <BottomModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white },
-  headerContainer: { padding: 20, borderBottomWidth: 1, borderBottomColor: colors.border.primary },
-  headerTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  container: {flex: 1, backgroundColor: colors.white},
+  headerContainer: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.primary,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   headerStatus: {
     flex: 1,
     marginLeft: 10,
@@ -139,14 +164,23 @@ const styles = StyleSheet.create({
     color: colors.text.primaryGrey,
     fontWeight: '500',
   },
-  headerIconsContainer: { flexDirection: 'row', gap: 10 },
-  headerIcon: { width: 24, height: 24 },
-  tabsContainer: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 10 },
-  tab: { paddingVertical: 10, paddingHorizontal: 15, borderBottomWidth: 2, borderBottomColor: colors.border.primary },
-  activeTab: { borderBottomColor: colors.purple },
-  tabText: { fontSize: typography.fontSize.medium, color: colors.text.primary },
-  activeTabText: { color: colors.purple },
-  listContainer: { padding: 10 },
+  headerIconsContainer: {flexDirection: 'row', gap: 10},
+  headerIcon: {width: 24, height: 24},
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.border.primary,
+  },
+  activeTab: {borderBottomColor: colors.purple},
+  tabText: {fontSize: typography.fontSize.medium, color: colors.text.primary},
+  activeTabText: {color: colors.purple},
+  listContainer: {padding: 10},
   cardContainer: {
     flex: 1,
     padding: 10,
@@ -157,14 +191,18 @@ const styles = StyleSheet.create({
     borderColor: colors.border.primary,
     alignItems: 'center',
   },
-  itemImage: { width: 80, height: 80, marginBottom: 10 },
+  itemImage: {width: 80, height: 80, marginBottom: 10},
   itemName: {
     fontSize: typography.fontSize.medium,
     fontWeight: 'bold',
     color: colors.text.primary,
     marginBottom: 5,
   },
-  itemQuantity: { fontSize: typography.fontSize.small, color: colors.text.primaryGrey, marginBottom: 10 },
+  itemQuantity: {
+    fontSize: typography.fontSize.small,
+    color: colors.text.primaryGrey,
+    marginBottom: 10,
+  },
   fullWidthAvailableButton: {
     backgroundColor: colors.green,
     paddingVertical: 10,
@@ -180,7 +218,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  buttonText: { color: colors.white, fontSize: typography.fontSize.medium },
+  buttonText: {color: colors.white, fontSize: typography.fontSize.medium},
   footerButton: {
     backgroundColor: colors.purple,
     paddingVertical: 15,
@@ -189,7 +227,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 20,
   },
-  footerButtonText: { color: colors.white, fontSize: typography.fontSize.medium, fontWeight: typography.fontWeight.bold as any},
+  footerButtonText: {
+    color: colors.white,
+    fontSize: typography.fontSize.medium,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
+  },
 });
 
 export default ItemReviewScreen;

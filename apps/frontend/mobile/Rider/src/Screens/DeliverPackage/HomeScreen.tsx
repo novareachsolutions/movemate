@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -18,8 +18,8 @@ import {AppScreens, AppScreensParamList} from '../../navigation/ScreenNames';
 const HomeScreen: React.FC = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [drawerHeight] = useState(new Animated.Value(0));
-//   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
-//   const [isExpandedModalVisible, setIsExpandedModalVisible] = useState(false);
+  //   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
+  //   const [isExpandedModalVisible, setIsExpandedModalVisible] = useState(false);
   const navigation = useNavigation<NavigationProp<AppScreensParamList>>();
 
   const toggleStatus = () => {
@@ -31,33 +31,32 @@ const HomeScreen: React.FC = () => {
     }).start();
   };
 
-//   // Show the `DeliveryModal` after 3 seconds
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       setIsOrderModalVisible(true);
-//     }, 3000);
+  //   // Show the `DeliveryModal` after 3 seconds
+  //   useEffect(() => {
+  //     const timer = setTimeout(() => {
+  //       setIsOrderModalVisible(true);
+  //     }, 3000);
 
-//     return () => clearTimeout(timer);
-//   }, []);
+  //     return () => clearTimeout(timer);
+  //   }, []);
 
-//   const handleTakePhoto = () => {
-//     console.log('Taking a photo for proof...');
-//     // Add your camera logic here
-//   };
+  //   const handleTakePhoto = () => {
+  //     console.log('Taking a photo for proof...');
+  //     // Add your camera logic here
+  //   };
 
-//   const handleOrderDelivered = () => {
-//     console.log('Order marked as delivered.');
-//     setIsOrderModalVisible(false); // Close DeliveryModal
-//   };
+  //   const handleOrderDelivered = () => {
+  //     console.log('Order marked as delivered.');
+  //     setIsOrderModalVisible(false); // Close DeliveryModal
+  //   };
 
-//     // Handle "Accept Order" button press
-//   const handleAcceptOrder = () => {
-//     setIsOrderModalVisible(false); // Close `OrderModal`
-//     setTimeout(() => {
-//       setIsExpandedModalVisible(true); // Open `ExpandedModal` with a slight delay
-//     }, 300);
-//   };
-
+  //     // Handle "Accept Order" button press
+  //   const handleAcceptOrder = () => {
+  //     setIsOrderModalVisible(false); // Close `OrderModal`
+  //     setTimeout(() => {
+  //       setIsExpandedModalVisible(true); // Open `ExpandedModal` with a slight delay
+  //     }, 300);
+  //   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -140,7 +139,6 @@ const HomeScreen: React.FC = () => {
                 deliveryInstructions={['Do not ring the bell', 'Drop-off at the door']}
                 itemsToDeliver={['Documents']}
             /> */}
-
 
       {/*Order Expanded Modal */}
       {/* <OrderExpandedModal

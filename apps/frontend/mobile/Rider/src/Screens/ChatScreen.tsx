@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import ChatModule from '../components/ChatModule';
 
 const ChatScreen = () => {
@@ -6,22 +6,22 @@ const ChatScreen = () => {
     {
       id: '1',
       text: 'Hi, Johnathon',
-      sender: 'receiver' as 'receiver', // Explicitly cast to union type
+      sender: 'receiver' as const, // Explicitly cast to union type
       time: '12:56 PM',
       senderImage: 'https://i.pravatar.cc/100',
     },
-    { id: '2', text: 'Hey, Yes', sender: 'user' as 'user', time: '12:57 PM' },
+    {id: '2', text: 'Hey, Yes', sender: 'user' as const, time: '12:57 PM'},
     {
       id: '3',
       text: 'How can I help you?',
-      sender: 'receiver' as 'receiver',
+      sender: 'receiver' as const,
       time: '12:58 PM',
       senderImage: 'https://i.pravatar.cc/100',
     },
     {
       id: '4',
       text: 'I need some assistance with my order.',
-      sender: 'user' as 'user',
+      sender: 'user' as const,
       time: '12:59 PM',
     },
   ]);
@@ -30,7 +30,7 @@ const ChatScreen = () => {
     const newMessage = {
       id: `${messages.length + 1}`,
       text: message,
-      sender: 'user' as 'user', // Explicitly cast to union type
+      sender: 'user' as const, // Explicitly cast to union type
       time: new Date().toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',

@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Image, StyleSheet} from 'react-native';
+import {View, Text, Image, StyleSheet, TextStyle} from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
 
@@ -18,10 +18,10 @@ const DetailRow: React.FC<DetailRowProps> = ({icon, label, value}) => {
           styles.detailText,
           icon
             ? {
-                fontWeight: typography.fontWeight.regular as any,
+                fontWeight: typography.fontWeight.regular as TextStyle['fontWeight'],
               }
             : {
-                fontWeight: typography.fontWeight.bold as any,
+                fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
               },
         ]}>
         {label}
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
   },
 });

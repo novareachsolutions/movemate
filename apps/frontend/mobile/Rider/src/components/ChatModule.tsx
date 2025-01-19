@@ -33,8 +33,6 @@ interface ChatModuleProps {
 const ChatModule: React.FC<ChatModuleProps> = ({
   messages,
   onSend,
-  headerTitle,
-  onReport,
 }) => {
   const [inputText, setInputText] = useState('');
 

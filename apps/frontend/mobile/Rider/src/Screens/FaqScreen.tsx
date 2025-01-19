@@ -5,9 +5,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  Modal,
   Dimensions,
   Image,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
@@ -16,8 +16,6 @@ import {images} from '../assets/images/images';
 import FAQModal from '../components/Modals/FaqModal';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {AppScreens, AppScreensParamList} from '../navigation/ScreenNames';
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface FAQ {
   question: string;
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: typography.fontSize.large,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: 10,
@@ -119,7 +117,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.semiMedium,
     color: colors.text.primaryGrey,
     marginBottom: 20,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
   },
   faqList: {
     marginBottom: 20,
@@ -138,7 +136,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     flex: 1,
     marginRight: 40,
-    fontWeight: typography.fontWeight.medium as any,
+    fontWeight: typography.fontWeight.medium as TextStyle['fontWeight'],
   },
   cancelButton: {
     borderColor: colors.error,
@@ -148,7 +146,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: colors.error,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
   },
   modalContainer: {
     flex: 1,
@@ -159,7 +157,7 @@ const styles = StyleSheet.create({
   },
   modalHeader: {
     fontSize: typography.fontSize.large,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
     marginBottom: 20,
     textAlign: 'center',

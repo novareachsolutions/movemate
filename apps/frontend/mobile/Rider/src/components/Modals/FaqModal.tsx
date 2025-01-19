@@ -6,10 +6,10 @@ import {
   StyleSheet,
   Modal,
   Image,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../../theme/colors';
 import {typography} from '../../theme/typography';
-import {formStyles} from '../../theme/form';
 import {images} from '../../assets/images/images';
 
 interface FAQModalProps {
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   },
   question: {
     fontSize: typography.fontSize.semiMedium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
     marginBottom: 20,
     lineHeight: 25,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   },
   supportHeader: {
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
     marginBottom: 20,
   },
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
 
   supportButtonText: {
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.medium as any,
+    fontWeight: typography.fontWeight.medium as TextStyle['fontWeight'],
     color: colors.purple,
   },
   supportIcon: {

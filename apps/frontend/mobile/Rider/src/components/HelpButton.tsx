@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, Image, TextStyle} from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
 import {images} from '../assets/images/images';
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: typography.fontSize.medium,
     color: colors.purple,
-    fontWeight: typography.fontWeight.medium as any,
+    fontWeight: typography.fontWeight.medium as TextStyle['fontWeight'],
   },
 });
 

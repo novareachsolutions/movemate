@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import {colors} from '../../theme/colors';
+import {typography} from '../../theme/typography';
 
 interface BottomModalProps {
   isVisible: boolean;
@@ -17,7 +17,7 @@ interface BottomModalProps {
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const BottomModal: React.FC<BottomModalProps> = ({ isVisible, onClose }) => {
+const BottomModal: React.FC<BottomModalProps> = ({isVisible, onClose}) => {
   const [showQuantitySelector, setShowQuantitySelector] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -29,8 +29,7 @@ const BottomModal: React.FC<BottomModalProps> = ({ isVisible, onClose }) => {
       visible={isVisible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Drag Indicator */}
@@ -42,18 +41,17 @@ const BottomModal: React.FC<BottomModalProps> = ({ isVisible, onClose }) => {
             <>
               <Text style={styles.title}>Confirm availability issue</Text>
               <Text style={styles.description}>
-                Is the item completely unavailable or is the requested quantity not in stock?
+                Is the item completely unavailable or is the requested quantity
+                not in stock?
               </Text>
               <TouchableOpacity
                 style={styles.unavailableButton}
-                onPress={onClose}
-              >
+                onPress={onClose}>
                 <Text style={styles.unavailableText}>Item Unavailable</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.missingButton}
-                onPress={() => setShowQuantitySelector(true)}
-              >
+                onPress={() => setShowQuantitySelector(true)}>
                 <Text style={styles.missingText}>Quantity Missing</Text>
               </TouchableOpacity>
             </>
@@ -63,34 +61,30 @@ const BottomModal: React.FC<BottomModalProps> = ({ isVisible, onClose }) => {
               <View style={styles.itemRow}>
                 <View style={styles.itemDetails}>
                   <Text style={styles.itemName}>Brown Bread</Text>
-                  <Text style={styles.itemOrdered}>Quantity ordered: 2 units</Text>
+                  <Text style={styles.itemOrdered}>
+                    Quantity ordered: 2 units
+                  </Text>
                 </View>
                 <View style={styles.quantitySelector}>
                   <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={decrementQuantity}
-                  >
+                    onPress={decrementQuantity}>
                     <Text style={styles.quantityText}>−</Text>
                   </TouchableOpacity>
                   <Text style={styles.quantity}>{quantity}</Text>
                   <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={incrementQuantity}
-                  >
+                    onPress={incrementQuantity}>
                     <Text style={styles.quantityText}>+</Text>
                   </TouchableOpacity>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={onClose}
-              >
+              <TouchableOpacity style={styles.confirmButton} onPress={onClose}>
                 <Text style={styles.confirmText}>Confirm Quantity</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowQuantitySelector(false)}
-              >
+                onPress={() => setShowQuantitySelector(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
             </>
@@ -168,9 +162,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 20,
   },
-  itemDetails: { flex: 2 },
-  itemName: { fontSize: typography.fontSize.medium, fontWeight: 'bold', color: colors.text.primary },
-  itemOrdered: { fontSize: typography.fontSize.small, color: colors.text.primaryGrey },
+  itemDetails: {flex: 2},
+  itemName: {
+    fontSize: typography.fontSize.medium,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+  },
+  itemOrdered: {
+    fontSize: typography.fontSize.small,
+    color: colors.text.primaryGrey,
+  },
   quantitySelector: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -180,9 +181,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  quantityButton: { padding: 5 },
-  quantityText: { fontSize: typography.fontSize.large, color: colors.text.primary },
-  quantity: { fontSize: typography.fontSize.medium, fontWeight: 'bold', color: colors.text.primary },
+  quantityButton: {padding: 5},
+  quantityText: {
+    fontSize: typography.fontSize.large,
+    color: colors.text.primary,
+  },
+  quantity: {
+    fontSize: typography.fontSize.medium,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+  },
   confirmButton: {
     backgroundColor: colors.green,
     padding: 15,
@@ -190,7 +198,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  confirmText: { color: colors.white, fontSize: typography.fontSize.medium, fontWeight: 'bold' },
+  confirmText: {
+    color: colors.white,
+    fontSize: typography.fontSize.medium,
+    fontWeight: 'bold',
+  },
   cancelButton: {
     backgroundColor: colors.white,
     padding: 15,
@@ -199,7 +211,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.error,
   },
-  cancelText: { color: colors.error, fontSize: typography.fontSize.medium, fontWeight: 'bold' },
+  cancelText: {
+    color: colors.error,
+    fontSize: typography.fontSize.medium,
+    fontWeight: 'bold',
+  },
 });
 
 export default BottomModal;

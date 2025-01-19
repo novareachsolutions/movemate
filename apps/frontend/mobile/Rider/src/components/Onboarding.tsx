@@ -17,11 +17,8 @@ import {colors} from '../theme/colors';
 import {images} from '../assets/images/images';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {
-  AuthScreens,
-  AuthScreensParamList,
   BuyFromStore,
   BuyFromStoreParamList,
-  DeliverAPackage,
 } from '../navigation/ScreenNames';
 const {width, height} = Dimensions.get('window');
 

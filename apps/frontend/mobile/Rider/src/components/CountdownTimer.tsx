@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet, TextStyle} from 'react-native';
+import {colors} from '../theme/colors';
+import {typography} from '../theme/typography';
 
-const CountdownTimer: React.FC<{ initialSeconds: number }> = ({ initialSeconds }) => {
+const CountdownTimer: React.FC<{initialSeconds: number}> = ({
+  initialSeconds,
+}) => {
   const [seconds, setSeconds] = useState(initialSeconds);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setSeconds((prev) => {
+      setSeconds(prev => {
         if (prev <= 0) {
           clearInterval(timer);
           return 0;
@@ -56,7 +54,7 @@ const styles = StyleSheet.create({
   timerText: {
     color: colors.white,
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
   },
 });
 

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Modal,
   Image,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../../theme/colors';
 import {typography} from '../../theme/typography';
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.fontSize.large,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
     marginBottom: 20,
   },
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   retryText: {
     color: colors.purple,
-    fontWeight: typography.fontWeight.semiBold as any,
+    fontWeight: typography.fontWeight.semiBold as TextStyle['fontWeight'],
   },
   doneButton: {
     backgroundColor: colors.purple,

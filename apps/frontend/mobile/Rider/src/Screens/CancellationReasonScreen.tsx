@@ -6,15 +6,13 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  Dimensions,
   Image,
+  TextStyle,
 } from 'react-native';
 import {colors} from '../theme/colors';
 import {typography} from '../theme/typography';
 import {formStyles} from '../theme/form';
 import {images} from '../assets/images/images';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const CancellationReasonScreen: React.FC = () => {
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
@@ -93,7 +91,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: typography.fontSize.large,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
     color: colors.text.primary,
     marginBottom: 10,
   },
@@ -138,7 +136,7 @@ const styles = StyleSheet.create({
   reasonText: {
     fontSize: typography.fontSize.medium,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium as any,
+    fontWeight: typography.fontWeight.medium as TextStyle['fontWeight'],
   },
   photoUploadContainer: {
     marginTop: 15,
@@ -170,7 +168,7 @@ const styles = StyleSheet.create({
   photoUploadButtonText: {
     color: colors.purple,
     fontSize: typography.fontSize.medium,
-    fontWeight: typography.fontWeight.medium as any,
+    fontWeight: typography.fontWeight.medium as TextStyle['fontWeight'],
   },
   footer: {
     position: 'absolute',
@@ -189,7 +187,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: colors.error,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.bold as TextStyle['fontWeight'],
   },
 });
 
