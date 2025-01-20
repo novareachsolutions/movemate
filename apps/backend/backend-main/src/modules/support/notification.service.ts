@@ -1,6 +1,4 @@
-// src/modules/support/notification.service.ts
-
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 
 import { ChatMessage } from "../../entity/ChatMessage";
 import { SupportTicket } from "../../entity/SupportTicket";
@@ -10,6 +8,8 @@ import { CustomerNotificationGateway } from "../../shared/gateways/customer.noti
 
 @Injectable()
 export class NotificationService {
+  private readonly logger = new Logger(NotificationService.name);
+
   constructor(
     @Inject(forwardRef(() => ChatSupportGateway))
     private readonly chatSupportGateway: ChatSupportGateway,
@@ -19,6 +19,10 @@ export class NotificationService {
 
   notifyNewMessage(message: ChatMessage): void {
     const sender = message.sender;
+
+    this.logger.debug(
+      `NotificationService.notifyNewMessage: Sending notification for message ${message.id}`,
+    );
 
     // Send to the specific ticket room
     this.chatSupportGateway.sendMessageToRoom(
@@ -36,6 +40,10 @@ export class NotificationService {
       },
     );
 
+    this.logger.log(
+      `NotificationService.notifyNewMessage: Notification sent for message ${message.id}`,
+    );
+
     // If the sender is a customer, notify the assigned rider
     if (sender.role === UserRoleEnum.CUSTOMER) {
       this.chatSupportGateway.sendMessageToClient(
@@ -46,6 +54,9 @@ export class NotificationService {
           customerId: message.sender.id,
           message: message.content,
         },
+      );
+      this.logger.log(
+        `NotificationService.notifyNewMessage: Notification sent to rider ${message.ticket.assignedRider.id} for message ${message.id} from customer ${message.sender.id}`,
       );
     }
 
@@ -60,6 +71,10 @@ export class NotificationService {
           riderId: message.sender.id,
           message: message.content,
         },
+      );
+
+      this.logger.log(
+        `NotificationService.notifyNewMessage: Notification sent to support agents for message ${message.id} from rider ${message.sender.id}`,
       );
     }
   }
@@ -90,6 +105,10 @@ export class NotificationService {
         },
       },
     );
+
+    this.logger.log(
+      `NotificationService.notifyRiderAssigned: Notification sent to rider ${ticket.assignedRider.id} for ticket ${ticket.id}`,
+    );
   }
 
   notifySupportAgentAssigned(ticket: SupportTicket): void {
@@ -118,6 +137,10 @@ export class NotificationService {
         },
       },
     );
+
+    this.logger.log(
+      `NotificationService.notifySupportAgentAssigned: Notification sent to support agent ${ticket.assignedSupportAgent.id} for ticket ${ticket.id}`,
+    );
   }
 
   notifyTicketStatusChanged(ticket: SupportTicket): void {
@@ -142,6 +165,10 @@ export class NotificationService {
         message: this.getStatusChangeMessage(ticket.status),
       },
     );
+
+    this.logger.log(
+      `NotificationService.notifyTicketStatusChanged: Notification sent to customer ${ticket.customer.id} for ticket ${ticket.id}`,
+    );
   }
 
   notifyTicketPriorityChanged(
@@ -158,10 +185,10 @@ export class NotificationService {
         newPriority: ticket.priority,
       },
     );
-  }
 
-  private isCustomerMessage(message: ChatMessage): boolean {
-    return message.sender.id === message.ticket.customer.id;
+    this.logger.log(
+      `NotificationService.notifyTicketPriorityChanged: Notification sent to support agents for ticket ${ticket.id}`,
+    );
   }
 
   private getStatusChangeMessage(status: string): string {

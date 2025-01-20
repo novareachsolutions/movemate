@@ -1,4 +1,4 @@
-export type ILocation = {
+export type TLocation = {
   addressLine1: string;
   addressLine2?: string;
   landmark?: string;
@@ -13,8 +13,8 @@ export type TSendPackageOrder = {
   receiverPhoneNumber: string;
   packageType: string;
   deliveryInstructions?: string;
-  pickupLocation: ILocation;
-  dropLocation: ILocation;
+  pickupLocation: TLocation;
+  dropLocation: TLocation;
   estimatedDistance: number;
   estimatedTime: number;
   customerId: number;

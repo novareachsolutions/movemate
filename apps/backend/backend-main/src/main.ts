@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { IoAdapter } from "@nestjs/platform-socket.io";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
@@ -9,7 +10,12 @@ import { CustomExceptionFilter } from "./errorFilter";
 
 const config = configuration();
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger("Bootstrap");
+
+  const app = await NestFactory.create(AppModule, {
+    logger: ["error", "warn", "debug", "log", "verbose"],
+    bufferLogs: true,
+  });
 
   const docConfig = new DocumentBuilder()
     .setTitle("API Documentation of Vamoose")
@@ -36,9 +42,11 @@ async function bootstrap(): Promise<void> {
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   });
+
   // Configure WebSocket adapter
   app.useWebSocketAdapter(new IoAdapter(app));
 
   await app.listen(config.port ?? 3000);
+  logger.log(`🚀 Application is running on: ${await app.getUrl()}`);
 }
 void bootstrap();

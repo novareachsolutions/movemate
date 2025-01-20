@@ -1,8 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { DeleteResult, UpdateResult } from "typeorm";
 
 import { User } from "../../entity/User";
-import { logger } from "../../logger";
 import {
   UserAlreadyExistsError,
   UserNotFoundError,
@@ -13,6 +12,8 @@ import { TCreateUser, TGetUserProfile, TUpdateUser } from "./user.types";
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   /**
    * Create a new user.
    * @param createUserDto Data Transfer Object for creating a user.
@@ -26,7 +27,7 @@ export class UserService {
     });
 
     if (existingUser) {
-      logger.error(
+      this.logger.error(
         `UserService.createUser: User with email ${email} or phone number ${phoneNumber} already exists.`,
       );
       throw new UserAlreadyExistsError(
@@ -78,12 +79,14 @@ export class UserService {
     const user = await dbReadRepo(User).findOne({ where: { id } });
 
     if (!user) {
-      logger.error(`UserService.updateUser: User with ID ${id} not found.`);
+      this.logger.error(
+        `UserService.updateUser: User with ID ${id} not found.`,
+      );
       throw new UserNotFoundError(`User with ID ${id} not found.`);
     }
 
     const filteredUpdateUser = filterEmptyValues(updateUserDto);
-    logger.debug(
+    this.logger.debug(
       `UserService.updateUser: Updating user with ID ${id} with data: ${JSON.stringify(
         filteredUpdateUser,
       )}`,
@@ -98,7 +101,7 @@ export class UserService {
    * @returns The result of the delete operation.
    */
   async deleteUser(id: string): Promise<DeleteResult> {
-    logger.debug(`UserService.deleteUser: Deleting user with ID ${id}`);
+    this.logger.debug(`UserService.deleteUser: Deleting user with ID ${id}`);
     return await dbRepo(User).softDelete(id);
   }
 }
