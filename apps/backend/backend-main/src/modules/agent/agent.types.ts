@@ -1,5 +1,3 @@
-// src/modules/agent/agent.types.ts
-
 import { AgentStatusEnum, AgentTypeEnum } from "../../shared/enums";
 import { TCreateUser, TUpdateUser } from "../user/user.types";
 
