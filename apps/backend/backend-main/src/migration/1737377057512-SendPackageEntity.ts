@@ -1,27 +1,35 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class SendPackageEntity1736926450088 implements MigrationInterface {
-  name = "SendPackageEntity1736926450088";
+export class SendPackageEntity1737377057512 implements MigrationInterface {
+  name = "SendPackageEntity1737377057512";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-            ALTER TABLE "order_review" DROP CONSTRAINT "FK_d47f4facc0a5ba3224d5aec7667"
+            CREATE TYPE "public"."user_role_enum" AS ENUM('ADMIN', 'AGENT', 'CUSTOMER', 'SUPPORT')
         `);
     await queryRunner.query(`
-            ALTER TABLE "order_review" DROP CONSTRAINT "FK_d2b82986ad264b7f66d2cc649b6"
+            CREATE TABLE "user" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "phoneNumber" character varying NOT NULL,
+                "role" "public"."user_role_enum" NOT NULL,
+                "firstName" character varying NOT NULL,
+                "lastName" character varying,
+                "email" character varying NOT NULL,
+                "street" character varying,
+                "suburb" character varying,
+                "state" character varying,
+                "postalCode" integer,
+                CONSTRAINT "UQ_user_phoneNumber" UNIQUE ("phoneNumber"),
+                CONSTRAINT "UQ_user_email" UNIQUE ("email"),
+                CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id")
+            )
         `);
     await queryRunner.query(`
-            ALTER TABLE "agent_review" DROP CONSTRAINT "FK_ca50468f2829e3b607d26c6b292"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "agent_review" DROP CONSTRAINT "FK_5ca3e3c3d70e553b69b009cd583"
-        `);
-    await queryRunner.query(`
-            DROP INDEX "public"."IDX_review_orderId"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "order_review"
-                RENAME COLUMN "orderId" TO "sendPackageOrderId"
+            CREATE INDEX "IDX_user_role" ON "user" ("role")
+            WHERE "deletedAt" IS NULL
         `);
     await queryRunner.query(`
             CREATE TABLE "chat_message" (
@@ -63,6 +71,19 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             )
         `);
     await queryRunner.query(`
+            CREATE TABLE "ticket_note" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "ticketId" integer NOT NULL,
+                "authorId" integer NOT NULL,
+                "content" text NOT NULL,
+                "isInternal" boolean NOT NULL DEFAULT false,
+                CONSTRAINT "PK_d5b5ab85fcf4daa52c8dc4420c5" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
             CREATE TABLE "ticket_activity" (
                 "id" SERIAL NOT NULL,
                 "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
@@ -76,16 +97,83 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             )
         `);
     await queryRunner.query(`
-            CREATE TABLE "ticket_note" (
+            CREATE TYPE "public"."agent_approvalstatus_enum" AS ENUM('APPROVED', 'PENDING', 'REJECTED')
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "agent" (
                 "id" SERIAL NOT NULL,
                 "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
                 "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
                 "deletedAt" TIMESTAMP,
-                "ticketId" integer NOT NULL,
-                "authorId" integer NOT NULL,
-                "content" text NOT NULL,
-                "isInternal" boolean NOT NULL DEFAULT false,
-                CONSTRAINT "PK_d5b5ab85fcf4daa52c8dc4420c5" PRIMARY KEY ("id")
+                "userId" integer NOT NULL,
+                "agentType" character varying NOT NULL,
+                "abnNumber" character varying NOT NULL,
+                "vehicleMake" character varying NOT NULL,
+                "vehicleModel" character varying NOT NULL,
+                "vehicleYear" character varying NOT NULL,
+                "profilePhoto" character varying,
+                "status" character varying NOT NULL DEFAULT 'OFFLINE',
+                "approvalStatus" "public"."agent_approvalstatus_enum" NOT NULL DEFAULT 'PENDING',
+                CONSTRAINT "UQ_agent_abnNumber" UNIQUE ("abnNumber"),
+                CONSTRAINT "REL_15baaa1eb6dd8d1f0a92a17d66" UNIQUE ("userId"),
+                CONSTRAINT "PK_1000e989398c5d4ed585cf9a46f" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
+            CREATE INDEX "IDX_agent_status" ON "agent" ("status")
+            WHERE "deletedAt" IS NULL
+        `);
+    await queryRunner.query(`
+            CREATE INDEX "IDX_agent_userId" ON "agent" ("userId")
+            WHERE "deletedAt" IS NULL
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "drop_location" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "addressLine1" character varying(255) NOT NULL,
+                "addressLine2" character varying(255),
+                "landmark" character varying(255),
+                "latitude" double precision NOT NULL,
+                "longitude" double precision NOT NULL,
+                CONSTRAINT "PK_60037bc09c9ca0212413462a8bc" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "order_review" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "rating" double precision NOT NULL,
+                "comment" character varying,
+                "customerId" integer NOT NULL,
+                "sendPackageOrderId" integer NOT NULL,
+                CONSTRAINT "PK_59c426f683eb876b8be2f033fd3" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
+            CREATE INDEX "IDX_review_sendPackageOrderId" ON "order_review" ("sendPackageOrderId")
+            WHERE "deletedAt" IS NULL
+        `);
+    await queryRunner.query(`
+            CREATE INDEX "IDX_review_customerId" ON "order_review" ("customerId")
+            WHERE "deletedAt" IS NULL
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "pickup_location" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "addressLine1" character varying(255) NOT NULL,
+                "addressLine2" character varying(255),
+                "landmark" character varying(255),
+                "latitude" double precision NOT NULL,
+                "longitude" double precision NOT NULL,
+                CONSTRAINT "PK_dff0bb23dcd6e0dd4c88db85374" PRIMARY KEY ("id")
             )
         `);
     await queryRunner.query(`
@@ -161,52 +249,58 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             )
         `);
     await queryRunner.query(`
-            ALTER TABLE "drop_location" DROP COLUMN "orderId"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "pickup_location" DROP COLUMN "orderId"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document" DROP COLUMN "role"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "public"."required_document_role_enum"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document" DROP COLUMN "documents"
-        `);
-    await queryRunner.query(`
-            CREATE TYPE "public"."agent_approvalstatus_enum" AS ENUM('APPROVED', 'PENDING', 'REJECTED')
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "agent"
-            ADD "approvalStatus" "public"."agent_approvalstatus_enum" NOT NULL DEFAULT 'PENDING'
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document"
-            ADD "name" character varying NOT NULL
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document"
-            ADD "description" character varying
-        `);
-    await queryRunner.query(`
             CREATE TYPE "public"."required_document_agenttype_enum" AS ENUM('CAR_TOWING', 'DELIVERY')
         `);
     await queryRunner.query(`
-            ALTER TABLE "required_document"
-            ADD "agentType" "public"."required_document_agenttype_enum" NOT NULL
+            CREATE TABLE "required_document" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "name" character varying NOT NULL,
+                "description" character varying,
+                "agentType" "public"."required_document_agenttype_enum" NOT NULL,
+                "isRequired" boolean NOT NULL DEFAULT true,
+                CONSTRAINT "PK_300ed345f09c863bbb1b3de7f2a" PRIMARY KEY ("id")
+            )
         `);
     await queryRunner.query(`
-            ALTER TABLE "required_document"
-            ADD "isRequired" boolean NOT NULL DEFAULT true
+            CREATE TABLE "agent_review" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "rating" double precision NOT NULL,
+                "comment" character varying,
+                "customerId" integer NOT NULL,
+                "agentId" integer NOT NULL,
+                CONSTRAINT "PK_2eafa7998bac37ec79237c0adb8" PRIMARY KEY ("id")
+            )
         `);
     await queryRunner.query(`
-            ALTER TABLE "agent"
-            ADD CONSTRAINT "UQ_15baaa1eb6dd8d1f0a92a17d667" UNIQUE ("userId")
+            CREATE INDEX "IDX_agent_review_agentId" ON "agent_review" ("agentId")
+            WHERE "deletedAt" IS NULL
         `);
     await queryRunner.query(`
-            CREATE INDEX "IDX_review_sendPackageOrderId" ON "order_review" ("sendPackageOrderId")
+            CREATE INDEX "IDX_agent_review_customerId" ON "agent_review" ("customerId")
+            WHERE "deletedAt" IS NULL
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "agent_document" (
+                "id" SERIAL NOT NULL,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+                "deletedAt" TIMESTAMP,
+                "name" character varying NOT NULL,
+                "description" character varying,
+                "url" character varying NOT NULL,
+                "agentId" integer NOT NULL,
+                CONSTRAINT "UQ_agent_document_agentId" UNIQUE ("agentId"),
+                CONSTRAINT "PK_7afc91eaadb01fb4274a78bd998" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
+            CREATE INDEX "IDX_agent_document_agentId" ON "agent_document" ("agentId")
             WHERE "deletedAt" IS NULL
         `);
     await queryRunner.query(`
@@ -230,20 +324,20 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             ADD CONSTRAINT "FK_c2714cfa3d6590d12e27cfa14ea" FOREIGN KEY ("assignedSupportAgentId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
     await queryRunner.query(`
-            ALTER TABLE "ticket_activity"
-            ADD CONSTRAINT "FK_7cc9884e6d4b04546686cc610b5" FOREIGN KEY ("ticketId") REFERENCES "support_ticket"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "ticket_activity"
-            ADD CONSTRAINT "FK_02a5f38ab132eebc76bc43f4584" FOREIGN KEY ("performerId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-    await queryRunner.query(`
             ALTER TABLE "ticket_note"
             ADD CONSTRAINT "FK_948abb98f768ac0fe2dd7e62fab" FOREIGN KEY ("ticketId") REFERENCES "support_ticket"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
     await queryRunner.query(`
             ALTER TABLE "ticket_note"
             ADD CONSTRAINT "FK_7abcf3f088527502f5647564bdc" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "ticket_activity"
+            ADD CONSTRAINT "FK_7cc9884e6d4b04546686cc610b5" FOREIGN KEY ("ticketId") REFERENCES "support_ticket"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "ticket_activity"
+            ADD CONSTRAINT "FK_02a5f38ab132eebc76bc43f4584" FOREIGN KEY ("performerId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
     await queryRunner.query(`
             ALTER TABLE "agent"
@@ -301,9 +395,16 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             ADD CONSTRAINT "FK_5ca3e3c3d70e553b69b009cd583" FOREIGN KEY ("agentId") REFERENCES "agent"("id") ON DELETE
             SET NULL ON UPDATE NO ACTION DEFERRABLE INITIALLY IMMEDIATE
         `);
+    await queryRunner.query(`
+            ALTER TABLE "agent_document"
+            ADD CONSTRAINT "FK_ec21940112f0cdf724e55e0df9b" FOREIGN KEY ("agentId") REFERENCES "agent"("id") ON DELETE CASCADE ON UPDATE NO ACTION DEFERRABLE INITIALLY IMMEDIATE
+        `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
+            ALTER TABLE "agent_document" DROP CONSTRAINT "FK_ec21940112f0cdf724e55e0df9b"
+        `);
     await queryRunner.query(`
             ALTER TABLE "agent_review" DROP CONSTRAINT "FK_5ca3e3c3d70e553b69b009cd583"
         `);
@@ -341,16 +442,16 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             ALTER TABLE "agent" DROP CONSTRAINT "FK_15baaa1eb6dd8d1f0a92a17d667"
         `);
     await queryRunner.query(`
-            ALTER TABLE "ticket_note" DROP CONSTRAINT "FK_7abcf3f088527502f5647564bdc"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "ticket_note" DROP CONSTRAINT "FK_948abb98f768ac0fe2dd7e62fab"
-        `);
-    await queryRunner.query(`
             ALTER TABLE "ticket_activity" DROP CONSTRAINT "FK_02a5f38ab132eebc76bc43f4584"
         `);
     await queryRunner.query(`
             ALTER TABLE "ticket_activity" DROP CONSTRAINT "FK_7cc9884e6d4b04546686cc610b5"
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "ticket_note" DROP CONSTRAINT "FK_7abcf3f088527502f5647564bdc"
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "ticket_note" DROP CONSTRAINT "FK_948abb98f768ac0fe2dd7e62fab"
         `);
     await queryRunner.query(`
             ALTER TABLE "support_ticket" DROP CONSTRAINT "FK_c2714cfa3d6590d12e27cfa14ea"
@@ -368,50 +469,25 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             ALTER TABLE "chat_message" DROP CONSTRAINT "FK_ec448aa6727a67d2dbe9cb1e5a3"
         `);
     await queryRunner.query(`
-            DROP INDEX "public"."IDX_review_sendPackageOrderId"
+            DROP INDEX "public"."IDX_agent_document_agentId"
         `);
     await queryRunner.query(`
-            ALTER TABLE "agent" DROP CONSTRAINT "UQ_15baaa1eb6dd8d1f0a92a17d667"
+            DROP TABLE "agent_document"
         `);
     await queryRunner.query(`
-            ALTER TABLE "required_document" DROP COLUMN "isRequired"
+            DROP INDEX "public"."IDX_agent_review_customerId"
         `);
     await queryRunner.query(`
-            ALTER TABLE "required_document" DROP COLUMN "agentType"
+            DROP INDEX "public"."IDX_agent_review_agentId"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "agent_review"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "required_document"
         `);
     await queryRunner.query(`
             DROP TYPE "public"."required_document_agenttype_enum"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document" DROP COLUMN "description"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document" DROP COLUMN "name"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "agent" DROP COLUMN "approvalStatus"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "public"."agent_approvalstatus_enum"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document"
-            ADD "documents" text array NOT NULL
-        `);
-    await queryRunner.query(`
-            CREATE TYPE "public"."required_document_role_enum" AS ENUM('AGENT', 'ADMIN', 'CUSTOMER', 'SUPPORT')
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "required_document"
-            ADD "role" "public"."required_document_role_enum" NOT NULL
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "pickup_location"
-            ADD "orderId" integer NOT NULL
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "drop_location"
-            ADD "orderId" integer NOT NULL
         `);
     await queryRunner.query(`
             DROP TABLE "send_package_order"
@@ -435,10 +511,37 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             DROP TABLE "report"
         `);
     await queryRunner.query(`
-            DROP TABLE "ticket_note"
+            DROP TABLE "pickup_location"
+        `);
+    await queryRunner.query(`
+            DROP INDEX "public"."IDX_review_customerId"
+        `);
+    await queryRunner.query(`
+            DROP INDEX "public"."IDX_review_sendPackageOrderId"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "order_review"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "drop_location"
+        `);
+    await queryRunner.query(`
+            DROP INDEX "public"."IDX_agent_userId"
+        `);
+    await queryRunner.query(`
+            DROP INDEX "public"."IDX_agent_status"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "agent"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "public"."agent_approvalstatus_enum"
         `);
     await queryRunner.query(`
             DROP TABLE "ticket_activity"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "ticket_note"
         `);
     await queryRunner.query(`
             DROP TABLE "support_ticket"
@@ -447,28 +550,13 @@ export class SendPackageEntity1736926450088 implements MigrationInterface {
             DROP TABLE "chat_message"
         `);
     await queryRunner.query(`
-            ALTER TABLE "order_review"
-                RENAME COLUMN "sendPackageOrderId" TO "orderId"
+            DROP INDEX "public"."IDX_user_role"
         `);
     await queryRunner.query(`
-            CREATE INDEX "IDX_review_orderId" ON "order_review" ("orderId")
-            WHERE ("deletedAt" IS NULL)
+            DROP TABLE "user"
         `);
     await queryRunner.query(`
-            ALTER TABLE "agent_review"
-            ADD CONSTRAINT "FK_5ca3e3c3d70e553b69b009cd583" FOREIGN KEY ("agentId") REFERENCES "agent"("id") ON DELETE CASCADE ON UPDATE NO ACTION DEFERRABLE INITIALLY IMMEDIATE
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "agent_review"
-            ADD CONSTRAINT "FK_ca50468f2829e3b607d26c6b292" FOREIGN KEY ("customerId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION DEFERRABLE INITIALLY IMMEDIATE
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "order_review"
-            ADD CONSTRAINT "FK_d2b82986ad264b7f66d2cc649b6" FOREIGN KEY ("orderId") REFERENCES "order"("id") ON DELETE CASCADE ON UPDATE NO ACTION DEFERRABLE INITIALLY IMMEDIATE
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "order_review"
-            ADD CONSTRAINT "FK_d47f4facc0a5ba3224d5aec7667" FOREIGN KEY ("customerId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION DEFERRABLE INITIALLY IMMEDIATE
+            DROP TYPE "public"."user_role_enum"
         `);
   }
 }
